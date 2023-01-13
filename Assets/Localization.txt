@@ -1,26 +1,0 @@
-"NO":"NO",
-"OK":"OK",
-"100":"100",
-"RETRY":"RETRY",
-"GET":"GET",
-"+100":"+100",
-"256":"256",
-"10":"10",
-"SETTINGS":"SETTINGS",
-"RATE US":"RATE US",
-"HOME":"HOME",
-"v1.0.1":"v1.0.1",
-"50%":"50%",
-"ENGINE":"ENGINE",
-"BRAKE":"BRAKE",
-"STEERING":"STEERING",
-"SHOP":"SHOP",
-"10000":"10000",
-"UNLOCK":"UNLOCK",
-"0":"0",
-"STAR RATING":"STAR RATING",
-"Enjoying Magic Dice?\n<size=30>Tap a star to rate it.</size>":"Enjoying Magic Dice?\n<size=30>Tap a star to rate it.</size>",
-"LATER":"LATER",
-"TIPS":"TIPS",
-"*Your rewards will be sent to you within seven business days [weekends not included].\nThe merchants represented are not sponsors of the rewards or otherwise affiliated with this company.\nThe logos and other identifying marks attached are trademarks of and owned by each represented company and/or its affiliates.\nPlease visit each company’s website for additional terms and conditions.\n":"*Your rewards will be sent to you within seven business days [weekends not included].\nThe merchants represented are not sponsors of the rewards or otherwise affiliated with this company.\nThe logos and other identifying marks attached are trademarks of and owned by each represented company and/or its affiliates.\nPlease visit each company’s website for additional terms and conditions.\n",
-"New Text":"New Text",

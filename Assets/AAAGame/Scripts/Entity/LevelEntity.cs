@@ -1,10 +1,9 @@
 using GameFramework;
 using GameFramework.Event;
-using LitJson;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Profiling;
 using UnityGameFramework.Runtime;
 
 public class LevelEntity : EntityBase

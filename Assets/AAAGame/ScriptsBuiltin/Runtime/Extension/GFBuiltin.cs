@@ -1,8 +1,8 @@
 ﻿using GameFramework;
-using LitJson;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Networking;
@@ -35,14 +35,26 @@ public class GFBuiltin : MonoBehaviour
     public static HotFixComponent Hotfix { get; private set; }
     public static Camera UICamera { get; private set; }
     public static ScreenFitMode CanvasFitMode { get; private set; }
-    public Vector2 ScreenWorldSize { get; private set; }
-    private Canvas canvasRoot;
+
+    public static Canvas RootCanvas { get; private set; } = null;
+
 
     private void Awake()
     {
-        Instance = this;
+        if (Instance == null)
+        {
+            Instance = this;
+            var resCom = GameEntry.GetComponent<ResourceComponent>();
+            if (resCom != null)
+            {
+                var resTp = resCom.GetType();
+                var m_ResourceMode = resTp.GetField("m_ResourceMode", BindingFlags.Instance | BindingFlags.NonPublic);
+                m_ResourceMode.SetValue(resCom, AppSettings.Instance.ResourceMode);
+                Log.Info("------------Set ResourceMode:{0}", AppSettings.Instance.ResourceMode);
+            }
+        }
     }
-    
+
     private void Start()
     {
         GFBuiltin.Base = GameEntry.GetComponent<BaseComponent>();
@@ -66,8 +78,8 @@ public class GFBuiltin : MonoBehaviour
         GFBuiltin.BuiltinView = GameEntry.GetComponent<BuiltinViewComponent>();
         GFBuiltin.Hotfix = GameEntry.GetComponent<HotFixComponent>();
 
-        canvasRoot = GFBuiltin.UI.transform.Find("UICanvasRoot").GetComponent<Canvas>();
-        GFBuiltin.UICamera = canvasRoot.worldCamera;
+        RootCanvas = GFBuiltin.UI.GetComponentInChildren<Canvas>();
+        GFBuiltin.UICamera = RootCanvas.worldCamera;
 
         UpdateCanvasScaler();
     }
@@ -78,23 +90,10 @@ public class GFBuiltin : MonoBehaviour
         screenFitter.SetFilterMode(screenFitMode);
         CanvasFitMode = screenFitter.UIFitMode;
 
-        CanvasScaler canvasScaler = canvasRoot.GetComponent<CanvasScaler>();
+        CanvasScaler canvasScaler = RootCanvas.GetComponent<CanvasScaler>();
         canvasScaler.referenceResolution = new Vector2(screenFitter.designWidth, screenFitter.designHeight);
-        this.ScreenWorldSize = GFBuiltin.UICamera.ViewportToWorldPoint(Vector3.one);
-        //Log.Info(this.ScreenWorldSize);
-        //Log.Info(GFBuiltin.UICamera.ViewportToWorldPoint(new Vector3(1, 1, 0)));
     }
-    public Vector2 GetCanvasSize()
-    {
-        var rect = canvasRoot.GetComponent<RectTransform>();
-        return rect.sizeDelta;
-    }
-    public Vector2 World2ScreenPoint(Camera cam, Vector3 worldPoint)
-    {
-        var rect = canvasRoot.GetComponent<RectTransform>();
-        Vector2 sPoint = cam.WorldToViewportPoint(worldPoint) * rect.sizeDelta;
-        return sPoint - rect.sizeDelta * 0.5f;
-    }
+
 
     /// <summary>
     /// 退出或重启

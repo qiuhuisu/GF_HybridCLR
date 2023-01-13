@@ -29,7 +29,7 @@ public partial class MenuUIForm : UIFormBase
         base.OnOpen(userData);
         GF.Event.Subscribe(UserDataChangedEventArgs.EventId, OnUserDataChanged);
         GF.Event.Subscribe(PlayerEventArgs.EventId, OnPlayerEvent);
-        SetLevelNumText(GF.UserData.GAME_LEVEL);
+        SetLevelNumText(GF.DataModel.GetOrCreate<PlayerDataModel>().GAME_LEVEL);
 
         RefreshMoneyText();
         InitScrollView();
@@ -88,7 +88,7 @@ public partial class MenuUIForm : UIFormBase
             }
             int curMoney = (int)parms["StartNum"];
 
-            var doMoneyNum = DOTween.To(() => curMoney, (x) => curMoney = x, GF.UserData.MONEY, 1).SetEase(Ease.Linear);
+            var doMoneyNum = DOTween.To(() => curMoney, (x) => curMoney = x, GF.DataModel.GetOrCreate<PlayerDataModel>().Coins, 1).SetEase(Ease.Linear);
             doMoneyNum.SetDelay(fxDelay);
             doMoneyNum.onUpdate = () =>
             {
@@ -185,7 +185,8 @@ public partial class MenuUIForm : UIFormBase
 
     private void RefreshMoneyText()
     {
-        SetMoneyText(GF.UserData.MONEY);
+        var playerDm = GF.DataModel.GetOrCreate<PlayerDataModel>();
+        SetMoneyText(playerDm.Coins);
     }
     private void SetMoneyText(int money)
     {
@@ -193,7 +194,7 @@ public partial class MenuUIForm : UIFormBase
     }
     public void SwitchLevel(int dir)
     {
-        GF.UserData.GAME_LEVEL += dir;
+        GF.DataModel.GetOrCreate<PlayerDataModel>().GAME_LEVEL += dir;
         var menuProcedure = GF.Procedure.CurrentProcedure as MenuProcedure;
         if (null != menuProcedure)
         {

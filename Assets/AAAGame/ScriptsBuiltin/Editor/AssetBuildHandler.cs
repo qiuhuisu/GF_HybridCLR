@@ -69,14 +69,6 @@ namespace UnityGameFramework.Editor
                     File.Copy(fileName, destFileName);
                 }
             }
-            
-            if (isSuccess)
-            {
-                if (outputFullSelected || outputFullSelected)
-                {
-                    EditorUtility.RevealInFinder(targetPath);
-                }
-            }
         }
 
         public void OnPostprocessAllPlatforms(string productName, string companyName, string gameIdentifier, string gameFrameworkVersion, string unityVersion, string applicableGameVersion, int internalResourceVersion, BuildAssetBundleOptions buildAssetBundleOptions, bool zip, string outputDirectory, string workingPath, bool outputPackageSelected, string outputPackagePath, bool outputFullSelected, string outputFullPath, bool outputPackedSelected, string outputPackedPath, string buildReportPath)
@@ -94,16 +86,11 @@ namespace UnityGameFramework.Editor
             if (Directory.Exists(streamingAssetsPath))
             {
                 Directory.Delete(streamingAssetsPath, true);
-                //string[] fileNames = Directory.GetFiles(streamingAssetsPath, "*", SearchOption.AllDirectories);
-                //foreach (string fileName in fileNames)
-                //{
-                //    if (fileName.Contains(".gitkeep"))
-                //    {
-                //        continue;
-                //    }
-
-                //    File.Delete(fileName);
-                //}
+            }
+            string streamMetaFile = streamingAssetsPath + ".meta";
+            if (File.Exists(streamMetaFile))
+            {
+                File.Delete(streamMetaFile);
             }
         }
 
@@ -112,13 +99,14 @@ namespace UnityGameFramework.Editor
             if (outputVersionInfo != null && (outputFullSelected || outputPackedSelected))
             {
                 outputVersionInfo.InternalResourceVersion = internalResourceVersion;
-                outputVersionInfo.ApplicableGameVersion = applicableGameVersion;
+                outputVersionInfo.ApplicableGameVersion = AppBuildSettings.Instance.ApplicableGameVersion;
+                outputVersionInfo.LastAppVersion = applicableGameVersion;
                 string targetPath = outputFullSelected ? outputFullPath : outputPackedPath;
                 //string versionFileName = string.Format("{0}_{1}", platforms.ToString(), ConstBuiltin.VersionFile);
                 string outputFileName = UtilityBuiltin.ResPath.GetCombinePath(targetPath, platforms.ToString(), ConstBuiltin.VersionFile);
                 try
                 {
-                    File.WriteAllText(outputFileName, LitJson.JsonMapper.ToJson(outputVersionInfo));
+                    File.WriteAllText(outputFileName, UtilityBuiltin.Json.ToJson(outputVersionInfo));
                     Debug.LogFormat("成功生成资源信息文件:{0}", outputFileName);
                 }
                 catch (System.Exception e)
@@ -134,7 +122,10 @@ namespace UnityGameFramework.Editor
         {
             outputVersionInfo = new VersionInfo()
             {
-                UpdatePrefixUri = UtilityBuiltin.ResPath.GetCombinePath(ConstBuiltin.DefaultHotFixUrl, platform.ToString()),
+                ForceUpdateApp = AppBuildSettings.Instance.ForceUpdateApp,
+                AppUpdateDesc = AppBuildSettings.Instance.AppUpdateDesc,
+                AppUpdateUrl = AppBuildSettings.Instance.AppUpdateUrl,
+                UpdatePrefixUri = UtilityBuiltin.ResPath.GetCombinePath(AppBuildSettings.Instance.UpdatePrefixUri, platform.ToString()),
                 VersionListHashCode = versionListHashCode,
                 VersionListLength = versionListLength,
                 VersionListCompressedHashCode = versionListCompressedHashCode,

@@ -144,7 +144,7 @@ public static class UtilityBuiltin
         }
         public static string GetScriptableConfigPath(string v)
         {
-            return Utility.Text.Format("Assets/AAAGame/Config/{0}.asset", v);
+            return Utility.Text.Format("Assets/AAAGame/ScriptableAssets/{0}.asset", v);
         }
 
         public static string GetPrefab(string v)
@@ -165,17 +165,26 @@ public static class UtilityBuiltin
         {
             return Utility.Text.Format("Assets/AAAGame/HotfixDlls/{0}.bytes", dllName);
         }
+
+        public static string GetScriptableAsset(string v)
+        {
+            return Utility.Text.Format("Assets/AAAGame/ScriptableAssets/{0}.asset", v);
+        }
     }
     public class Json
     {
         public static string ToJson(object obj)
         {
-            return LitJson.JsonMapper.ToJson(obj);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(obj);
         }
         
         public static T ToObject<T>(string json)
         {
-            return LitJson.JsonMapper.ToObject<T>(json);
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(json);
+        }
+        public static object ToObject(string json)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject(json);
         }
     }
     public class CurvePath

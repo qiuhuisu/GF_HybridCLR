@@ -1,18 +1,16 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System.Collections.Generic;
 using GameFramework;
 using GameFramework.Procedure;
 using GameFramework.Fsm;
 using GameFramework.Event;
 using UnityGameFramework.Runtime;
 using System;
-using System.IO;
 using GameFramework.Resource;
 using ResourceUpdateStartEventArgs = UnityGameFramework.Runtime.ResourceUpdateStartEventArgs;
 using ResourceUpdateChangedEventArgs = UnityGameFramework.Runtime.ResourceUpdateChangedEventArgs;
 using ResourceUpdateSuccessEventArgs = UnityGameFramework.Runtime.ResourceUpdateSuccessEventArgs;
 using ResourceUpdateFailureEventArgs = UnityGameFramework.Runtime.ResourceUpdateFailureEventArgs;
+using UnityEngine;
 //using ResourceVerifyStartEventArgs = UnityGameFramework.Runtime.ResourceVerifyStartEventArgs;
 //using ResourceVerifySuccessEventArgs = UnityGameFramework.Runtime.ResourceVerifySuccessEventArgs;
 //using ResourceVerifyFailureEventArgs = UnityGameFramework.Runtime.ResourceVerifyFailureEventArgs;
@@ -20,14 +18,18 @@ using ResourceUpdateFailureEventArgs = UnityGameFramework.Runtime.ResourceUpdate
 [Serializable]
 public class VersionInfo
 {
-    public int InternalResourceVersion;
+    public int InternalResourceVersion;//资源版本号
     public int VersionListLength;
     public int VersionListHashCode;
     public int VersionListCompressedLength;
     public int VersionListCompressedHashCode;
-    public string ApplicableGameVersion;
-    public string UpdatePrefixUri;
+    public string ApplicableGameVersion;//资源适用的App版本
+    public string UpdatePrefixUri;//热更资源地址
 
+    public string LastAppVersion; //最新的App版本号
+    public bool ForceUpdateApp;//是否强制更新App
+    public string AppUpdateUrl;//强制更新App地址
+    public string AppUpdateDesc;//强制更新说明文字,显示在对话框中
 }
 /// <summary>
 /// 初始化资源流程
@@ -56,7 +58,7 @@ public class CheckAndUpdateProcedure : ProcedureBase
         //GFBuiltin.Event.Subscribe(UnityGameFramework.Runtime.ResourceVerifySuccessEventArgs.EventId, OnResourceVerifySuccess);
         //GFBuiltin.Event.Subscribe(UnityGameFramework.Runtime.ResourceVerifyFailureEventArgs.EventId, OnResourceVerifyFailure);
         CheckVersion();
-        
+
     }
 
 
@@ -89,7 +91,11 @@ public class CheckAndUpdateProcedure : ProcedureBase
 #elif UNITY_IOS
             return "IOS";
 #elif UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
+#if UNITY_64
+            return "Windows64";
+#else
             return "Windows";
+#endif
 #elif UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
             return "MacOS";
 #elif UNITY_WEBGL
@@ -123,7 +129,7 @@ public class CheckAndUpdateProcedure : ProcedureBase
         }
         var webText = Utility.Converter.GetString(arg.GetWebResponseBytes());
         Log.Info("最新资源版本信息:{0}", webText);
-        var vinfo = LitJson.JsonMapper.ToObject<VersionInfo>(webText);
+        var vinfo = Utility.Json.ToObject<VersionInfo>(webText);
         CheckVersionList(vinfo);
     }
     private void CheckVersionList(VersionInfo vinfo)
@@ -134,12 +140,44 @@ public class CheckAndUpdateProcedure : ProcedureBase
             return;
         }
         //Log.Info("{0},{1},{2},{3}", vinfo.VersionListLength, vinfo.VersionListHashCode, vinfo.VersionListCompressedLength, vinfo.VersionListCompressedHashCode);
+        var curAppVersion = System.Version.Parse(GameFramework.Version.GameVersion);
+        var lastAppVersion = System.Version.Parse(vinfo.LastAppVersion);
+        if (lastAppVersion > curAppVersion)
+        {
+            GFBuiltin.BuiltinView.ShowDialog(GFBuiltin.Localization.GetText("New Version!"),
+                vinfo.AppUpdateDesc, GFBuiltin.Localization.GetText("UPDATE"), GFBuiltin.Localization.GetText("LATER"),
+                () =>
+                {
+                    Application.OpenURL(vinfo.AppUpdateUrl);
+                    GFBuiltin.Shutdown(ShutdownType.Quit);
+                },
+                () =>
+                {
+                    if (vinfo.ForceUpdateApp)//强制更新时点不更新则退出游戏
+                        GFBuiltin.Shutdown(ShutdownType.Quit);
+                    else
+                        CheckVersionAndUpdate(vinfo);
+                });
+            return;
+        }
 
-        //string hotfixDir = Utility.Text.Format("{0}_{1}", Application.version.Replace('.', '_'), vinfo.InternalResourceVersion);
+        CheckVersionAndUpdate(vinfo);
+    }
+    private void CheckVersionAndUpdate(VersionInfo vinfo)
+    {
         GFBuiltin.Resource.UpdatePrefixUri = UtilityBuiltin.ResPath.GetCombinePath(vinfo.UpdatePrefixUri);
         Log.Info("资源服务器地址:{0}", GFBuiltin.Resource.UpdatePrefixUri);
-        var checkResult = GFBuiltin.Resource.CheckVersionList(vinfo.InternalResourceVersion);
-        Log.Info("检查是否存在可更新资源:{0}", checkResult);
+        CheckVersionListResult checkResult;
+        if (CheckResourceApplicable(vinfo.ApplicableGameVersion))
+        {
+            checkResult = GFBuiltin.Resource.CheckVersionList(vinfo.InternalResourceVersion);
+            Log.Info("是否存需要更新资源:{0}", checkResult);
+        }
+        else
+        {
+            Log.Info("资源不适用当前客户端版本, 已跳过更新");
+            checkResult = GFBuiltin.Resource.CheckVersionList(GFBuiltin.Resource.InternalResourceVersion);
+        }
         if (checkResult == GameFramework.Resource.CheckVersionListResult.NeedUpdate)
         {
             Log.Info("更新资源列表文件...");
@@ -152,7 +190,24 @@ public class CheckAndUpdateProcedure : ProcedureBase
             GFBuiltin.Resource.CheckResources(OnCheckResurcesComplete);
         }
     }
-
+    /// <summary>
+    /// 检测最新资源是否适用于当前客户端版本
+    /// </summary>
+    /// <param name="applicableGameVersion"></param>
+    /// <returns></returns>
+    private bool CheckResourceApplicable(string applicableGameVersion)
+    {
+        string[] versionArr = applicableGameVersion.Split('|');
+        foreach (var version in versionArr)
+        {
+            var fixVer = version.Trim();
+            if (GameFramework.Version.GameVersion.CompareTo(fixVer) == 0)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 
     private void OnVerifyResourcesComplete(bool result)
     {

@@ -120,12 +120,13 @@ public class GameProcedure : ProcedureBase
 
     public void EnterNextLevel(bool isNext)
     {
+        var playerDm = GF.DataModel.GetOrCreate<PlayerDataModel>();
         if (isNext)
-            GF.UserData.GAME_LEVEL += 1;
+            playerDm.GAME_LEVEL += 1;
         else
         {
-            GF.UserData.GAME_LEVEL -= 1;
-            GF.UserData.GAME_LEVEL = Mathf.Clamp(GF.UserData.GAME_LEVEL, 1, GF.UserData.GAME_LEVEL);
+            playerDm.GAME_LEVEL -= 1;
+            playerDm.GAME_LEVEL = Mathf.Clamp(playerDm.GAME_LEVEL, 1, playerDm.GAME_LEVEL);
         }
 
         this.procedure.SetData<VarBoolean>("EnterNextLevel", true);
@@ -135,7 +136,8 @@ public class GameProcedure : ProcedureBase
     #region - Debug Mode
     public void ChangeLevel(int level)
     {
-        GF.UserData.GAME_LEVEL = level;
+        var playerDm = GF.DataModel.GetOrCreate<PlayerDataModel>();
+        playerDm.GAME_LEVEL = level;
         this.procedure.SetData<VarBoolean>("EnterNextLevel", true);
         ChangeState<MenuProcedure>(procedure);
     }

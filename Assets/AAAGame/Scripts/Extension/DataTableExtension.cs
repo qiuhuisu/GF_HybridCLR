@@ -32,11 +32,8 @@ public static class DataTableExtension
         }
 
         string dataRowClassName = splitNames[0];
-#if !DISABLE_HYBRIDCLR
-        Type dataRowType = GFBuiltin.Hotfix.GetHotfixClass(dataRowClassName);
-#else
+
         Type dataRowType = Type.GetType(dataRowClassName);
-#endif
         if (dataRowType == null)
         {
             Log.Warning("Can not get data row type with class name '{0}'.", dataRowClassName);
@@ -136,14 +133,14 @@ public static class DataTableExtension
         string[] splitValue = value.Split(',');
         return new Vector3Int(int.Parse(splitValue[0]), int.Parse(splitValue[1]), int.Parse(splitValue[2]));
     }
-    public static LitJson.JsonData ParseJsonData(string value)
-    {
-        return LitJson.JsonMapper.ToObject(value);
-    }
-    public static T ParseJsonData<T>(string value)
-    {
-        return LitJson.JsonMapper.ToObject<T>(value);
-    }
+    //public static LitJson.JsonData ParseJsonData(string value)
+    //{
+    //    return LitJson.JsonMapper.ToObject(value);
+    //}
+    //public static T ParseJsonData<T>(string value)
+    //{
+    //    return LitJson.JsonMapper.ToObject<T>(value);
+    //}
     public static Vector4 ParseVector4(string value)
     {
         string[] splitValue = value.Split(',');

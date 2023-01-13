@@ -131,7 +131,7 @@ public class UIFormBase : UIFormLogic
                 continue;
             }
 
-            textCom.text = GF.Localization.GetLocalString(t.Key);
+            textCom.text = GF.Localization.GetText(t.Key);
         }
     }
     private void FitHoleScreen()

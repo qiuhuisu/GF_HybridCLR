@@ -7,6 +7,7 @@ using UnityEngine;
 using System.Linq;
 using System.IO;
 using System.Collections.Generic;
+using GameFramework;
 
 public class LoadHotfixDllProcedure : ProcedureBase
 {
@@ -20,14 +21,18 @@ public class LoadHotfixDllProcedure : ProcedureBase
     protected override void OnEnter(IFsm<IProcedureManager> procedureOwner)
     {
         base.OnEnter(procedureOwner);
+#if !DISABLE_HYBRIDCLR
         GFBuiltin.Event.Subscribe(LoadHotfixDllEventArgs.EventId, OnLoadHotfixDllCallback);
+#endif
         PreloadAndInitData();
     }
 
 
     protected override void OnLeave(IFsm<IProcedureManager> procedureOwner, bool isShutdown)
     {
+#if !DISABLE_HYBRIDCLR
         GFBuiltin.Event.Unsubscribe(LoadHotfixDllEventArgs.EventId, OnLoadHotfixDllCallback);
+#endif
         base.OnLeave(procedureOwner, isShutdown);
     }
 
@@ -42,18 +47,24 @@ public class LoadHotfixDllProcedure : ProcedureBase
         //加载热更新Dll完成,进入热更逻辑
         if (loadedProgress >= totalProgress)
         {
-            Log.Info("热更dll加载完成, 开始进入HotfixEntry");
             loadedProgress = -1;
-#if !DISABLE_HYBRIDCLR
-            var hotfixDll = GFBuiltin.Hotfix.GetHotfixClass("HotfixEntry");
-            if (hotfixDll == null)
+            var entryFunc = Utility.Assembly.GetType("HotfixEntry")?.GetMethod("StartHotfixLogic", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+            if (entryFunc == null)
             {
-                Log.Error("获取热更入口类HotfixEntry失败!");
+                Log.Error("游戏启动失败, 未找到HotfixEntry.StartHotfixLogic入口函数");
                 return;
             }
-            hotfixDll.GetMethod("StartHotfixLogic").Invoke(null, new object[] { true });
+#if !DISABLE_HYBRIDCLR
+            //var hotfixDll = GFBuiltin.Hotfix.GetHotfixClass("HotfixEntry");
+            //if (hotfixDll == null)
+            //{
+            //    Log.Error("获取热更入口类HotfixEntry失败!");
+            //    return;
+            //}
+            entryFunc?.Invoke(null, new object[] { true });
 #else
-            HotfixEntry.StartHotfixLogic(false);
+            entryFunc?.Invoke(null, new object[] { false });
+            //HotfixEntry.StartHotfixLogic(false);
 #endif
         }
     }
@@ -71,10 +82,32 @@ public class LoadHotfixDllProcedure : ProcedureBase
 
 #if !UNITY_EDITOR && !DISABLE_HYBRIDCLR
         hotfixListIsLoaded = false;
+        LoadAotDlls();
         LoadHotfixDlls();
 #endif
     }
-
+#if !DISABLE_HYBRIDCLR
+    /// <summary>
+    /// 补充元数据
+    /// </summary>
+    private void LoadAotDlls()
+    {
+        var aotMetaDlls = Resources.LoadAll<TextAsset>(ConstBuiltin.AOT_DLL_DIR);
+        totalProgress += aotMetaDlls.Length;
+        LoadMetadata(aotMetaDlls);
+    }
+    private void LoadMetadata(TextAsset[] aotMetaDlls)
+    {
+        foreach (var dll in aotMetaDlls)
+        {
+            var success = GFBuiltin.Hotfix.LoadMetadataForAOTAssembly(dll.bytes);
+            Log.Info(Utility.Text.Format("补充元数据:{0}. ret:{1}", dll.name, success));
+            if (success)
+            {
+                loadedProgress++;
+            }
+        }
+    }
     private void LoadHotfixDlls()
     {
         Log.Info("开始加载热更新dll");
@@ -90,8 +123,7 @@ public class LoadHotfixDllProcedure : ProcedureBase
             if (textAsset != null)
             {
                 hotfixDlls = UtilityBuiltin.Json.ToObject<string[]>(textAsset.text);
-                Log.Info("hotfix dll json:{0}", textAsset.text);
-                totalProgress = hotfixDlls.Length;
+                totalProgress += hotfixDlls.Length;
                 for (int i = 0; i < hotfixDlls.Length - 1; i++)
                 {
                     var dllName = hotfixDlls[i];
@@ -101,7 +133,6 @@ public class LoadHotfixDllProcedure : ProcedureBase
                 hotfixListIsLoaded = true;
             }
         }));
-
     }
 
 
@@ -128,4 +159,5 @@ public class LoadHotfixDllProcedure : ProcedureBase
             GFBuiltin.Hotfix.LoadHotfixDll(mainDll, this);
         }
     }
+#endif
 }

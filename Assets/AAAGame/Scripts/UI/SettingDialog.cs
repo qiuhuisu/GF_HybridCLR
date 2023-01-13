@@ -19,9 +19,6 @@ public class SettingDialog : UIFormBase
     [SerializeField] private GameObject rateBtnObject;
     [SerializeField] private GameObject restoreBtnObject;
 
-    //震动开关的回调
-    public static Action<bool> JoystickEvent;
-
     protected override void OnInit(object userData)
     {
         base.OnInit(userData);
@@ -36,12 +33,7 @@ public class SettingDialog : UIFormBase
                 OnSettingToggle(tgIndex, settingTgs[tgIndex].isOn);
             });
         }
-        versionText.text = Utility.Text.Format("{0} v{1}", ConstBuiltin.IsDebug ? "Debug" : string.Empty, Application.version);
-
-#if UNITY_IPHONE
-        rateBtnObject.SetActive(false);
-        restoreBtnObject.SetActive(true);
-#endif
+        versionText.text = Utility.Text.Format("{0} v{1}", AppSettings.Instance.DebugMode ? "Debug" : string.Empty, GF.Base.EditorResourceMode ? Application.version : Utility.Text.Format("{0}({1})", Application.version, GF.Resource.InternalResourceVersion));
     }
 
 
@@ -51,7 +43,6 @@ public class SettingDialog : UIFormBase
         settingTgs[0].isOn = !GF.Setting.GetMediaMute(Const.SoundGroup.Sound);
         settingTgs[1].isOn = !GF.Setting.GetMediaMute(Const.SoundGroup.Vibrate);
         settingTgs[2].isOn = !GF.Setting.GetMediaMute(Const.SoundGroup.Joystick);
-        var isInGame = GF.Fsm.GetFsm<IProcedureManager>().CurrentState.GetType() == typeof(GameProcedure);
         clickCount = 0;
         lastClickTime = Time.time;
     }
@@ -65,17 +56,12 @@ public class SettingDialog : UIFormBase
                 break;
             case "HOME":
                 Back2Home();
-                UIExtension.CloseUIFormWithAnim(GF.UI, this.UIForm);
+                GF.UI.CloseUIFormWithAnim(this.UIForm);
                 break;
         }
     }
     public void OnClickVersionText()
     {
-        if (ConstBuiltin.IsDebug)
-        {
-            GF.UserData.MONEY += 1000;
-            return;
-        }
         if (Time.time - lastClickTime <= clickInterval)
         {
             clickCount++;
@@ -95,7 +81,7 @@ public class SettingDialog : UIFormBase
     private void Back2Home()
     {
         var curProcedure = GF.Procedure.CurrentProcedure;
-        if (curProcedure.GetType() == typeof(GameProcedure))
+        if (curProcedure is GameProcedure)
         {
             var gameProcedure = curProcedure as GameProcedure;
             gameProcedure.BackHome();
@@ -117,7 +103,6 @@ public class SettingDialog : UIFormBase
                 break;
             case 2:
                 GF.Setting.SetMediaMute(Const.SoundGroup.Joystick, isMute);
-                JoystickEvent?.Invoke(!isMute);
                 break;
         }
     }

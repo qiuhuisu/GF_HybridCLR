@@ -17,9 +17,15 @@ public class BuiltinViewComponent : GameFrameworkComponent
     [SerializeField] private Slider loadSlider;
 
     [Space(20)]
+    [Header("Tips Dialog:")]
     [SerializeField] GameObject tipsDialog = null;
-    [SerializeField] GameObject adLoadingMask = null;
-    
+    [SerializeField] TextMeshProUGUI tipsTitleText;
+    [SerializeField] TextMeshProUGUI tipsContentText;
+    [SerializeField] Button tipsPositiveBtn;
+    [SerializeField] Button tipsNegativeBtn;
+    //[Header("Waiting View:")]
+    //[SerializeField] GameObject waitingView = null;
+
     //public void WaitAndShowVideoAd(float loadingOutTime, GameFrameworkAction onAdReady)
     //{
     //    adLoadingMask.SetActive(true);
@@ -50,7 +56,7 @@ public class BuiltinViewComponent : GameFrameworkComponent
     private void Start()
     {
         ShowLoadingProgress();
-        adLoadingMask.SetActive(false);
+        //waitingView.SetActive(false);
     }
     public void ShowLoadingProgress(float defaultProgress = 0)
     {
@@ -62,36 +68,34 @@ public class BuiltinViewComponent : GameFrameworkComponent
         loadSlider.value = progress;
         loadSliderText.text = Utility.Text.Format("{0:N0}%", loadSlider.value * 100);
     }
-    
+
     public void HideLoadingProgress()
     {
         loadingProgressNode.SetActive(false);
     }
 
-    public void ShowTips(string title, string content, string yes_btn_title = "YES", string no_btn_title = "NO", UnityEngine.Events.UnityAction yes_cb = null, UnityEngine.Events.UnityAction no_cb = null)
+    public void ShowDialog(string title, string content, string yes_btn_title = "YES", string no_btn_title = "NO", UnityEngine.Events.UnityAction yes_cb = null, UnityEngine.Events.UnityAction no_cb = null)
     {
         tipsDialog.SetActive(true);
         if (yes_cb == null && no_cb == null)
         {
-            yes_cb = HideTips;
+            yes_cb = HideDialog;
         }
+        tipsNegativeBtn.gameObject.SetActive(no_cb != null);
+        tipsNegativeBtn.GetComponentInChildren<TextMeshProUGUI>().text = no_btn_title;
 
-        var btns = tipsDialog.GetComponentsInChildren<Button>(true);
-        btns[0].gameObject.SetActive(no_cb != null);
-        btns[0].GetComponentInChildren<Text>().text = no_btn_title;
-
-        btns[1].gameObject.SetActive(yes_cb != null);
-        btns[1].GetComponentInChildren<Text>().text = yes_btn_title;
+        tipsPositiveBtn.gameObject.SetActive(yes_cb != null);
+        tipsPositiveBtn.GetComponentInChildren<TextMeshProUGUI>().text = yes_btn_title;
         var dialog_bg = tipsDialog.transform.Find("DialogBG");
-        dialog_bg.Find("Title").GetComponent<Text>().text = title.ToUpper();
-        dialog_bg.Find("Content").GetComponent<TextMeshProUGUI>().text = content;
-        btns[0].onClick.RemoveAllListeners();
-        btns[1].onClick.RemoveAllListeners();
-        if (no_cb != null) btns[0].onClick.AddListener(() => { no_cb.Invoke(); HideTips(); });
-        if (yes_cb != null) btns[1].onClick.AddListener(() => { yes_cb.Invoke(); HideTips(); });
+        tipsTitleText.text = title.ToUpper();
+        tipsContentText.text = content;
+        tipsNegativeBtn.onClick.RemoveAllListeners();
+        tipsPositiveBtn.onClick.RemoveAllListeners();
+        if (no_cb != null) tipsNegativeBtn.onClick.AddListener(() => { no_cb.Invoke(); HideDialog(); });
+        if (yes_cb != null) tipsPositiveBtn.onClick.AddListener(() => { yes_cb.Invoke(); HideDialog(); });
     }
 
-    public void HideTips()
+    public void HideDialog()
     {
         tipsDialog.SetActive(false);
     }

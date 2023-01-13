@@ -6,19 +6,14 @@ using UnityGameFramework.Runtime;
 using System;
 using GameFramework.Resource;
 using System.Linq;
+#if !DISABLE_HYBRIDCLR
 using HybridCLR;
+#endif
 
 public class HotFixComponent : GameFrameworkComponent
 {
+#if !DISABLE_HYBRIDCLR
     [SerializeField] HomologousImageMode mHomologousImageMode = HomologousImageMode.SuperSet;
-    private List<System.Reflection.Assembly> mHotfixAssemblyList;
-    public List<System.Reflection.Assembly> HotfixAssemblyList => mHotfixAssemblyList;
-
-    protected override void Awake()
-    {
-        base.Awake();
-        mHotfixAssemblyList = new List<System.Reflection.Assembly>();
-    }
     /// <summary>
     /// 加载热更文件
     /// </summary>
@@ -69,7 +64,6 @@ public class HotFixComponent : GameFrameworkComponent
             try
             {
                 dllAssembly = System.Reflection.Assembly.Load(dllTextAsset.bytes);
-                mHotfixAssemblyList.Add(dllAssembly);
             }
             catch (Exception e)
             {
@@ -82,53 +76,12 @@ public class HotFixComponent : GameFrameworkComponent
         GFBuiltin.Event.Fire(this, ReferencePool.Acquire<LoadHotfixDllEventArgs>().Fill(assetName, dllAssembly, userData));
     }
     /// <summary>
-    /// 从热更程序集中获取类
-    /// </summary>
-    /// <param name="className"></param>
-    /// <returns></returns>
-    public Type GetHotfixClass(string hotfixDllName, string className)
-    {
-        var hotfixDll = GetHotfixAssembly(hotfixDllName);
-        if (hotfixDll == null)
-        {
-            Log.Error("GetHotfixAssembly Hotfix failed");
-            return null;
-        }
-        return hotfixDll.GetType(className, true);
-    }
-    public Type GetHotfixClass(string className)
-    {
-        return GetHotfixClass("Hotfix", className);
-    }
-    /// <summary>
-    /// 获取热更程序集
-    /// </summary>
-    /// <param name="dllName"></param>
-    /// <returns></returns>
-    public System.Reflection.Assembly GetHotfixAssembly(string dllName)
-    {
-        System.Reflection.Assembly result = null;
-#if UNITY_EDITOR
-        result = AppDomain.CurrentDomain.GetAssemblies().First(assembly => assembly.GetName().Name.CompareTo(dllName) == 0);
-
-#else
-        foreach (var item in mHotfixAssemblyList)
-        {
-            if (item.GetName().Name.CompareTo(dllName) == 0)
-            {
-                result = item;
-                break;
-            }
-        }
-#endif
-        return result;
-    }
-    /// <summary>
     /// 为aot assembly加载原始metadata， 这个代码放aot或者热更新都行。
     /// 一旦加载后，如果AOT泛型函数对应native实现不存在，则自动替换为解释模式执行
     /// </summary>
-    private unsafe LoadImageErrorCode LoadMetadataForAOT(byte[] dllBytes)
+    private LoadImageErrorCode LoadMetadataForAOT(byte[] dllBytes)
     {
         return RuntimeApi.LoadMetadataForAOTAssembly(dllBytes, mHomologousImageMode);
     }
+#endif
 }

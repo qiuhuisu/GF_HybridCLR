@@ -8,28 +8,6 @@ using GameFramework.Fsm;
 
 public class PreloadProcedure : ProcedureBase
 {
-    /// <summary>
-    /// 预加载的数据表
-    /// </summary>
-    public static readonly string[] dataTables =
-    {
-        "UITable",
-        "LevelTable",
-        "ColorTable",
-        "CameraViewTable",
-        "EntityGroupTable",
-        "SoundGroupTable",
-        "UIGroupTable"
-    };
-
-    /// <summary>
-    /// 预加载配置表
-    /// </summary>
-    public static readonly string[] configs =
-    {
-        "GameConfig"
-    };
-
     private int totalProgress;
     private int loadedProgress;
     private int aotLoadTaskCount;
@@ -47,8 +25,6 @@ public class PreloadProcedure : ProcedureBase
         GF.Event.Subscribe(LoadDictionaryFailureEventArgs.EventId, OnLoadDicFailure);
         GF.BuiltinView.ShowLoadingProgress();
         Log.Info(">>>>>>>>>>>>>进入HybridCLR热更流程! 预加载游戏数据...");
-
-        AwaitExtension.SubscribeEvent();
         PreloadAndInitData();
     }
 
@@ -68,7 +44,7 @@ public class PreloadProcedure : ProcedureBase
     protected override void OnUpdate(IFsm<IProcedureManager> procedureOwner, float elapseSeconds, float realElapseSeconds)
     {
         base.OnUpdate(procedureOwner, elapseSeconds, realElapseSeconds);
-        if (preloadAllCompleted) return;
+        if (totalProgress <= 0 || preloadAllCompleted) return;
 
         smoothProgress = Mathf.Lerp(smoothProgress, loadedProgress / totalProgress, elapseSeconds * progressSmoothSpeed);
 
@@ -80,7 +56,6 @@ public class PreloadProcedure : ProcedureBase
             InitGameSettings();
             Log.Info("预加载完成, 进入游戏场景.");
             procedureOwner.SetData<VarString>("NextScene", "Game");
-            GF.DataNode.SetData<VarBoolean>("", true);
             ChangeState<ChangeSceneProcedure>(procedureOwner);
         }
     }
@@ -145,7 +120,7 @@ public class PreloadProcedure : ProcedureBase
     /// <summary>
     /// 预加载数据表、游戏配置,以及初始化游戏数据
     /// </summary>
-    private void PreloadAndInitData()
+    private async void PreloadAndInitData()
     {
         if (string.IsNullOrWhiteSpace(GF.Setting.GetABTestGroup()))
         {
@@ -154,25 +129,22 @@ public class PreloadProcedure : ProcedureBase
 
         preloadAllCompleted = false;
         smoothProgress = 0;
-        totalProgress = dataTables.Length + configs.Length + 2;//2是加载多语言和创建框架扩展
+        totalProgress = 0;
         loadedProgress = 0;
-#if UNITY_EDITOR || DISABLE_HYBRIDCLR
+
+        var appConfig = await AppConfigs.GetInstanceSync();
+        totalProgress = appConfig.DataTables.Length + appConfig.Configs.Length + 2;//2是加载多语言和创建框架扩展
         CreateGFExtension();
-#else
-        var aotMetaDlls = Resources.LoadAll<TextAsset>(ConstBuiltin.AOT_DLL_DIR);
-        aotLoadTaskCount = aotMetaDlls.Length;
-        totalProgress += aotLoadTaskCount;
-        LoadMetadata(aotMetaDlls);
-#endif
     }
-    private void LoadOthers()
+    private async void LoadOthers()
     {
         LoadDictionary();
-        foreach (var item in configs)
+        var appConfig = await AppConfigs.GetInstanceSync();
+        foreach (var item in appConfig.Configs)
         {
             LoadConfig(item);
         }
-        foreach (var item in dataTables)
+        foreach (var item in appConfig.DataTables)
         {
             LoadDataTable(item);
         }
@@ -197,25 +169,6 @@ public class PreloadProcedure : ProcedureBase
     {
         GF.DataTable.LoadDataTable(name, this);
     }
-
-    private void LoadMetadata(TextAsset[] aotMetaDlls)
-    {
-        foreach (var dll in aotMetaDlls)
-        {
-            var success = GF.Hotfix.LoadMetadataForAOTAssembly(dll.bytes);
-            Log.Info(Utility.Text.Format("LoadMetadataForAOTAssembly:{0}. ret:{1}", dll.name, success));
-            if (success)
-            {
-                loadedProgress++;
-                //元数据补充完后创建框架扩展
-                if (--aotLoadTaskCount <= 0)
-                {
-                    CreateGFExtension();
-                }
-            }
-        }
-    }
-
 
     private void LoadDictionary()
     {

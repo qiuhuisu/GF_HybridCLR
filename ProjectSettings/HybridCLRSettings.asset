@@ -14,16 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enable: 1
   useGlobalIl2cpp: 0
-  cloneFromGitee: 1
+  hybridclrRepoURL: https://gitee.com/focus-creative-games/hybridclr
+  il2cppPlusRepoURL: https://gitee.com/focus-creative-games/il2cpp_plus
   hotUpdateAssemblyDefinitions:
   - {fileID: 5897886265953266890, guid: ffcadf451fde59846a9f26513f27e864, type: 3}
-  - {fileID: 5897886265953266890, guid: 021d24036b3e27c41913d1f458888c79, type: 3}
-  hotUpdateAssemblies: []
+  hotUpdateAssemblies:
+  - Hotfix
   preserveHotUpdateAssemblies: []
   hotUpdateDllCompileOutputRootDir: HybridCLRData/HotUpdateDlls
+  externalHotUpdateAssembliyDirs: []
   strippedAOTDllOutputRootDir: HybridCLRData/AssembliesPostIl2CppStrip
   patchAOTAssemblies:
-  - LitJson
   - mscorlib
   - System.Core
   - System

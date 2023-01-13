@@ -10,6 +10,12 @@ scopes = {
 	"last_search.DA949528" = ""
 	"OpenInspectorPreview.DA949528" = "0"
 	"currentGroup.DA949528" = "all"
+	"last_search.C4949528" = "<noninit> t:RenderTexture"
+	"OpenInspectorPreview.C4949528" = "0"
+	"currentGroup.C4949528" = "asset"
+	"last_search.10697386" = ""
+	"OpenInspectorPreview.10697386" = "0"
+	"currentGroup.10697386" = "all"
 }
 providers = {
 	adb = {

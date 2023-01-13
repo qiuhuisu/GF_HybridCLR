@@ -217,7 +217,7 @@ public static class UIExtension
         {
             GF.Sound.PlayEffect("add_money.wav");
         });
-        var richText = Utility.Text.Format("<sprite name=USD_{0}>", GF.UserData.GetMoneyStyleId());
+        var richText = "<sprite name=USD_0>";
         for (int i = 0; i < num; i++)
         {
             var animPrams = EntityParams.Acquire(centerPos, Vector3.zero, Vector3.one);

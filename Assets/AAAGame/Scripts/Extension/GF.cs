@@ -7,15 +7,14 @@ using UnityGameFramework.Runtime;
 
 public class GF : GFBuiltin
 {
+    public static DataModelComponent DataModel { get; private set; }
     public static ADComponent AD { get; private set; }
-    public static UserDataComponent UserData { get; private set; }
     public static StaticUIComponent StaticUI { get; private set; } //无需异步加载的, 通用UI
-    
+
     private void Start()
     {
-        LitJsonExtensions.Register();
+        DataModel = GameEntry.GetComponent<DataModelComponent>();
         AD = GameEntry.GetComponent<ADComponent>();
-        UserData = GameEntry.GetComponent<UserDataComponent>();
         StaticUI = GameEntry.GetComponent<StaticUIComponent>();
     }
 
@@ -30,6 +29,17 @@ public class GF : GFBuiltin
         {
             OnExitGame();
         }
+    }
+    public Vector2 GetCanvasSize()
+    {
+        var rect = RootCanvas.GetComponent<RectTransform>();
+        return rect.sizeDelta;
+    }
+    public Vector2 World2ScreenPoint(Camera cam, Vector3 worldPoint)
+    {
+        var rect = RootCanvas.GetComponent<RectTransform>();
+        Vector2 sPoint = cam.WorldToViewportPoint(worldPoint) * rect.sizeDelta;
+        return sPoint - rect.sizeDelta * 0.5f;
     }
     private void OnExitGame()
     {

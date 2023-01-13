@@ -17,14 +17,14 @@ public partial class MyGameTools
     [MenuItem("Game Framework/GameTools/link.xml Editor【代码裁剪配置】", false, 1)]
     public static void ShowStripConfigEditor()
     {
-        var win = EditorWindow.GetWindow<StripLinkConfigWindow>("Strip LinkConfig Editor");
+        var win = EditorWindow.GetWindow<StripLinkConfigEditor>("Strip LinkConfig Editor");
         win.Show();
         win.SetEditorMode(ConfigEditorMode.StripLinkConfig);
     }
     [MenuItem("HybridCLR/AOT dlls Editor【元数据补充配置】", false, 5)]
     public static void ShowAotDllsConfigEditor()
     {
-        var win = EditorWindow.GetWindow<StripLinkConfigWindow>("AOT dlls Config Window");
+        var win = EditorWindow.GetWindow<StripLinkConfigEditor>("AOT dlls Config Window");
         win.Show();
         win.SetEditorMode(ConfigEditorMode.AotDllConfig);
     }
@@ -43,8 +43,7 @@ public partial class MyGameTools
         var files = Directory.GetFiles(dllDir, "*.dll", SearchOption.AllDirectories);
         foreach (var file in files)
         {
-            var fileInfo = new FileInfo(file);
-            var fileName = fileInfo.Name.Substring(0, fileInfo.Name.Length - fileInfo.Extension.Length);
+            var fileName = Path.GetFileNameWithoutExtension(file);
             if (!dlls.Contains(fileName)) dlls.Add(fileName);
         }
         return dlls.ToArray();

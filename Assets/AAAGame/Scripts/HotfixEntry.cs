@@ -1,27 +1,29 @@
 using GameFramework;
 using GameFramework.Fsm;
 using GameFramework.Procedure;
+using System;
 using UnityGameFramework.Runtime;
 /// <summary>
-/// 热更逻辑入口
+/// 鐑洿閫昏緫鍏ュ彛
 /// </summary>
 public class HotfixEntry
 {
-    public static void StartHotfixLogic(bool enableHotfix)
+    public static async void StartHotfixLogic(bool enableHotfix)
     {
         Log.Info("Hotfix Enable:{0}", enableHotfix);
+        AwaitExtension.SubscribeEvent();
+
+
         GFBuiltin.Fsm.DestroyFsm<IProcedureManager>();
         var fsmManager = GameFrameworkEntry.GetModule<IFsmManager>();
         var procManager = GameFrameworkEntry.GetModule<IProcedureManager>();
-        //手动把热更新程序集的流程添加进来
-        ProcedureBase[] procedures = new ProcedureBase[]
+        var appConfig = await AppConfigs.GetInstanceSync();
+
+        ProcedureBase[] procedures = new ProcedureBase[appConfig.Procedures.Length];
+        for (int i = 0; i < appConfig.Procedures.Length; i++)
         {
-            new PreloadProcedure(),
-            new ChangeSceneProcedure(),
-            new MenuProcedure(),
-            new GameProcedure(),
-            new GameOverProcedure()
-        };
+            procedures[i] = Activator.CreateInstance(Type.GetType(appConfig.Procedures[i])) as ProcedureBase;
+        }
         procManager.Initialize(fsmManager, procedures);
         procManager.StartProcedure<PreloadProcedure>();
     }

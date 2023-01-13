@@ -23,8 +23,8 @@ namespace UnityGameFramework.Runtime
     /// </summary>
     public class DefaultLoadResourceAgentHelper : LoadResourceAgentHelperBase, IDisposable
     {
-        protected string m_FileFullPath = null;
-        protected string m_FileName = null;
+        private string m_FileFullPath = null;
+        private string m_FileName = null;
         private string m_BytesFullPath = null;
         private string m_AssetName = null;
         private float m_LastProgress = 0f;
@@ -34,7 +34,7 @@ namespace UnityGameFramework.Runtime
 #else
         private WWW m_WWW = null;
 #endif
-        protected AssetBundleCreateRequest m_FileAssetBundleCreateRequest = null;
+        private AssetBundleCreateRequest m_FileAssetBundleCreateRequest = null;
         private AssetBundleCreateRequest m_BytesAssetBundleCreateRequest = null;
         private AssetBundleRequest m_AssetBundleRequest = null;
         private AsyncOperation m_AsyncOperation = null;

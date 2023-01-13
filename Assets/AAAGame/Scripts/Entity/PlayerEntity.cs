@@ -18,7 +18,9 @@ public class PlayerEntity : SampleEntity
     private float jumpHeight = 3f;
     private bool isGrounded;
     private Vector3 moveStep;
-
+    private Transform firePoint;
+    private float fireInterval = 0.4f;
+    private float lastFireTime;
     private bool mCtrlable;
     public bool Ctrlable
     {
@@ -33,6 +35,7 @@ public class PlayerEntity : SampleEntity
     {
         base.OnInit(userData);
         characterCtrl = GetComponent<CharacterController>();
+        firePoint = transform.Find("FirePoint");
     }
     protected override void OnUpdate(float elapseSeconds, float realElapseSeconds)
     {
@@ -41,8 +44,21 @@ public class PlayerEntity : SampleEntity
         isGrounded = characterCtrl.isGrounded;
 
         Move();//ÒÆ¶¯
-
+        Fire();
         Jump();//ÌøÔ¾
+    }
+    private void Fire()
+    {
+        if (Input.GetKey(KeyCode.A))
+        {
+            if (Time.time - lastFireTime > fireInterval)
+            {
+                lastFireTime = Time.time;
+                var fireParms = EntityParams.Acquire(firePoint.position, firePoint.eulerAngles);
+                fireParms.Set<VarFloat>("LifeTime", 1.5f);
+                GF.Entity.ShowEntity<BulletEntity>("Effect/Trail", Const.EntityGroup.Effect, fireParms);
+            }
+        }
     }
     private void Move()
     {

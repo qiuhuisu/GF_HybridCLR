@@ -10,7 +10,8 @@ using GameFramework;
 using System.Text.RegularExpressions;
 using System.Text;
 using System.IO;
-
+using UnityEngine.UI;
+using UnityEngine.Events;
 
 [CustomEditor(typeof(UIFormBase), true)]
 public class UIFormBaseEditor : Editor
@@ -31,6 +32,9 @@ public class UIFormBaseEditor : Editor
     bool useSerializeMode = false;
     static int varPrefixIndex = -1;
     static bool mShowSelectTypeMenu;
+
+    GUIContent prefixContent;
+    GUIContent typeContent;
 
     #region #右键菜单
     private static GUIStyle normalStyle;
@@ -154,6 +158,7 @@ public class UIFormBaseEditor : Editor
         removeToFieldToggle = true;
         addToFieldToggle = false;
     }
+
     /// <summary>
     /// 不带名字空间的类型名
     /// </summary>
@@ -230,6 +235,8 @@ public class UIFormBaseEditor : Editor
 
     private void OnEnable()
     {
+        prefixContent = new GUIContent();
+        typeContent = new GUIContent();
         useSerializeMode = EditorPrefs.GetBool("SerializeMode", true);
         varPrefixIndex = 0;
         mShowSelectTypeMenu = false;
@@ -335,7 +342,8 @@ public class UIFormBaseEditor : Editor
             string targetsTitle = $"Size {targetsCount}";
 
             unfoldProperty.boolValue = EditorGUILayout.BeginFoldoutHeaderGroup(unfoldProperty.boolValue, targetsTitle);
-            if (EditorGUILayout.DropdownButton(new GUIContent(varPrefixProperty.stringValue), FocusType.Passive, GUILayout.MaxWidth(fieldPrefixWidth)))
+            prefixContent.text = varPrefixProperty.stringValue;
+            if (EditorGUILayout.DropdownButton(prefixContent, FocusType.Passive, GUILayout.MaxWidth(fieldPrefixWidth)))
             {
                 GenericMenu popMenu = new GenericMenu();
                 foreach (var varPrefix in varPrefixArr)
@@ -348,7 +356,8 @@ public class UIFormBaseEditor : Editor
                 }
                 popMenu.ShowAsContext();
             }
-            if (EditorGUILayout.DropdownButton(new GUIContent(varTypeProperty.stringValue), FocusType.Passive, GUILayout.MaxWidth(fieldTypeWidth)))
+            typeContent.text = varTypeProperty.stringValue;
+            if (EditorGUILayout.DropdownButton(typeContent, FocusType.Passive, GUILayout.MaxWidth(fieldTypeWidth)))
             {
                 GenericMenu popMenu = new GenericMenu();
                 var popContens = GetPopupContents(targetsProperty);

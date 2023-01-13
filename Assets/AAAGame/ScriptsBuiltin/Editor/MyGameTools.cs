@@ -10,12 +10,8 @@ using System.Text.RegularExpressions;
 using GameFramework;
 using OfficeOpenXml;
 using GameFramework.Editor.DataTableTools;
-using UnityEngine.U2D;
 
 //using PathCreation;
-using DG.Tweening;
-using UnityEditor.Compilation;
-using UnityEditorInternal;
 using System;
 
 public partial class MyGameTools : EditorWindow
@@ -57,10 +53,11 @@ public partial class MyGameTools : EditorWindow
         }
     }
     [MenuItem("Game Framework/GameTools/Refresh All Excels【刷新配置表】", false, 1001)]
-    public static void GenerateDataTables()
+    public static async void GenerateDataTables()
     {
-        RefreshAllDataTable(PreloadProcedure.dataTables);
-        RefreshAllConfig(PreloadProcedure.configs);
+        var appConfig = await AppConfigs.GetInstanceSync();
+        RefreshAllDataTable(appConfig.DataTables);
+        RefreshAllConfig(appConfig.Configs);
 
         try
         {
@@ -341,39 +338,49 @@ public partial class MyGameTools : EditorWindow
     /// <summary>
     /// Excel转换为Txt
     /// </summary>
-    public static void Excel2TxtFile(string excelFileName, string outTxtFile)
+    public static bool Excel2TxtFile(string excelFileName, string outTxtFile)
     {
+        bool result = false;
         var fileInfo = new FileInfo(excelFileName);
         string tmpExcelFile;
 
         tmpExcelFile = UtilityBuiltin.ResPath.GetCombinePath(fileInfo.Directory.FullName, Utility.Text.Format("{0}.temp", fileInfo.Name));
         File.Copy(excelFileName, tmpExcelFile, true);
 
-
-        //var stream = new FileStream(tmpExcelFile, FileMode.Open);
         var excelFileInfo = new FileInfo(tmpExcelFile);
-        var excelPackage = new ExcelPackage(excelFileInfo);
-        //stream.Close();
-        var excelSheet = excelPackage.Workbook.Worksheets[0];
-        string excelTxt = string.Empty;
-        for (int rowIndex = excelSheet.Dimension.Start.Row; rowIndex <= excelSheet.Dimension.End.Row; rowIndex++)
+        using (var excelPackage = new ExcelPackage(excelFileInfo))
         {
-            string rowTxt = string.Empty;
-            for (int colIndex = excelSheet.Dimension.Start.Column; colIndex <= excelSheet.Dimension.End.Column; colIndex++)
+            var excelSheet = excelPackage.Workbook.Worksheets[0];
+            string excelTxt = string.Empty;
+            for (int rowIndex = excelSheet.Dimension.Start.Row; rowIndex <= excelSheet.Dimension.End.Row; rowIndex++)
             {
-                rowTxt = Utility.Text.Format("{0}{1}\t", rowTxt, excelSheet.GetValue(rowIndex, colIndex));
+                string rowTxt = string.Empty;
+                for (int colIndex = excelSheet.Dimension.Start.Column; colIndex <= excelSheet.Dimension.End.Column; colIndex++)
+                {
+                    rowTxt = Utility.Text.Format("{0}{1}\t", rowTxt, excelSheet.GetValue(rowIndex, colIndex));
+                }
+                rowTxt = rowTxt.Substring(0, rowTxt.Length - 1);
+                excelTxt = Utility.Text.Format("{0}{1}\n", excelTxt, rowTxt);
             }
-            rowTxt = rowTxt.Substring(0, rowTxt.Length - 1);
-            excelTxt = Utility.Text.Format("{0}{1}\n", excelTxt, rowTxt);
+            excelTxt = excelTxt.TrimEnd('\n');
+            excelSheet.Dispose();
+            excelPackage.Dispose();
+            try
+            {
+                File.WriteAllText(outTxtFile, excelTxt, Encoding.UTF8);
+                result = true;
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+            
         }
-        excelTxt = excelTxt.TrimEnd('\n');
-        File.WriteAllText(outTxtFile, excelTxt, Encoding.UTF8);
-        excelSheet.Dispose();
-        excelPackage.Dispose();
         if (File.Exists(tmpExcelFile))
         {
             File.Delete(tmpExcelFile);
         }
+        return result;
     }
     //[MenuItem("Game Framework/GameTools/Refresh All GameConfigs")]
     public static void RefreshAllConfig(string[] files = null)
@@ -398,7 +405,10 @@ public partial class MyGameTools : EditorWindow
             string savePath = UtilityBuiltin.ResPath.GetCombinePath(ConstEditor.GameConfigPath, Utility.Text.Format("{0}.txt", Path.GetFileNameWithoutExtension(excelFileName)));
             try
             {
-                Excel2TxtFile(excelFileName, savePath);
+                if(Excel2TxtFile(excelFileName, savePath))
+                {
+                    Debug.LogFormat("------------导出Config表成功:{0}", savePath);
+                }
             }
             catch (System.Exception e)
             {
@@ -408,7 +418,7 @@ public partial class MyGameTools : EditorWindow
         }
         AssetDatabase.Refresh();
     }
-    public static void RefreshAllDataTable(string[] files = null)
+    public static async void RefreshAllDataTable(string[] files = null)
     {
         var excelDir = ConstEditor.DataTableExcelPath;
         if (!Directory.Exists(excelDir))
@@ -445,7 +455,8 @@ public partial class MyGameTools : EditorWindow
         }
 
         //生成数据表代码
-        foreach (var dataTableName in PreloadProcedure.dataTables)
+        var appConfig = await AppConfigs.GetInstanceSync();
+        foreach (var dataTableName in appConfig.DataTables)
         {
             string tbTxtFile = Utility.Path.GetRegularPath(Path.Combine(ConstEditor.DataTablePath, dataTableName + ".txt"));
             if (!File.Exists(tbTxtFile))

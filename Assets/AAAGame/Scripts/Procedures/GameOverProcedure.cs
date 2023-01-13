@@ -19,16 +19,6 @@ public class GameOverProcedure : ProcedureBase
         this.procedure = procedureOwner;
         isWin = this.procedure.GetData<VarBoolean>("IsWin");
 
-        GF.AD.SendEvent(isWin ? "finish" : "fail", new Dictionary<string, string> { ["levelID"] = GF.UserData.GAME_LEVEL.ToString()});
-        if (isWin)
-        {
-            if (GF.Setting.GetBool(Utility.Text.Format("NEW_LV{0}", GF.UserData.GAME_LEVEL), true) && GF.UserData.GAME_LEVEL <= GF.DataTable.GetDataTable<LevelTable>().MaxIdDataRow.Id)
-            {
-                GF.AD.SendEvent("firstFinish", new Dictionary<string, string> { ["levelID"] = GF.UserData.GAME_LEVEL.ToString()});
-            }
-            GF.UserData.GAME_LEVEL++;
-        }
-        GF.Setting.SetBool(Utility.Text.Format("NEW_LV{0}", GF.UserData.GAME_LEVEL), false);
         ShowGameOverUIForm(2);
     }
     protected override void OnLeave(IFsm<IProcedureManager> procedureOwner, bool isShutdown)

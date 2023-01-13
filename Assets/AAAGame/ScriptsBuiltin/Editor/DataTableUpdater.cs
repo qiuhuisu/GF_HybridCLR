@@ -1,12 +1,7 @@
 #if UNITY_EDITOR
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using System.IO;
-using System;
-using System.Linq;
-using static UnityEditor.Progress;
 
 public static partial class DataTableUpdater
 {
@@ -14,8 +9,9 @@ public static partial class DataTableUpdater
     static string[] configFileChangedList;
 
     static bool isInitialized = false;
+    static AppConfigs appConfigs = null;
     [InitializeOnLoadMethod]
-    private static void Init()
+    private static async void Init()
     {
         if (isInitialized) return;
         EditorApplication.update += OnUpdate;
@@ -38,15 +34,18 @@ public static partial class DataTableUpdater
         cfgWatcher.Changed += cfgFileChangedCb;
         cfgWatcher.Deleted += cfgFileChangedCb;
         cfgWatcher.Renamed += cfgFileRenameCb;
+        appConfigs = await AppConfigs.GetInstanceSync();
         isInitialized = true;
     }
 
 
     private static void OnUpdate()
     {
+        if (!isInitialized) return;
+
         if (tableFileChangedList != null && tableFileChangedList.Length > 0)
         {
-            var changedFiles = GetMainExcelFiles(PreloadProcedure.dataTables, tableFileChangedList);
+            var changedFiles = GetMainExcelFiles(appConfigs.DataTables, tableFileChangedList);
             MyGameTools.RefreshAllDataTable(changedFiles);
             if (ArrayUtility.Contains(changedFiles, Path.GetFileNameWithoutExtension(ConstEditor.UITableExcel)))
             {
@@ -67,7 +66,7 @@ public static partial class DataTableUpdater
         }
         if (configFileChangedList != null && configFileChangedList.Length > 0)
         {
-            var changedFiles = GetMainExcelFiles(PreloadProcedure.configs, configFileChangedList);
+            var changedFiles = GetMainExcelFiles(appConfigs.Configs, configFileChangedList);
             MyGameTools.RefreshAllConfig(changedFiles);
             foreach (var item in changedFiles)
             {

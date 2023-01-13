@@ -1,7 +1,9 @@
 #if !UNITY_EDITOR
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.Scripting;
 
+[Preserve]
 public class SkipUnityLogo
 {
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]

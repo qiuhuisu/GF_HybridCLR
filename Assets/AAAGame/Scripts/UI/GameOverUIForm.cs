@@ -32,7 +32,7 @@ public class GameOverUIForm : UIFormBase
         panels[0].SetActive(!isWin);
         panels[1].SetActive(isWin);
         topBar.gameObject.SetActive(isWin);
-        this.SetMoneyText(GF.UserData.MONEY);
+        this.SetMoneyText(GF.DataModel.GetOrCreate<PlayerDataModel>().Coins);
         rewardNumText.text = Utility.Text.Format("+{0}", rewardNum);
     }
 
@@ -44,19 +44,19 @@ public class GameOverUIForm : UIFormBase
             onClaimComplete?.Invoke();
             return;
         }
-
+        var playerDm = GF.DataModel.GetOrCreate<PlayerDataModel>();
         animDoing = true;
-        int diamondNum = GF.UserData.GetMultiReward(rewardNum, multi);
-        int curMoney = GF.UserData.MONEY;
+        int diamondNum = playerDm.GetMultiReward(rewardNum, multi);
+        int curMoney = playerDm.Coins;
         isClaimed = true;
-        GF.UserData.MONEY += rewardNum;
+        playerDm.Coins += rewardNum;
         float doMoneyNumDuration = Mathf.Clamp(rewardNum * 0.01f, 0.5f, 1f);
         GF.UI.ShowRewardEffect(rewardNumText.transform.position, diamondNode.position,0.5f, () =>
         {
             onClaimComplete?.Invoke();
             animDoing = false;
         }, 30);
-        var doMoneyNum = DOTween.To(() => curMoney, (x) => curMoney = x, GF.UserData.MONEY, doMoneyNumDuration).SetEase(Ease.Linear).SetDelay(1f);
+        var doMoneyNum = DOTween.To(() => curMoney, (x) => curMoney = x, playerDm.Coins, doMoneyNumDuration).SetEase(Ease.Linear).SetDelay(1f);
         doMoneyNum.onUpdate = () =>
         {
             SetMoneyText(curMoney);

@@ -43,13 +43,6 @@ public class ADComponent : GameFrameworkComponent//, IAppsFlyerConversionData
     [SerializeField] private string m_RewardAdUnitId_IOS = "";
     [SerializeField] private string m_BannerAdUnitId_IOS = "";
 
-
-#if UNITY_IPHONE || UNITY_IOS
-        private string Bugly_APP_ID = "77f7d6f0b2";
-#elif UNITY_ANDROID
-    private string Bugly_APP_ID = "ac2d5767a2";
-#endif
-
     private AndroidJavaObject activity = null;
     /// <summary>
     /// 0等待结果 1非自然量 2自然量 3超时
@@ -107,7 +100,6 @@ public class ADComponent : GameFrameworkComponent//, IAppsFlyerConversionData
         targetBannerUnitId = m_BannerAdUnitId;
         targetAdKey = m_AdKey;
 #endif
-        InitBugly();
         InitFacebook();
     }
 
@@ -235,29 +227,16 @@ public class ADComponent : GameFrameworkComponent//, IAppsFlyerConversionData
         //AppsFlyer.startSDK();
     }
 
-    internal void InitBugly()
-    {
-        // 开启SDK的日志打印，发布版本请务必关闭
-        //BuglyAgent.ConfigDebugMode(Const.IsDebug);
-
-//#if UNITY_IPHONE || UNITY_IOS
-//        BuglyAgent.InitWithAppId(Bugly_APP_ID);
-//#elif UNITY_ANDROID
-//        BuglyAgent.InitWithAppId(Bugly_APP_ID);
-//#endif
-//        BuglyAgent.EnableExceptionHandler();
-    }
-
     public bool UserPrivacyAccepted()
     {
         return true;
-#if UNITY_EDITOR
-        return true;
-#elif UNITY_IPHONE
-        return true;
-#else
-        return m_CustomADHelper && m_CustomADHelper.UserPrivacyAccepted();
-#endif
+//#if UNITY_EDITOR
+//        return true;
+//#elif UNITY_IPHONE
+//        return true;
+//#else
+//        return m_CustomADHelper && m_CustomADHelper.UserPrivacyAccepted();
+//#endif
     }
     /// <summary>
     /// 展示插屏广告
@@ -386,7 +365,6 @@ public class ADComponent : GameFrameworkComponent//, IAppsFlyerConversionData
 
     private void OnInterstitialAdLoaded(bool success)
     {
-        Log.Info("AD-> OnInterstitialAdLoaded:{0}", success);
         if (!success)
         {
             EnqueueAdEvent(delegate
@@ -456,7 +434,6 @@ public class ADComponent : GameFrameworkComponent//, IAppsFlyerConversionData
 
     private void OnRewardedAdLoaded(bool loadSuccess)
     {
-        Log.Info("AD-> OnRewardedAdLoaded:{0}", loadSuccess);
         if (!loadSuccess)
         {
             EnqueueAdEvent(delegate

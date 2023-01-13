@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using GameFramework;
+﻿using UnityEngine;
 using GameFramework.Procedure;
 using UnityGameFramework.Runtime;
 using GameFramework.Fsm;
-using GameFramework.Event;
-using System.IO;
-using System.Text;
 using System.Globalization;
 
 public class LunchProcedure : ProcedureBase
@@ -19,14 +12,15 @@ public class LunchProcedure : ProcedureBase
         this.InitSettings();
         Log.Info("Lunch:初始化游戏设置.");
         ChangeState(procedureOwner, GFBuiltin.Base.EditorResourceMode ? typeof(LoadHotfixDllProcedure) : typeof(CheckAndUpdateProcedure));
+
+
     }
 
     private void InitSettings()
     {
         CultureInfo.CurrentCulture = CultureInfo.CreateSpecificCulture("en-GB");
-        GFBuiltin.Debugger.ActiveWindow = ConstBuiltin.IsDebug;
+        GFBuiltin.Debugger.ActiveWindow = AppSettings.Instance.DebugMode;
         GFBuiltin.Debugger.WindowScale = 1.4f;
-
         //初始化语言
         GameFramework.Localization.Language language;
         if (Application.platform == RuntimePlatform.WindowsEditor)

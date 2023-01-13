@@ -4,7 +4,6 @@
     "references": [
         "Unity.TextMeshPro",
         "Cinemachine",
-        "LitJson",
         "UnityGameFramework.Runtime",
         "UltimateJoystick",
         "Unity.RenderPipelines.Universal.Runtime",

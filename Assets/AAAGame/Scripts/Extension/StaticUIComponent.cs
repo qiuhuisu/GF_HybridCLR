@@ -7,6 +7,9 @@ using UnityEngine.UI;
 
 public class StaticUIComponent : GameFrameworkComponent
 {
+    [Header("Waiting View:")]
+    [SerializeField] GameObject waitingView = null;
+
     [SerializeField] UltimateJoystick mJoystick;
     public bool JoystickEnable
     {
@@ -22,25 +25,36 @@ public class StaticUIComponent : GameFrameworkComponent
             {
                 mJoystick.DisableJoystick();
             }
-            mJoystick.GetComponent<CanvasGroup>().alpha = value ? 1 : 0;
+            mJoystick.disableVisuals = !value;
         }
     }
     public UltimateJoystick Joystick { get { return mJoystick; } }
 
-
+    private void OnEnable()
+    {
+        waitingView.SetActive(false);
+    }
     private void Start()
     {
-        mJoystick.GetComponentInParent<Canvas>().worldCamera = GFBuiltin.UICamera;
-        mJoystick.GetComponent<CanvasGroup>().alpha = 0;
+        mJoystick.disableVisuals = true;
         UpdateCanvasScaler();
     }
     public void UpdateCanvasScaler()
     {
-        var joystickScaler = mJoystick.GetComponentInParent<CanvasScaler>();
-        joystickScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        joystickScaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
-        joystickScaler.matchWidthOrHeight = GFBuiltin.CanvasFitMode == ScreenFitMode.Width ? 0 : 1;
+        var uiRootCanvas = GFBuiltin.RootCanvas;
+        var canvasRoot = this.GetComponent<Canvas>();
+        canvasRoot.worldCamera = uiRootCanvas.worldCamera;
+        canvasRoot.planeDistance = uiRootCanvas.planeDistance;
+        canvasRoot.sortingLayerID = uiRootCanvas.sortingLayerID;
+        canvasRoot.sortingOrder = uiRootCanvas.sortingOrder;
 
+        var canvasScaler = this.GetComponent<CanvasScaler>();
+        var uiRootScaler = uiRootCanvas.GetComponent<CanvasScaler>();
+
+        canvasScaler.uiScaleMode = uiRootScaler.uiScaleMode;
+        canvasScaler.screenMatchMode = uiRootScaler.screenMatchMode;
+        canvasScaler.matchWidthOrHeight = uiRootScaler.matchWidthOrHeight;
+        canvasScaler.referencePixelsPerUnit = uiRootScaler.referencePixelsPerUnit;
     }
     IEnumerator RefreshJoystickPosition() { yield return new WaitForEndOfFrame(); mJoystick.UpdatePositioning(); }
 }
