@@ -6,7 +6,6 @@ using UnityEditor;
 using UnityEngine;
 using GameFramework.Resource;
 using Unity.VisualScripting;
-using static UnityEditor.BuildPlayerWindow;
 using HybridCLR.Editor.Commands;
 using System.Text;
 using System.Linq;
