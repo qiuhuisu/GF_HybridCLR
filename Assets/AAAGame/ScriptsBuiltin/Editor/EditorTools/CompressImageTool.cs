@@ -76,18 +76,19 @@ public class CompressImageTool : EditorWindow
 
     private void OnGUI()
     {
-        EditorGUILayout.BeginVertical();
+        var rect = EditorGUILayout.BeginVertical();
         EditorGUILayout.Space(10);
         srcScrollPos = EditorGUILayout.BeginScrollView(srcScrollPos);
         srcScrollList.DoLayoutList();
         EditorGUILayout.EndScrollView();
 
         GUILayout.FlexibleSpace();
+        DrawDropArea();
+        EditorGUILayout.Space(10);
         if (settingFoldout = EditorGUILayout.Foldout(settingFoldout, "展开设置项:"))
         {
             DrawSettingsPanel();
         }
-        DrawDropArea();
         EditorGUILayout.BeginHorizontal("box");
         {
             if (GUILayout.Button("开始压缩", GUILayout.Height(30)))
@@ -112,7 +113,7 @@ public class CompressImageTool : EditorWindow
         }
         EditorGUILayout.BeginHorizontal("box");
         {
-            AppBuildSettings.Instance.CompressImgToolCoverRaw = EditorGUILayout.ToggleLeft("覆盖源文件", AppBuildSettings.Instance.CompressImgToolCoverRaw, GUILayout.Width(100));
+            AppBuildSettings.Instance.CompressImgToolCoverRaw = EditorGUILayout.ToggleLeft("覆盖原图片", AppBuildSettings.Instance.CompressImgToolCoverRaw, GUILayout.Width(100));
             EditorGUI.BeginDisabledGroup(AppBuildSettings.Instance.CompressImgToolCoverRaw);
             {
                 EditorGUILayout.SelectableLabel(AppBuildSettings.Instance.CompressImgToolOutputDir, EditorStyles.selectionRect, GUILayout.Height(EditorGUIUtility.singleLineHeight), GUILayout.ExpandWidth(true));
@@ -242,7 +243,7 @@ public class CompressImageTool : EditorWindow
             var itmTp = CheckItemType(item);
             if (itmTp == ItemType.Image)
             {
-                string imgFileName = AssetDatabase.GetAssetPath(item);
+                string imgFileName = Utility.Path.GetRegularPath(AssetDatabase.GetAssetPath(item));
                 if (images.Contains(imgFileName)) continue;
                 images.Add(imgFileName);
             }
@@ -251,17 +252,23 @@ public class CompressImageTool : EditorWindow
                 string imgFolder = AssetDatabase.GetAssetPath(item);
                 if (Directory.Exists(imgFolder))
                 {
-                    var allImgFiles = Directory.GetFiles(imgFolder, "*.*", SearchOption.AllDirectories).Where(fileName => ArrayUtility.Contains(SupportImgTypes, Path.GetExtension(fileName)) && !images.Contains(fileName));
+                    var allImgFiles = Directory.GetFiles(imgFolder, "*.*", SearchOption.AllDirectories).Where(fileName =>
+                    {
+                        fileName = Utility.Path.GetRegularPath(fileName);
+                        return ArrayUtility.Contains(SupportImgTypes, Path.GetExtension(fileName)) && !images.Contains(fileName);
+                    });
+
                     images.AddRange(allImgFiles);
                 }
             }
         }
-        return images;
+
+        return images.Distinct().ToList();//把结果去重处理
     }
 
     private void DrawDropArea()
     {
-        var dragRect = EditorGUILayout.BeginVertical("box");
+        var dragRect = EditorGUILayout.BeginVertical(EditorStyles.selectionRect);
         {
             EditorGUILayout.LabelField(dragAreaContent, centerLabelStyle, GUILayout.Height(100));
             if (dragRect.Contains(Event.current.mousePosition))
@@ -270,7 +277,7 @@ public class CompressImageTool : EditorWindow
                 {
                     DragAndDrop.visualMode = DragAndDropVisualMode.Generic;
                 }
-                else if (Event.current.type == EventType.DragExited && dragRect.Contains(Event.current.mousePosition))
+                else if (Event.current.type == EventType.DragExited)
                 {
                     if (DragAndDrop.objectReferences != null && DragAndDrop.objectReferences.Length > 0)
                     {
@@ -347,6 +354,5 @@ public class CompressImageTool : EditorWindow
     private void AddItem(ReorderableList list)
     {
         var openSuccess = EditorUtilityExtension.OpenAssetSelector(typeof(UnityEngine.Object), "t:sprite t:texture2d t:folder", OnSelectAsset, selectOjbWinId);
-
     }
 }

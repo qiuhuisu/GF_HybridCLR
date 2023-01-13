@@ -10,7 +10,6 @@ public class PreloadProcedure : ProcedureBase
 {
     private int totalProgress;
     private int loadedProgress;
-    private int aotLoadTaskCount;
     private float smoothProgress;
     private bool preloadAllCompleted;
     private float progressSmoothSpeed = 10f;

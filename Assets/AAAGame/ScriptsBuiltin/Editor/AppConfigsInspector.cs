@@ -312,7 +312,7 @@ public class AppConfigsInspector : Editor
         procedures ??= new ItemData[0];
         ArrayUtility.Clear(ref procedures);
         //#if !DISABLE_HYBRIDCLR
-        var hotfixDlls = Utility.Assembly.GetAssemblies().Where(dll => HybridCLR.Editor.SettingsUtil.HotUpdateAssemblyNames.Contains(dll.GetName().Name)).ToArray();
+        var hotfixDlls = Utility.Assembly.GetAssemblies().Where(dll => HybridCLR.Editor.SettingsUtil.HotUpdateAssemblyNamesIncludePreserved.Contains(dll.GetName().Name)).ToArray();
 
         foreach (var item in hotfixDlls)
         {

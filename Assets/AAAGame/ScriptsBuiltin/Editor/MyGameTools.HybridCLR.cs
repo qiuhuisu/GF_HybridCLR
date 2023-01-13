@@ -12,50 +12,6 @@ using UnityEngine;
 
 public partial class MyGameTools
 {
-    //    [MenuItem("HybridCLR/Update", false, 2)]
-    //    public static void UpdateHybridCLR()
-    //    {
-    //#if UNITY_EDITOR_WIN
-    //        string batFileName = "init_local_il2cpp_data.bat";
-    //#else
-    //        string batFileName = "init_local_il2cpp_data.sh";
-    //#endif
-    //        var batFile = UtilityBuiltin.ResPath.GetCombinePath(HybridCLR.BuildConfig.HybridCLRDataDir, batFileName);
-    //        if (!File.Exists(batFile))
-    //        {
-    //            Debug.LogErrorFormat("HybridCLR file not exist:{0}", batFile);
-    //            return;
-    //        }
-    //        System.Diagnostics.Process proce = new System.Diagnostics.Process();
-    //        proce.StartInfo.FileName = batFile;
-    //        proce.StartInfo.WorkingDirectory = Path.GetDirectoryName(batFile);
-    //        //proce.StartInfo.Arguments = $"{il2cppVer} '{il2cppPath}'";
-    //        proce.StartInfo.Verb = "runas";
-    //#if !UNITY_EDITOR_WIN
-    //        proce.StartInfo.UseShellExecute = true;
-    //#endif
-    //        proce.Start();
-    //        while (!proce.HasExited)
-    //        {
-    //            proce.WaitForExit();
-    //        }
-    //    }
-    //#endif
-
-
-    //#if DISABLE_HYBRIDCLR
-    //    [MenuItem("HybridCLR/Hotfix [OFF]【已禁用】", false, 3)]
-    //#else
-    //    [MenuItem("HybridCLR/Hotfix [ON]【已启用】", false, 3)]
-    //#endif
-    //    public static void HybridCLRSwitch()
-    //    {
-    //#if DISABLE_HYBRIDCLR
-    //        EnableHybridCLR();
-    //#else
-    //        DisableHybridCLR();
-    //#endif
-    //    }
     [MenuItem("HybridCLR/CompileDll And Copy【生成热更dll】", false, 4)]
     public static void CompileTargetDll()
     {
@@ -95,7 +51,7 @@ public partial class MyGameTools
         List<string> failList = new List<string>();
         string hotfixDllSrcDir = HybridCLR.Editor.SettingsUtil.GetHotUpdateDllsOutputDirByTarget(target);
 
-        foreach (var dll in HybridCLR.Editor.SettingsUtil.PatchingHotUpdateAssemblyFiles)
+        foreach (var dll in HybridCLR.Editor.SettingsUtil.HotUpdateAssemblyFilesIncludePreserved)
         {
             string dllPath = UtilityBuiltin.ResPath.GetCombinePath(hotfixDllSrcDir, dll);
             if (File.Exists(dllPath))
@@ -109,21 +65,19 @@ public partial class MyGameTools
             }
         }
 
-        var aotDlls = HybridCLRSettings.Instance.patchAOTAssemblies.Select(dll => dll + ".dll").ToArray();
         if (copyAotMeta)
         {
             var failNames = CopyAotDllsToProject(target);
             failList.AddRange(failNames);
         }
         var hotfixListFile = UtilityBuiltin.ResPath.GetCombinePath(Application.dataPath, ConstBuiltin.HOT_FIX_DLL_DIR, "HotfixFileList.txt");
-        File.WriteAllText(hotfixListFile, UtilityBuiltin.Json.ToJson(HybridCLR.Editor.SettingsUtil.HotUpdateAssemblyFiles.ToArray()), System.Text.Encoding.UTF8);
+        File.WriteAllText(hotfixListFile, UtilityBuiltin.Json.ToJson(HybridCLR.Editor.SettingsUtil.HotUpdateAssemblyFilesIncludePreserved), System.Text.Encoding.UTF8);
         AssetDatabase.Refresh();
         return failList.ToArray();
     }
     public static string[] CopyAotDllsToProject(BuildTarget target)
     {
         List<string> failList = new List<string>();
-        var aotDlls = HybridCLRSettings.Instance.patchAOTAssemblies.Select(dll => dll + ".dll").ToArray();
         string aotDllDir = HybridCLR.Editor.SettingsUtil.GetAssembliesPostIl2CppStripDir(target);
         string aotSaveDir = UtilityBuiltin.ResPath.GetCombinePath(Application.dataPath, "Resources", ConstBuiltin.AOT_DLL_DIR);
         if (Directory.Exists(aotSaveDir))
@@ -131,9 +85,9 @@ public partial class MyGameTools
             Directory.Delete(aotSaveDir, true);
         }
         Directory.CreateDirectory(aotSaveDir);
-        foreach (var dll in aotDlls)
+        foreach (var dll in HybridCLR.Editor.SettingsUtil.AOTAssemblyNames)
         {
-            string dllPath = UtilityBuiltin.ResPath.GetCombinePath(aotDllDir, dll);
+            string dllPath = UtilityBuiltin.ResPath.GetCombinePath(aotDllDir, dll.EndsWith(".dll") ? dll : dll + ".dll");
             if (!File.Exists(dllPath))
             {
                 Debug.LogWarning($"ab中添加AOT补充元数据dll:{dllPath} 时发生错误,文件不存在。裁剪后的AOT dll在BuildPlayer时才能生成，因此需要你先构建一次游戏App后再打包。");
@@ -211,10 +165,6 @@ public partial class MyGameTools
     private static void RefreshAssemblyDefinition(bool disableHybridCLR)
     {
         var assetParentDir = Directory.GetParent(Application.dataPath).FullName;
-        //var enableHotfixFile = UtilityBuiltin.ResPath.GetCombinePath(assetParentDir, ConstEditor.HotfixAssembly);
-        //var disableHotfixFile = UtilityBuiltin.ResPath.GetCombinePath(assetParentDir, ConstEditor.HotfixAssembly + ".disable");
-        //var enableBuiltinFile = UtilityBuiltin.ResPath.GetCombinePath(assetParentDir, ConstEditor.BuiltinAssembly);
-        //var disableBuiltinFile = UtilityBuiltin.ResPath.GetCombinePath(assetParentDir, ConstEditor.BuiltinAssembly + ".disable");
 
         var builtinFile = UtilityBuiltin.ResPath.GetCombinePath(assetParentDir, ConstEditor.BuiltinAssembly);
         var textData = File.ReadAllText(builtinFile);
@@ -272,41 +222,6 @@ public partial class MyGameTools
                 Debug.Log("Set UNITY_IL2CPP_PATH:" + HybridCLR.Editor.SettingsUtil.LocalIl2CppDir);
             }
         }
-
-        //if (!disableHybridCLR)
-        //{
-        //    //if (File.Exists(disableHotfixFile))
-        //    //{
-        //    //    File.Move(disableHotfixFile, enableHotfixFile);
-        //    //    AssetDatabase.Refresh();
-        //    //}
-        //    //if (File.Exists(disableBuiltinFile))
-        //    //{
-        //    //    File.Move(disableBuiltinFile, enableBuiltinFile);
-        //    //    AssetDatabase.Refresh();
-        //    //}
-        //    if (Directory.Exists(HybridCLR.Editor.SettingsUtil.LocalIl2CppDir))
-        //    {
-        //        Environment.SetEnvironmentVariable("UNITY_IL2CPP_PATH", HybridCLR.Editor.SettingsUtil.LocalIl2CppDir);
-        //        Debug.Log("Set UNITY_IL2CPP_PATH:" + HybridCLR.Editor.SettingsUtil.LocalIl2CppDir);
-        //    }
-        //}
-        //else
-        //{
-        //    //if (File.Exists(enableHotfixFile))
-        //    //{
-        //    //    File.Move(enableHotfixFile, disableHotfixFile);
-        //    //    AssetDatabase.Refresh();
-        //    //}
-        //    //if (File.Exists(enableBuiltinFile))
-        //    //{
-        //    //    File.Move(enableBuiltinFile, disableBuiltinFile);
-        //    //    AssetDatabase.Refresh();
-        //    //}
-
-        //    Environment.SetEnvironmentVariable("UNITY_IL2CPP_PATH", string.Empty);
-        //    Debug.Log("Remove UNITY_IL2CPP_PATH");
-        //}
     }
 
 }

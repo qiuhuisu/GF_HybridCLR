@@ -354,7 +354,7 @@
       <HintPath>Assets\Plugins\TinyPng\System.Text.Encodings.Web.dll</HintPath>
     </Reference>
     <Reference Include="LZ4">
-      <HintPath>Library\PackageCache\com.focus-creative-games.hybridclr_unity@ef70a49ae2\Plugins\LZ4.dll</HintPath>
+      <HintPath>Library\PackageCache\com.focus-creative-games.hybridclr_unity@5a50778821\Plugins\LZ4.dll</HintPath>
     </Reference>
     <Reference Include="System.Text.Json">
       <HintPath>Assets\Plugins\TinyPng\System.Text.Json.dll</HintPath>
@@ -366,7 +366,7 @@
       <HintPath>Library\PackageCache\com.unity.burst@1.8.2\Unity.Burst.CodeGen\Unity.Burst.Cecil.Pdb.dll</HintPath>
     </Reference>
     <Reference Include="dnlib">
-      <HintPath>Library\PackageCache\com.focus-creative-games.hybridclr_unity@ef70a49ae2\Plugins\dnlib.dll</HintPath>
+      <HintPath>Library\PackageCache\com.focus-creative-games.hybridclr_unity@5a50778821\Plugins\dnlib.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>Library\PackageCache\com.unity.nuget.newtonsoft-json@3.0.2\Runtime\Newtonsoft.Json.dll</HintPath>

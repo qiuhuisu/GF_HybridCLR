@@ -9,6 +9,7 @@ using Unity.VisualScripting;
 using static UnityEditor.BuildPlayerWindow;
 using HybridCLR.Editor.Commands;
 using System.Text;
+using System.Linq;
 
 namespace UnityGameFramework.Editor.ResourceTools
 {
@@ -17,6 +18,7 @@ namespace UnityGameFramework.Editor.ResourceTools
     /// </summary>
     public class AppBuildEidtor : EditorWindow
     {
+        private readonly string[] keystoreExtNames = { ".keystore", ".jks", ".ks" };
         private ResourceBuilderController m_Controller = null;
         private bool m_OrderBuildResources = false;
         private int m_CompressionHelperTypeNameIndex = 0;
@@ -34,6 +36,7 @@ namespace UnityGameFramework.Editor.ResourceTools
         private GUIContent hybridclrSettingBtContent;
         private Vector2 scrollPosition;
         private GUIStyle dropDownBtStyle;
+
         public static void Open()
         {
             AppBuildEidtor window = GetWindow<AppBuildEidtor>("App Builder", true);
@@ -648,8 +651,8 @@ namespace UnityGameFramework.Editor.ResourceTools
         private bool CheckKeystoreAvailable(string keystore)
         {
             if (string.IsNullOrWhiteSpace(keystore)) return false;
-            var ext = Path.GetExtension(keystore);
-            if (File.Exists(keystore) && (ext.CompareTo(".keystore") == 0 || ext.CompareTo(".jks") == 0 || ext.CompareTo(".ks") == 0))
+            var ext = Path.GetExtension(keystore).ToLower();
+            if (File.Exists(keystore) && keystoreExtNames.Contains(ext))
             {
                 return true;
             }
@@ -705,7 +708,7 @@ namespace UnityGameFramework.Editor.ResourceTools
             {
                 var strBuilder = new StringBuilder();
                 strBuilder.AppendLine("<linker>");
-                foreach (var dllName in HybridCLR.Editor.SettingsUtil.HotUpdateAssemblyNames)
+                foreach (var dllName in HybridCLR.Editor.SettingsUtil.HotUpdateAssemblyNamesIncludePreserved)
                 {
                     strBuilder.AppendLineFormat("\t<assembly fullname=\"{0}\" preserve=\"all\" />", dllName);
                 }
@@ -723,6 +726,7 @@ namespace UnityGameFramework.Editor.ResourceTools
         /// <param name="generateAotDll"></param>
         private void HybridCLRGenerateAll(bool generateAotDll)
         {
+            HybridCLR.Editor.Commands.PrebuildCommand.GenerateAll();
             BuildTarget target = EditorUserBuildSettings.activeBuildTarget;
             // 生成裁剪后的aot dll
             if (generateAotDll) StripAOTDllCommand.GenerateStripedAOTDlls(target, EditorUserBuildSettings.selectedBuildTargetGroup);

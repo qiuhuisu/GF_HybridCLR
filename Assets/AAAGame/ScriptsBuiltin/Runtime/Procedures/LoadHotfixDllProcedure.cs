@@ -55,16 +55,9 @@ public class LoadHotfixDllProcedure : ProcedureBase
                 return;
             }
 #if !DISABLE_HYBRIDCLR
-            //var hotfixDll = GFBuiltin.Hotfix.GetHotfixClass("HotfixEntry");
-            //if (hotfixDll == null)
-            //{
-            //    Log.Error("获取热更入口类HotfixEntry失败!");
-            //    return;
-            //}
             entryFunc?.Invoke(null, new object[] { true });
 #else
             entryFunc?.Invoke(null, new object[] { false });
-            //HotfixEntry.StartHotfixLogic(false);
 #endif
         }
     }
