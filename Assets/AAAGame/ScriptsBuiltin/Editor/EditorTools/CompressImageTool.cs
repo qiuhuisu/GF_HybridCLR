@@ -292,6 +292,7 @@ public class CompressImageTool : EditorWindow
                 {
                     imgList.RemoveAt(i);
                 }
+                GUIUtility.ExitGUI();
             }
         }
         EditorUtility.ClearProgressBar();
@@ -307,7 +308,7 @@ public class CompressImageTool : EditorWindow
             return;
         }
         //提示是否再次压缩所有失败的图片
-        var clickBtIdx = EditorUtility.DisplayDialogComplex("警告", Utility.Text.Format("有 {0} 张图片压缩失败, 是否继续压缩?"), "继续压缩", "取消", null);
+        var clickBtIdx = EditorUtility.DisplayDialogComplex("警告", Utility.Text.Format("有 {0} 张图片压缩失败, 是否继续压缩?", imgList.Count), "继续压缩", "取消", null);
         if (clickBtIdx == 0)
         {
             CompressImages(imgList);
@@ -333,15 +334,15 @@ public class CompressImageTool : EditorWindow
         strBuilder.AppendFormat(" --force --quality {0}-{1}", AppBuildSettings.Instance.CompressImgToolMinLv, AppBuildSettings.Instance.CompressImgToolMaxLv);
         strBuilder.AppendFormat(" --speed {0}", AppBuildSettings.Instance.CompressImgToolFastLv);
         strBuilder.AppendFormat(" --output {0}", outputFileName);
+        strBuilder.Append(" --verbose");
         strBuilder.AppendFormat(" -- {0}", imgFileName);
-        var procInfo = new System.Diagnostics.ProcessStartInfo(pngquant, strBuilder.ToString());
-        procInfo.CreateNoWindow = true;
-        System.Diagnostics.Process.Start(procInfo).WaitForExit();
-        Debug.Log("-------Log-------");
-        foreach (var item in procInfo.Verbs)
-        {
-            Debug.Log(item);
-        }
+
+        var proce = System.Diagnostics.Process.Start(pngquant, strBuilder.ToString());
+        //proce.OutputDataReceived += (object sender, System.Diagnostics.DataReceivedEventArgs e) =>
+        //{
+        //    Debug.Log(e.Data);
+        //};
+        proce.WaitForExit();
         return true;
     }
     /// <summary>
