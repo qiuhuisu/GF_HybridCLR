@@ -158,11 +158,7 @@ public class CompressImageTool : EditorWindow
             return;
         }
         var imgList = GetAllImages();
-        //CompressImages(imgList);
-        foreach (var item in imgList)
-        {
-            Debug.Log(item);
-        }
+        CompressImages(imgList);
     }
 
     private async void CompressImages(List<string> imgList)
@@ -182,7 +178,7 @@ public class CompressImageTool : EditorWindow
         }
         if (imgList.Count < 1) return;
 
-        int clickBtIdx = EditorUtility.DisplayDialogComplex("请确认", Utility.Text.Format("共 {0} 张图片待压缩, 是否开始压缩?", imgList), "开始压缩", "取消", null);
+        int clickBtIdx = EditorUtility.DisplayDialogComplex("请确认", Utility.Text.Format("共 {0} 张图片待压缩, 是否开始压缩?", imgList.Count), "开始压缩", "取消", null);
         if (clickBtIdx != 0)
         {
             //用户取消压缩
@@ -193,34 +189,61 @@ public class CompressImageTool : EditorWindow
         imgList.Reverse();
 
         var rootPath = Directory.GetParent(Application.dataPath).FullName;
-
+        string outputPath;
         if (AppBuildSettings.Instance.CompressImgToolCoverRaw)
         {
-            for (int i = imgList.Count - 1; i >= 0; i--)
-            {
-                var imgFileName = imgList[i];
-                var srcImg = TinifyAPI.Tinify.FromFile(imgFileName);
-                await srcImg.ToFile(imgFileName);
-                if (srcImg.IsCompletedSuccessfully)
-                {
-                    imgList.RemoveAt(i);
-                }
-            }
-            OnCompressCompleted(imgList);
+            outputPath = rootPath;
         }
         else
         {
-            string desPath = Path.Combine(rootPath, AppBuildSettings.Instance.CompressImgToolOutputDir);
-
+            outputPath = Path.GetFullPath(AppBuildSettings.Instance.CompressImgToolOutputDir, rootPath);
         }
+
+        if (!Directory.Exists(outputPath))
+        {
+            try
+            {
+                Directory.CreateDirectory(outputPath);
+            }
+            catch (Exception)
+            {
+                EditorUtility.DisplayDialog("错误", Utility.Text.Format("创建路径失败,请检查路径是否有效:{0}", outputPath), "OK");
+                return;
+            }
+        }
+
+        int totalCount = imgList.Count;
+        for (int i = totalCount - 1; i >= 0; i--)
+        {
+            var imgName = imgList[i];
+            var imgFileName = Path.GetFullPath(imgName, rootPath);
+            var outputFileName = Path.GetFullPath(imgName, outputPath);
+            var outputFilePath = Path.GetDirectoryName(outputFileName);
+            if (!Directory.Exists(outputFilePath))
+            {
+                Directory.CreateDirectory(outputFilePath);
+            }
+            if (EditorUtility.DisplayCancelableProgressBar(Utility.Text.Format("压缩进度({0}/{1})", totalCount - imgList.Count, totalCount), Utility.Text.Format("正在压缩:{0}", imgName), 1 - imgList.Count / (float)totalCount))
+            {
+                break;
+            }
+            var srcImg = TinifyAPI.Tinify.FromFile(imgFileName);
+            await srcImg.ToFile(outputFileName);
+            if (srcImg.IsCompletedSuccessfully)
+            {
+                imgList.RemoveAt(i);
+            }
+        }
+        EditorUtility.ClearProgressBar();
+        OnCompressCompleted(imgList);
     }
 
     private void OnCompressCompleted(List<string> imgList)
     {
+        AssetDatabase.Refresh();
         if (imgList.Count <= 0)
         {
             EditorUtility.DisplayDialog("压缩完成!", "全部文件已压缩完成", "OK");
-            GUIUtility.ExitGUI();
             return;
         }
         //提示是否再次压缩所有失败的图片
