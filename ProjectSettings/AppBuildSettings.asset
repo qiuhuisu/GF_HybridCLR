@@ -32,8 +32,7 @@ MonoBehaviour:
   - VM39XwW9WBmz2LxPZQSyVgQb15kdKngB
   - f3sYcGWPjkmgVYmcPfWqJw6bt6BLvmYf
   CompressImgToolItemList:
-  - {fileID: 2800000, guid: 5f1b4f256071ef64f8d7605d6b641b06, type: 3}
+  - {fileID: 102900000, guid: 442acce8f6ed02449830697cedf791f5, type: 3}
   CompressImgToolOffline: 1
-  CompressImgToolMinLv: 64.83051
-  CompressImgToolMaxLv: 79.83053
+  CompressImgToolQualityLv: 60
   CompressImgToolFastLv: 1

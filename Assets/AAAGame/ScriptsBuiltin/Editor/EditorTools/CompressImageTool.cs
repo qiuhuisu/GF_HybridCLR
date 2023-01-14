@@ -23,9 +23,9 @@ public class CompressImageTool : EditorWindow
     GUIStyle centerLabelStyle;
     ReorderableList srcScrollList;
     Vector2 srcScrollPos;
-    //List<UnityEngine.Object> srcItemList;
     ReorderableList tinypngKeyScrollList;
     Vector2 tinypngScrollListPos;
+
 
     int selectOjbWinId = "CompressImageTool".GetHashCode();
     private bool settingFoldout = true;
@@ -49,7 +49,6 @@ public class CompressImageTool : EditorWindow
         centerLabelStyle.fontSize = 25;
         centerLabelStyle.normal.textColor = Color.gray;
 
-        //srcItemList = new List<UnityEngine.Object>();
         srcScrollList = new ReorderableList(AppBuildSettings.Instance.CompressImgToolItemList, typeof(UnityEngine.Object), true, true, true, true);
         srcScrollList.drawHeaderCallback = DrawScrollListHeader;
         srcScrollList.onAddCallback = AddItem;
@@ -66,19 +65,12 @@ public class CompressImageTool : EditorWindow
     }
     private void DrawTinypngKeyItem(Rect rect, int index, bool isActive, bool isFocused)
     {
-        EditorGUI.BeginChangeCheck();
-        {
-            AppBuildSettings.Instance.CompressImgToolKeys[index] = EditorGUI.TextField(rect, AppBuildSettings.Instance.CompressImgToolKeys[index]);
-            if (EditorGUI.EndChangeCheck())
-            {
-                AppBuildSettings.Save();
-            }
-        }
+        AppBuildSettings.Instance.CompressImgToolKeys[index] = EditorGUI.TextField(rect, AppBuildSettings.Instance.CompressImgToolKeys[index]);
     }
 
     private void DrawTinypngKeyScrollListHeader(Rect rect)
     {
-        if (EditorGUI.LinkButton(rect, "添加TinyPng Keys:\t点击跳转到key获取地址..."))
+        if (EditorGUI.LinkButton(rect, "添加TinyPng Keys(默认使用第一行Key):\t点击跳转到key获取地址..."))
         {
             Application.OpenURL("https://tinify.com/dashboard/api");
         }
@@ -86,13 +78,11 @@ public class CompressImageTool : EditorWindow
 
     private void OnGUI()
     {
-        var rect = EditorGUILayout.BeginVertical();
+        EditorGUILayout.BeginVertical();
         EditorGUILayout.Space(10);
         srcScrollPos = EditorGUILayout.BeginScrollView(srcScrollPos);
         srcScrollList.DoLayoutList();
         EditorGUILayout.EndScrollView();
-
-        GUILayout.FlexibleSpace();
         DrawDropArea();
         EditorGUILayout.Space(10);
         if (settingFoldout = EditorGUILayout.Foldout(settingFoldout, "展开设置项:"))
@@ -134,7 +124,7 @@ public class CompressImageTool : EditorWindow
 
     private void DrawSettingsPanel()
     {
-        tinypngScrollListPos = EditorGUILayout.BeginScrollView(tinypngScrollListPos, GUILayout.Height(100));
+        tinypngScrollListPos = EditorGUILayout.BeginScrollView(tinypngScrollListPos, GUILayout.Height(110));
         {
             tinypngKeyScrollList.DoLayoutList();
             EditorGUILayout.EndScrollView();
@@ -149,7 +139,7 @@ public class CompressImageTool : EditorWindow
         {
             EditorGUI.BeginDisabledGroup(!AppBuildSettings.Instance.CompressImgToolOffline);
             {
-                EditorGUILayout.MinMaxSlider(Utility.Text.Format("压缩质量({0:N0}%-{1:N0}%)", AppBuildSettings.Instance.CompressImgToolMinLv, AppBuildSettings.Instance.CompressImgToolMaxLv), ref AppBuildSettings.Instance.CompressImgToolMinLv, ref AppBuildSettings.Instance.CompressImgToolMaxLv, 0, 100);
+                AppBuildSettings.Instance.CompressImgToolQualityLv = EditorGUILayout.IntSlider(Utility.Text.Format("压缩质量({0}%)", AppBuildSettings.Instance.CompressImgToolQualityLv), AppBuildSettings.Instance.CompressImgToolQualityLv, 0, 100);
 
                 AppBuildSettings.Instance.CompressImgToolFastLv = EditorGUILayout.IntSlider(Utility.Text.Format("快压等级({0})", AppBuildSettings.Instance.CompressImgToolFastLv), AppBuildSettings.Instance.CompressImgToolFastLv, 1, 10);
                 EditorGUI.EndDisabledGroup();
@@ -215,21 +205,17 @@ public class CompressImageTool : EditorWindow
 
     private async void CompressImages(List<string> imgList)
     {
-        if (AppBuildSettings.Instance.CompressImgToolKeys == null || AppBuildSettings.Instance.CompressImgToolKeys.Count <= 0)
-        {
-            EditorUtility.DisplayDialog("错误", "请填写TinyPng Key", "OK");
-            GUIUtility.ExitGUI();
-            return;
-        }
-        string firstKey = AppBuildSettings.Instance.CompressImgToolKeys[0];
-        if (string.IsNullOrWhiteSpace(firstKey))
-        {
-            EditorUtility.DisplayDialog("错误", "TinyPng首行Key无效", "OK");
-            GUIUtility.ExitGUI();
-            return;
-        }
         if (imgList.Count < 1) return;
+        if (AppBuildSettings.Instance.CompressImgToolKeys != null && AppBuildSettings.Instance.CompressImgToolKeys.Count > 0 && !string.IsNullOrWhiteSpace(AppBuildSettings.Instance.CompressImgToolKeys[0]))
+        {
+            TinifyAPI.Tinify.Key = AppBuildSettings.Instance.CompressImgToolKeys[0];
+        }
 
+        if (!AppBuildSettings.Instance.CompressImgToolOffline && string.IsNullOrWhiteSpace(TinifyAPI.Tinify.Key))
+        {
+            EditorUtility.DisplayDialog("错误", "TinyPng Key无效,可前往tinypng.com获取.", "OK");
+            return;
+        }
         int clickBtIdx = EditorUtility.DisplayDialogComplex("请确认", Utility.Text.Format("共 {0} 张图片待压缩, 是否开始压缩?", imgList.Count), "开始压缩", "取消", null);
         if (clickBtIdx != 0)
         {
@@ -237,7 +223,6 @@ public class CompressImageTool : EditorWindow
             return;
         }
 
-        TinifyAPI.Tinify.Key = firstKey;
         imgList.Reverse();
 
         var rootPath = Directory.GetParent(Application.dataPath).FullName;
@@ -268,14 +253,14 @@ public class CompressImageTool : EditorWindow
         for (int i = totalCount - 1; i >= 0; i--)
         {
             var imgName = imgList[i];
-            var imgFileName = Path.GetFullPath(imgName, rootPath);
-            var outputFileName = Path.GetFullPath(imgName, outputPath);
+            var imgFileName = Utility.Path.GetRegularPath(Path.GetFullPath(imgName, rootPath));
+            var outputFileName = Utility.Path.GetRegularPath(Path.GetFullPath(imgName, outputPath));
             var outputFilePath = Path.GetDirectoryName(outputFileName);
             if (!Directory.Exists(outputFilePath))
             {
                 Directory.CreateDirectory(outputFilePath);
             }
-            if (EditorUtility.DisplayCancelableProgressBar(Utility.Text.Format("压缩进度({0}/{1})", totalCount - imgList.Count, totalCount), Utility.Text.Format("正在压缩:{0}", imgName), 1 - imgList.Count / (float)totalCount))
+            if (EditorUtility.DisplayCancelableProgressBar(Utility.Text.Format("压缩进度({0}/{1})", totalCount - imgList.Count, totalCount), Utility.Text.Format("正在压缩:{0}", imgName), (totalCount - i) / (float)totalCount))
             {
                 break;
             }
@@ -292,7 +277,6 @@ public class CompressImageTool : EditorWindow
                 {
                     imgList.RemoveAt(i);
                 }
-                GUIUtility.ExitGUI();
             }
         }
         EditorUtility.ClearProgressBar();
@@ -319,6 +303,11 @@ public class CompressImageTool : EditorWindow
     /// </summary>
     private async Task<bool> CompressOnlineAsync(string imgFileName, string outputFileName)
     {
+        if (string.IsNullOrWhiteSpace(TinifyAPI.Tinify.Key))
+        {
+            return false;
+        }
+
         var srcImg = TinifyAPI.Tinify.FromFile(imgFileName);
         await srcImg.ToFile(outputFileName);
         return srcImg.IsCompletedSuccessfully;
@@ -331,19 +320,25 @@ public class CompressImageTool : EditorWindow
         string pngquant = Path.Combine(Directory.GetParent(Application.dataPath).FullName, pngquantTool);
 
         StringBuilder strBuilder = new StringBuilder();
-        strBuilder.AppendFormat(" --force --quality {0}-{1}", AppBuildSettings.Instance.CompressImgToolMinLv, AppBuildSettings.Instance.CompressImgToolMaxLv);
+        strBuilder.AppendFormat(" --force --quality 0-{0}", AppBuildSettings.Instance.CompressImgToolQualityLv);
         strBuilder.AppendFormat(" --speed {0}", AppBuildSettings.Instance.CompressImgToolFastLv);
-        strBuilder.AppendFormat(" --output {0}", outputFileName);
-        strBuilder.Append(" --verbose");
-        strBuilder.AppendFormat(" -- {0}", imgFileName);
+        strBuilder.AppendFormat(" --output \"{0}\"", outputFileName);
+        strBuilder.AppendFormat(" -- \"{0}\"", imgFileName);
 
-        var proce = System.Diagnostics.Process.Start(pngquant, strBuilder.ToString());
-        //proce.OutputDataReceived += (object sender, System.Diagnostics.DataReceivedEventArgs e) =>
-        //{
-        //    Debug.Log(e.Data);
-        //};
-        proce.WaitForExit();
-        return true;
+        var proceInfo = new System.Diagnostics.ProcessStartInfo(pngquant, strBuilder.ToString());
+        proceInfo.CreateNoWindow = true;
+        proceInfo.UseShellExecute = false;
+        bool success;
+        using (var proce = System.Diagnostics.Process.Start(proceInfo))
+        {
+            proce.WaitForExit();
+            success = proce.ExitCode == 0;
+            if (!success)
+            {
+                Debug.LogWarningFormat("离线压缩图片:{0}失败,ExitCode:{1}", imgFileName, proce.ExitCode);
+            }
+        }
+        return success;
     }
     /// <summary>
     /// 获取当前添加的所有图片(相对项目路径)
@@ -364,12 +359,13 @@ public class CompressImageTool : EditorWindow
             else if (itmTp == ItemType.Folder)
             {
                 string imgFolder = AssetDatabase.GetAssetPath(item);
+
                 if (Directory.Exists(imgFolder))
                 {
                     var allImgFiles = Directory.GetFiles(imgFolder, "*.*", SearchOption.AllDirectories).Where(fileName =>
                     {
                         fileName = Utility.Path.GetRegularPath(fileName);
-                        return ArrayUtility.Contains(SupportImgTypes, Path.GetExtension(fileName)) && !images.Contains(fileName);
+                        return ArrayUtility.Contains(SupportImgTypes, Path.GetExtension(fileName).ToLower()) && !images.Contains(fileName);
                     });
 
                     images.AddRange(allImgFiles);
@@ -384,7 +380,8 @@ public class CompressImageTool : EditorWindow
     {
         var dragRect = EditorGUILayout.BeginVertical(EditorStyles.selectionRect);
         {
-            EditorGUILayout.LabelField(dragAreaContent, centerLabelStyle, GUILayout.Height(100));
+            GUILayout.FlexibleSpace();
+            EditorGUILayout.LabelField(dragAreaContent, centerLabelStyle);
             if (dragRect.Contains(Event.current.mousePosition))
             {
                 if (Event.current.type == EventType.DragUpdated)
@@ -400,7 +397,7 @@ public class CompressImageTool : EditorWindow
 
                 }
             }
-
+            GUILayout.FlexibleSpace();
             EditorGUILayout.EndVertical();
         }
     }
