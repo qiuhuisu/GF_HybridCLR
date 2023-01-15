@@ -9,6 +9,8 @@ using TinifyAPI;
 using GameFramework;
 using System.Threading.Tasks;
 using System.Text;
+using static UnityEditor.Progress;
+using Unity.VisualScripting;
 
 public class CompressImageTool : EditorWindow
 {
@@ -112,15 +114,6 @@ public class CompressImageTool : EditorWindow
         EditorGUILayout.EndVertical();
     }
 
-    private void SaveSettings()
-    {
-        AppBuildSettings.Save();
-    }
-
-    private void RecoveryImages()
-    {
-        throw new NotImplementedException();
-    }
 
     private void DrawSettingsPanel()
     {
@@ -187,9 +180,135 @@ public class CompressImageTool : EditorWindow
         }
     }
 
+    private void SaveSettings()
+    {
+        AppBuildSettings.Save();
+    }
+
+    private void RecoveryImages()
+    {
+        var projectRoot = Directory.GetParent(Application.dataPath).FullName;
+        var backupRoot = UtilityBuiltin.ResPath.GetCombinePath(projectRoot, AppBuildSettings.Instance.CompressImgToolBackupDir);
+        if (!Directory.Exists(backupRoot))
+        {
+            EditorUtility.DisplayDialog("提示", $"备份路径不存在:{backupRoot}", "OK");
+            return;
+        }
+        var backupItems = Directory.GetDirectories(backupRoot, "*", SearchOption.TopDirectoryOnly);
+        if (backupItems.Length < 1)
+        {
+            EditorUtility.DisplayDialog("提示", "没有备份记录", "OK");
+            return;
+        }
+        var contents = new GUIContent[backupItems.Length];
+
+        for (int i = 0; i < backupItems.Length; i++)
+        {
+            var item = Path.GetRelativePath(backupRoot, backupItems[i]);
+            contents[i] = new GUIContent(item);
+        }
+        var dialogRect = new Rect(Event.current.mousePosition, Vector2.zero);
+
+        EditorUtility.DisplayCustomMenu(dialogRect, contents, -1, (object userData, string[] options, int selected) =>
+        {
+            string backupName = options[selected];
+            if (0 != EditorUtility.DisplayDialogComplex("还原备份", $"是否还原此备份:[{backupName}]?", "还原备份", "取消", null))
+            {
+                return;
+            }
+            var recoveryDir = UtilityBuiltin.ResPath.GetCombinePath(backupRoot, backupName);
+            var imgList = GetAllImagesByDir(recoveryDir, recoveryDir);
+            CopyFilesTo(imgList, recoveryDir, projectRoot);
+        }, null);
+    }
+
+    private void CopyFilesTo(List<string> imgList, string srcRoot, string desRoot)
+    {
+        int totalCount = imgList.Count;
+        int successCount = 0;
+        for (int i = 0; i < totalCount; i++)
+        {
+            var item = imgList[i];
+            var desFile = UtilityBuiltin.ResPath.GetCombinePath(desRoot, item);
+            var desFileDir = Path.GetDirectoryName(desFile);
+            if (!Directory.Exists(desFileDir))
+            {
+                Directory.CreateDirectory(desFileDir);
+            }
+            var srcFile = UtilityBuiltin.ResPath.GetCombinePath(srcRoot, item);
+            if (!EditorUtility.DisplayCancelableProgressBar("还原进度", $"还原文件:{item}", i / (float)totalCount))
+            {
+                try
+                {
+                    File.Copy(srcFile, desFile, true);
+                    successCount++;
+                }
+                catch (Exception e)
+                {
+                    Debug.LogWarningFormat("--------还原文件{0}失败:{1}", srcFile, e.Message);
+                }
+            }
+            else
+            {
+                break;
+            }
+        }
+        EditorUtility.ClearProgressBar();
+        EditorUtility.DisplayDialog("还原备份结束", $"共 {totalCount} 张图片{Environment.NewLine}成功还原 {successCount} 张{Environment.NewLine}还原失败 {totalCount - successCount} 张", "OK");
+        AssetDatabase.Refresh();
+    }
+
     private void BackupImages()
     {
-        //TODO 备份图片
+        var itmList = GetAllImages();
+        int totalImgCount = itmList.Count;
+        if (0 != EditorUtility.DisplayDialogComplex("提示", $"确认开始备份已选 {totalImgCount} 张图片吗?", "确定备份", "取消", null))
+        {
+            return;
+        }
+        var projectRoot = Directory.GetParent(Application.dataPath).FullName;
+        var backupDir = UtilityBuiltin.ResPath.GetCombinePath(projectRoot, AppBuildSettings.Instance.CompressImgToolBackupDir);
+
+        if (string.IsNullOrWhiteSpace(AppBuildSettings.Instance.CompressImgToolBackupDir))
+        {
+            EditorUtility.DisplayDialog("错误", $"当前选择的备份路径无效:{Environment.NewLine}{AppBuildSettings.Instance.CompressImgToolBackupDir}", "OK");
+            return;
+        }
+        var backupPath = UtilityBuiltin.ResPath.GetCombinePath(backupDir, DateTime.Now.ToString("yyyy-MM-dd-HHmmss"));
+
+        int successCount = 0;
+        for (int i = 0; i < itmList.Count; i++)
+        {
+            var imgFile = itmList[i];
+            var srcImg = Path.GetFullPath(imgFile, projectRoot);
+            var desImg = Path.GetFullPath(imgFile, backupPath);
+            try
+            {
+                if (EditorUtility.DisplayCancelableProgressBar($"备份进度({i}/{totalImgCount})", $"正在备份:{Environment.NewLine}{imgFile}", i / (float)totalImgCount))
+                {
+                    break;
+                }
+                string desFilePath = Path.GetDirectoryName(desImg);
+                if (!Directory.Exists(desFilePath))
+                {
+                    Directory.CreateDirectory(desFilePath);
+                }
+                File.Copy(srcImg, desImg, true);
+                successCount++;
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarningFormat("---------备份图片{0}失败:{1}", imgFile, e.Message);
+            }
+        }
+
+        EditorUtility.ClearProgressBar();
+
+        if (0 == EditorUtility.DisplayDialogComplex("备份结束", $"共 {totalImgCount} 张图片{Environment.NewLine}成功备份  {successCount} 张{Environment.NewLine}备份失败 {totalImgCount - successCount} 张", "打开备份目录", "关闭", null))
+        {
+            EditorUtility.RevealInFinder(backupPath);
+            GUIUtility.ExitGUI();
+        }
     }
 
     private void StartCompress()
@@ -347,6 +466,7 @@ public class CompressImageTool : EditorWindow
     private List<string> GetAllImages()
     {
         List<string> images = new List<string>();
+        var projectRoot = Directory.GetParent(Application.dataPath).FullName;
         foreach (var item in AppBuildSettings.Instance.CompressImgToolItemList)
         {
             var itmTp = CheckItemType(item);
@@ -358,16 +478,11 @@ public class CompressImageTool : EditorWindow
             }
             else if (itmTp == ItemType.Folder)
             {
-                string imgFolder = AssetDatabase.GetAssetPath(item);
+                string imgFolder = Path.GetFullPath(AssetDatabase.GetAssetPath(item), projectRoot);
 
                 if (Directory.Exists(imgFolder))
                 {
-                    var allImgFiles = Directory.GetFiles(imgFolder, "*.*", SearchOption.AllDirectories).Where(fileName =>
-                    {
-                        fileName = Utility.Path.GetRegularPath(fileName);
-                        return ArrayUtility.Contains(SupportImgTypes, Path.GetExtension(fileName).ToLower()) && !images.Contains(fileName);
-                    });
-
+                    var allImgFiles = GetAllImagesByDir(imgFolder, projectRoot);
                     images.AddRange(allImgFiles);
                 }
             }
@@ -375,7 +490,29 @@ public class CompressImageTool : EditorWindow
 
         return images.Distinct().ToList();//把结果去重处理
     }
-
+    /// <summary>
+    /// 获取绝对路径下的所有图片, 图片路径相对于baseFolder
+    /// </summary>
+    /// <param name="imgFolder"></param>
+    /// <param name="baseFolder"></param>
+    /// <returns></returns>
+    private List<string> GetAllImagesByDir(string imgFolder, string baseFolder)
+    {
+        var images = new List<string>();
+        if (!string.IsNullOrWhiteSpace(imgFolder) && Directory.Exists(imgFolder))
+        {
+            var allFiles = Directory.GetFiles(imgFolder, "*.*", SearchOption.AllDirectories);
+            foreach (var item in allFiles)
+            {
+                var fileName = Utility.Path.GetRegularPath(Path.GetRelativePath(baseFolder, item));
+                if (ArrayUtility.Contains(SupportImgTypes, Path.GetExtension(fileName).ToLower()) && !images.Contains(fileName))
+                {
+                    images.Add(fileName);
+                }
+            }
+        }
+        return images;
+    }
     private void DrawDropArea()
     {
         var dragRect = EditorGUILayout.BeginVertical(EditorStyles.selectionRect);
