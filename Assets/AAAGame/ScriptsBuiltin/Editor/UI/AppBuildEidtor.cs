@@ -725,15 +725,17 @@ namespace UnityGameFramework.Editor.ResourceTools
         /// <param name="generateAotDll"></param>
         private void HybridCLRGenerateAll(bool generateAotDll)
         {
-            HybridCLR.Editor.Commands.PrebuildCommand.GenerateAll();
             BuildTarget target = EditorUserBuildSettings.activeBuildTarget;
+            MyGameTools.CompileTargetDll(false);
             // 生成裁剪后的aot dll
-            if (generateAotDll) StripAOTDllCommand.GenerateStripedAOTDlls(target, EditorUserBuildSettings.selectedBuildTargetGroup);
-            MyGameTools.CompileTargetDll(generateAotDll);
-
+            if (generateAotDll)
+            {
+                StripAOTDllCommand.GenerateStripedAOTDlls(target, EditorUserBuildSettings.selectedBuildTargetGroup);
+                MyGameTools.CopyAotDllsToProject(target);
+            }
+            LinkGeneratorCommand.GenerateLinkXml(target);
             Il2CppDefGeneratorCommand.GenerateIl2CppDef();
             // 这几个生成依赖HotUpdateDlls
-            LinkGeneratorCommand.GenerateLinkXml(target);
 
             // 桥接函数生成依赖于AOT dll，必须保证已经build过，生成AOT dll
             MethodBridgeGeneratorCommand.GenerateMethodBridge(target);
