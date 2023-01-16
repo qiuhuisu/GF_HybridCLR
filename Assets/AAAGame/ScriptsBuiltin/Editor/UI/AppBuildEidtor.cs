@@ -45,11 +45,7 @@ namespace UnityGameFramework.Editor.ResourceTools
             window.minSize = new Vector2(800f, 750f);
 #endif
         }
-        private void Awake()
-        {
-            dropDownBtStyle = Utility.Assembly.GetType("UnityEditor.EditorStyles").GetProperty("dropDownToggleButton", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) as GUIStyle;
-
-        }
+        
         private void OnEnable()
         {
             hotfixUrlContent = new GUIContent("Update Prefix Uri", "热更新资源服务器地址");
@@ -64,6 +60,11 @@ namespace UnityGameFramework.Editor.ResourceTools
             playerSettingBtContent = EditorGUIUtility.TrTextContentWithIcon("Player Settings", "打开Player Settings界面", "Settings");
             hybridclrSettingBtContent = EditorGUIUtility.TrTextContentWithIcon("Hotfix Settings", "打开HybridCLR Settings界面", "Settings");
             saveBtContent = EditorGUIUtility.TrTextContentWithIcon("Save", "保存设置", "SaveAs@2x");
+
+            string tgStyleName = "DropDownToggleButton";
+            dropDownBtStyle = GUI.skin.FindStyle(tgStyleName) ?? EditorGUIUtility.GetBuiltinSkin(EditorSkin.Inspector).FindStyle(tgStyleName);
+
+
             if (AppSettings.Instance == null)
             {
                 AssetDatabase.CreateAsset(CreateInstance<AppSettings>(), "Assets/Resources/AppSettings.asset");
