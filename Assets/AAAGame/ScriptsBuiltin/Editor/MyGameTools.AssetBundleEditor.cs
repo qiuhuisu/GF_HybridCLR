@@ -69,6 +69,8 @@ public partial class MyGameTools
 
         if (hasChanged)
         {
+            resEditor.RemoveUnknownAssets();
+            resEditor.RemoveUnusedResources();
             resEditor.Save();
         }
     }

@@ -7,7 +7,7 @@
       <AssetBundleCompression>1</AssetBundleCompression>
       <CompressionHelperTypeName>UnityGameFramework.Runtime.DefaultCompressionHelper</CompressionHelperTypeName>
       <AdditionalCompressionSelected>True</AdditionalCompressionSelected>
-      <ForceRebuildAssetBundleSelected>False</ForceRebuildAssetBundleSelected>
+      <ForceRebuildAssetBundleSelected>True</ForceRebuildAssetBundleSelected>
       <BuildEventHandlerTypeName>UnityGameFramework.Editor.AssetBuildHandler</BuildEventHandlerTypeName>
       <OutputDirectory>D:/Workspace/UnityProjects/GF_HybridCLR/AB</OutputDirectory>
       <OutputPackageSelected>False</OutputPackageSelected>
