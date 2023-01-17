@@ -8,18 +8,19 @@ public class LocalizationStringEditor : EditorWindow
 {
     Vector2 scrollViewPos1;
     Vector2 scrollViewPos2;
-    [MenuItem("Game Framework/GameTools/Localization Editor¡¾ÓïÑÔ±¾µØ»¯¡¿", false)]
-    public static void ShowAotDllsConfigEditor()
+    //[MenuItem("Game Framework/GameTools/Localization Editorã€è¯­è¨€æœ¬åœ°åŒ–ã€‘", false)]
+    public static LocalizationStringEditor Open()
     {
         var win = EditorWindow.GetWindow<LocalizationStringEditor>("Localization Editor");
         win.Show();
+        return win;
     }
     private void OnGUI()
     {
         EditorGUILayout.BeginVertical();
         EditorGUILayout.BeginHorizontal();
-        GUILayout.Label("ÄÚÖÃ¹ú¼Ê»¯ÎÄ±¾:");
-        GUILayout.Label("ÈÈ¸ü¹ú¼Ê»¯ÎÄ±¾:");
+        GUILayout.Label("å†…ç½®å›½é™…åŒ–æ–‡æœ¬:");
+        GUILayout.Label("çƒ­æ›´å›½é™…åŒ–æ–‡æœ¬:");
         EditorGUILayout.EndHorizontal();
         EditorGUILayout.BeginHorizontal();
         scrollViewPos1 = EditorGUILayout.BeginScrollView(scrollViewPos1);

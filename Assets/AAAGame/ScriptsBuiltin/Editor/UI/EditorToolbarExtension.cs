@@ -63,7 +63,7 @@ public static class EditorToolbarExtension
                 CompressImageTool.Open();
                 break;
             case 1: //语言国际化扫描工具
-                Debug.LogWarning("工具正在开发中...");
+                LocalizationStringEditor.Open();
                 break;
         }
     }
