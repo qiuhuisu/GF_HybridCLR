@@ -32,12 +32,7 @@ MonoBehaviour:
   - VM39XwW9WBmz2LxPZQSyVgQb15kdKngB
   - f3sYcGWPjkmgVYmcPfWqJw6bt6BLvmYf
   CompressImgToolItemList:
-  - {fileID: 2800000, guid: 140056dae9246407594757b8ec82f946, type: 3}
-  - {fileID: 2800000, guid: 1ba70e132f28941ed9977c1a213eb0a4, type: 3}
-  - {fileID: 2800000, guid: 2437969a2b17b41b0a10bef95252a284, type: 3}
-  - {fileID: 2800000, guid: 03f0513cf9924497c8eb042e999d16dd, type: 3}
-  - {fileID: 2800000, guid: bfd71187e5f614337ae0b4a9bcfff07f, type: 3}
-  - {fileID: 2800000, guid: 5f1b4f256071ef64f8d7605d6b641b06, type: 3}
-  CompressImgToolOffline: 0
+  - {fileID: 102900000, guid: 1514a05b61ba75c4d9823c2c761e30f8, type: 3}
+  CompressImgToolOffline: 1
   CompressImgToolQualityLv: 65
   CompressImgToolFastLv: 1
