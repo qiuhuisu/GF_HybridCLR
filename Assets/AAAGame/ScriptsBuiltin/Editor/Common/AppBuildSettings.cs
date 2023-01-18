@@ -31,7 +31,8 @@ public class AppBuildSettings : HybridCLR.Editor.ScriptableSingleton<AppBuildSet
     public List<string> CompressImgToolKeys = new List<string>() { "TinyPngKey" };
     public List<UnityEngine.Object> CompressImgToolItemList = new List<UnityEngine.Object>();
     public bool CompressImgToolOffline = true;//离线模式; 使用本地压缩工具pngquant压缩(仅支持png,其它格式依然走tinypng在线压缩)
-    public int CompressImgToolQualityLv = 80; //pngquant压缩质量等级,数值越小压缩后图片越小
     public int CompressImgToolFastLv = 1;  //取值1-10, 数值越大压缩的速度越快,但压缩比会稍微降低
+    public float CompressImgToolQualityLv = 80; //pngquant压缩质量等级,数值越小压缩后图片越小
+    public float CompressImgToolQualityMinLv = 0;
 }
 #endif

@@ -9,8 +9,6 @@ using TinifyAPI;
 using GameFramework;
 using System.Threading.Tasks;
 using System.Text;
-using static UnityEditor.Progress;
-using Unity.VisualScripting;
 
 public class CompressImageTool : EditorWindow
 {
@@ -132,7 +130,7 @@ public class CompressImageTool : EditorWindow
         {
             EditorGUI.BeginDisabledGroup(!AppBuildSettings.Instance.CompressImgToolOffline);
             {
-                AppBuildSettings.Instance.CompressImgToolQualityLv = EditorGUILayout.IntSlider(Utility.Text.Format("压缩质量({0}%)", AppBuildSettings.Instance.CompressImgToolQualityLv), AppBuildSettings.Instance.CompressImgToolQualityLv, 0, 100);
+                EditorGUILayout.MinMaxSlider(Utility.Text.Format("压缩质量({0}%-{1}%)", (int)AppBuildSettings.Instance.CompressImgToolQualityMinLv, (int)AppBuildSettings.Instance.CompressImgToolQualityLv), ref AppBuildSettings.Instance.CompressImgToolQualityMinLv, ref AppBuildSettings.Instance.CompressImgToolQualityLv, 0, 100);
 
                 AppBuildSettings.Instance.CompressImgToolFastLv = EditorGUILayout.IntSlider(Utility.Text.Format("快压等级({0})", AppBuildSettings.Instance.CompressImgToolFastLv), AppBuildSettings.Instance.CompressImgToolFastLv, 1, 10);
                 EditorGUI.EndDisabledGroup();
@@ -439,7 +437,7 @@ public class CompressImageTool : EditorWindow
         string pngquant = Path.Combine(Directory.GetParent(Application.dataPath).FullName, pngquantTool);
 
         StringBuilder strBuilder = new StringBuilder();
-        strBuilder.AppendFormat(" --force --quality 0-{0}", AppBuildSettings.Instance.CompressImgToolQualityLv);
+        strBuilder.AppendFormat(" --force --quality {0}-{1}", (int)AppBuildSettings.Instance.CompressImgToolQualityMinLv, (int)AppBuildSettings.Instance.CompressImgToolQualityLv);
         strBuilder.AppendFormat(" --speed {0}", AppBuildSettings.Instance.CompressImgToolFastLv);
         strBuilder.AppendFormat(" --output \"{0}\"", outputFileName);
         strBuilder.AppendFormat(" -- \"{0}\"", imgFileName);
@@ -515,7 +513,7 @@ public class CompressImageTool : EditorWindow
     }
     private void DrawDropArea()
     {
-        var dragRect = EditorGUILayout.BeginVertical(EditorStyles.selectionRect);
+        var dragRect = EditorGUILayout.BeginVertical("box");
         {
             GUILayout.FlexibleSpace();
             EditorGUILayout.LabelField(dragAreaContent, centerLabelStyle);
