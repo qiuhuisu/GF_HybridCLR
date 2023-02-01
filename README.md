@@ -31,8 +31,10 @@ GameFramework 接入HybridCLR
 
 此框架对GF又进一步封装,使用更加简单便捷:
 
-UIForm: 使用 GF.UI.OpenUIForm() 打开UI, GF.UI.CloseUIForm()关闭UI； 开发者只管打开/关闭，GF内部会自动通过对象池管理复用或销毁释放
+UIForm: 使用 GF.UI.OpenUIForm() 打开UI, GF.UI.CloseUIForm()关闭UI； 开发者只管打开/关闭，GF内部会自动通过对象池管理复用或销毁释放。
+
 Entity：使用 GF.Entity.ShowEntity()显示实体， GF.Entity.HideEntity()隐藏实体； 同样,开发者只需管显示/隐藏，GF会自动对象池复用或销毁释放。
+
 Procedure：它拥有类似MonoBehaviour的生命周期，如OnEnter(进入流程)、OnUpdate(每帧刷新)、OnLeave(离开流程)，在流程内调用ChangeState()即可切换到其它流程
 
 GF_HybridCLR通过Procedure(流程)来走游戏逻辑，游戏入口流程为LaunchProcedure
