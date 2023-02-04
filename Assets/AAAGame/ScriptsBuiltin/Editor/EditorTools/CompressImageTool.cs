@@ -10,8 +10,10 @@ using GameFramework;
 using System.Threading.Tasks;
 using System.Text;
 
-public class CompressImageTool : EditorWindow
+[EditorToolMenu("资源/图片压缩工具", 2)]
+public class CompressImageTool : EditorToolBase
 {
+    public override string ToolName => "图片压缩工具";
     enum ItemType
     {
         NoSupport,
@@ -31,16 +33,11 @@ public class CompressImageTool : EditorWindow
     private bool settingFoldout = true;
 #if UNITY_EDITOR_WIN
     const string pngquantTool = "Tools/CompressImageTools/pngquant_win/pngquant.exe";
+
 #elif UNITY_EDITOR_OSX
     const string pngquantTool = "Tools/CompressImageTools/pngquant_mac/pngquant";
 #endif
 
-    public static CompressImageTool Open()
-    {
-        var win = EditorWindow.GetWindow<CompressImageTool>("图片压缩工具");
-        win.Show();
-        return win;
-    }
     private void OnEnable()
     {
         dragAreaContent = new GUIContent("拖拽到此添加图片文件/文件夹");

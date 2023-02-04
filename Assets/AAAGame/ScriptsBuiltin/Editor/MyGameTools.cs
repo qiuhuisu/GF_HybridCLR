@@ -193,47 +193,7 @@ public partial class MyGameTools : EditorWindow
         File.WriteAllText(ConstEditor.UIViewScriptFile, sBuilder.ToString());
         Debug.LogFormat("-------------------成功生成UIViews.cs-----------------");
     }
-    /// <summary>
-    /// 查找UI上的文字用于语言国际化
-    /// </summary>
-    [MenuItem("Game Framework/GameTools/Find Localization String【生成多语言】", false, 1002)]
-    public static void FindLocalizationString()
-    {
-        EditorUtility.DisplayProgressBar("Progress", "Find Localization String...", 0);
-        string[] dirs = { "Assets/AAAGame/Prefabs/UI" };
-        var asstIds = AssetDatabase.FindAssets("t:Prefab", dirs);
-        int count = 0;
-        List<string> str_list = new List<string>();
-        for (int i = 0; i < asstIds.Length; i++)
-        {
-            string path = AssetDatabase.GUIDToAssetPath(asstIds[i]);
-            var pfb = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-            foreach (Text item in pfb.GetComponentsInChildren<Text>(true))
-            {
-                var str = item.text;
-                //str.Replace(@"\n", @"\\n");
-                str = Regex.Replace(str, @"\n", @"\n");
-
-                if (string.IsNullOrWhiteSpace(str))
-                {
-                    continue;
-                }
-                if (!str_list.Contains(str))
-                {
-                    str_list.Add(str);
-                }
-            }
-            count++;
-            EditorUtility.DisplayProgressBar("Find Class", pfb.name, count / (float)asstIds.Length);
-        }
-        string content = string.Empty;
-        foreach (var item in str_list)
-        {
-            content += string.Format("\"{0}\":\"{0}\",\n", item);
-        }
-        System.IO.File.WriteAllText(Application.dataPath + "/Localization.txt", content);
-        EditorUtility.ClearProgressBar();
-    }
+    
 
     /// <summary>
     /// 批量替换字体文件

@@ -1,15 +1,13 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-using UnityEngine.UIElements;
 internal enum ConfigEditorMode
 {
     StripLinkConfig,
     AotDllConfig
 }
-public class StripLinkConfigEditor : EditorWindow
+[EditorToolMenu("打包/代码裁剪配置", 1)]
+public class StripLinkConfigEditor : EditorToolBase
 {
     private class ItemData
     {
@@ -21,6 +19,7 @@ public class StripLinkConfigEditor : EditorWindow
             this.dllName = dllName;
         }
     }
+    public override string ToolName => "代码裁剪配置";
     private Vector2 scrollPosition;
     private string[] selectedDllList;
     private List<ItemData> dataList;
@@ -28,6 +27,8 @@ public class StripLinkConfigEditor : EditorWindow
     private GUIStyle selectedStyle;
 
     ConfigEditorMode mode;
+
+
     private void OnEnable()
     {
         normalStyle = new GUIStyle();
@@ -36,7 +37,12 @@ public class StripLinkConfigEditor : EditorWindow
         selectedStyle = new GUIStyle();
         selectedStyle.normal.textColor = Color.green;
         dataList = new List<ItemData>();
-        RefreshListData();
+
+        InitEditorMode();
+    }
+    protected virtual void InitEditorMode()
+    {
+        SetEditorMode(ConfigEditorMode.StripLinkConfig);
     }
     internal void SetEditorMode(ConfigEditorMode mode)
     {

@@ -14,20 +14,7 @@ public partial class MyGameTools
     public const string LinkFile = "Assets/link.xml";
     public const string STRIP_GENERATE_TAG = "<!--GENERATE_TAG-->";
     private const string MatchPattern = "<assembly[\\s]+fullname[\\s]*=[\\s]*\"([^\"]+)\"";
-    [MenuItem("Game Framework/GameTools/link.xml Editor【代码裁剪配置】", false, 1)]
-    public static void ShowStripConfigEditor()
-    {
-        var win = EditorWindow.GetWindow<StripLinkConfigEditor>("Strip LinkConfig Editor");
-        win.Show();
-        win.SetEditorMode(ConfigEditorMode.StripLinkConfig);
-    }
-    [MenuItem("HybridCLR/AOT dlls Editor【元数据补充配置】", false, 5)]
-    public static void ShowAotDllsConfigEditor()
-    {
-        var win = EditorWindow.GetWindow<StripLinkConfigEditor>("AOT dlls Config Window");
-        win.Show();
-        win.SetEditorMode(ConfigEditorMode.AotDllConfig);
-    }
+
     /// <summary>
     /// 获取项目全部dll
     /// </summary>

@@ -61,7 +61,7 @@
     <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\AppConfigsInspector.cs" />
     <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\DataTableGenerator\DataTableProcessor.Vector3IntProcessor.cs" />
     <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\DataTableGenerator\DataTableProcessor.ShortProcessor.cs" />
-    <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\StripLinkConfigEditor.cs" />
+    <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\EditorTools\StripLinkConfigEditor.cs" />
     <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\DataTableGenerator\DataTableProcessor.LongProcessor.cs" />
     <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\DataTableGenerator\DataTableProcessor.SByteProcessor.cs" />
     <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\EditorTools\LocalizationStringEditor.cs" />
@@ -110,6 +110,9 @@
     <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\DataTableGenerator\DataTableProcessor.CommentProcessor.cs" />
     <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\DataTableGenerator\DataTableProcessor.IntProcessor.cs" />
     <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\DataTableGenerator\DataTableProcessor.ColorProcessor.cs" />
+    <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\EditorTools\EditorToolMenuAttribute.cs" />
+    <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\EditorTools\EditorToolBase.cs" />
+    <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\EditorTools\AotDllsConfigEditor.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\AAAGame\ScriptsBuiltin\Editor\DataTableGenerator\DataTableCodeTemplate\DataTableCodeTemplate.txt" />
@@ -383,7 +386,7 @@
       <HintPath>Assets\Plugins\TinyPng\System.Text.Encodings.Web.dll</HintPath>
     </Reference>
     <Reference Include="LZ4">
-      <HintPath>Library\PackageCache\com.focus-creative-games.hybridclr_unity@5a50778821\Plugins\LZ4.dll</HintPath>
+      <HintPath>Library\PackageCache\com.focus-creative-games.hybridclr_unity@bf6ae99dad\Plugins\LZ4.dll</HintPath>
     </Reference>
     <Reference Include="System.Text.Json">
       <HintPath>Assets\Plugins\TinyPng\System.Text.Json.dll</HintPath>
@@ -401,7 +404,7 @@
       <HintPath>Library\PackageCache\com.unity.collab-proxy@1.17.7\Lib\Editor\PlasticSCM\log4netPlastic.dll</HintPath>
     </Reference>
     <Reference Include="dnlib">
-      <HintPath>Library\PackageCache\com.focus-creative-games.hybridclr_unity@5a50778821\Plugins\dnlib.dll</HintPath>
+      <HintPath>Library\PackageCache\com.focus-creative-games.hybridclr_unity@bf6ae99dad\Plugins\dnlib.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>Library\PackageCache\com.unity.nuget.newtonsoft-json@3.0.2\Runtime\Newtonsoft.Json.dll</HintPath>
