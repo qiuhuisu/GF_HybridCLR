@@ -9,6 +9,7 @@
     <type fullname="LocalizationExtension" preserve="all" />
     <type fullname="SettingBuiltinExtension" preserve="all" />
     <type fullname="UtilityBuiltin" preserve="all" />
+    <type fullname="UtilityBuiltin/Json" preserve="all" />
     <type fullname="UtilityBuiltin/ResPath" preserve="all" />
     <type fullname="UtilityBuiltin/Valuer" preserve="all" />
   </assembly>

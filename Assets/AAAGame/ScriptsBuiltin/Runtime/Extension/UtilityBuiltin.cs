@@ -8,7 +8,6 @@ using System;
 using UnityGameFramework.Runtime;
 using TMPro;
 using System.Collections.Generic;
-using System.Globalization;
 using ICSharpCode.SharpZipLib.Zip;
 
 

@@ -1,11 +1,8 @@
-﻿using DG.Tweening;
-using GameFramework;
+﻿using GameFramework;
 using GameFramework.Event;
 using GameFramework.Fsm;
 using GameFramework.Procedure;
-using System.Collections.Generic;
 using UnityEngine;
-using GameFramework.Network;
 using UnityGameFramework.Runtime;
 public class MenuProcedure : ProcedureBase
 {
@@ -23,6 +20,7 @@ public class MenuProcedure : ProcedureBase
         GF.Event.Subscribe(ShowEntitySuccessEventArgs.EventId, OnShowEntitySuccess);//订阅Entity打开事件, Entity显示成功时触发
         GF.Event.Subscribe(OpenUIFormSuccessEventArgs.EventId, OnOpenUIFormSuccess);//订阅UI打开事件, UI打开成功时触发
         ShowLevel();//加载关卡
+        Log.Info(UtilityBuiltin.Json.ToJson(Vector3.one));
     }
     protected override void OnUpdate(IFsm<IProcedureManager> procedureOwner, float elapseSeconds, float realElapseSeconds)
     {
@@ -81,7 +79,7 @@ public class MenuProcedure : ProcedureBase
         var lvTb = GF.DataTable.GetDataTable<LevelTable>();
         var playerMd = GF.DataModel.GetOrCreate<PlayerDataModel>();
         var lvRow = lvTb.GetDataRow(playerMd.GAME_LEVEL);
-        
+
         var lvParams = EntityParams.Acquire(Vector3.zero, Vector3.zero, Vector3.one);
         lvParams.Set("LevelData", lvRow);
         lvParams.Set("OnLevelReady", (GameFrameworkAction)OnLevelAllReady);

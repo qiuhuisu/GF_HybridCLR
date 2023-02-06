@@ -642,9 +642,9 @@ PlayerSettings:
   webGLDecompressionFallback: 0
   webGLPowerPreference: 2
   scriptingDefineSymbols:
-    Android: ENABLE_LOG;AMPLIFY_SHADER_EDITOR
-    Standalone: ENABLE_LOG;AMPLIFY_SHADER_EDITOR
-    WebGL: ENABLE_LOG;AMPLIFY_SHADER_EDITOR;DISABLE_HYBRIDCLR
+    Android: AMPLIFY_SHADER_EDITOR;ENABLE_LOG
+    Standalone: AMPLIFY_SHADER_EDITOR;ENABLE_LOG
+    WebGL: AMPLIFY_SHADER_EDITOR;DISABLE_HYBRIDCLR;ENABLE_LOG
     Windows Store Apps: ENABLE_LOG
     iPhone: ENABLE_LOG
   additionalCompilerArguments: {}

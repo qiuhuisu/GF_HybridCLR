@@ -1,5 +1,6 @@
 {
     "name": "Newtonsoft.Json.UnityConverters",
+    "rootNamespace": "",
     "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -26,5 +27,6 @@
             "expression": "",
             "define": "HAVE_MODULE_PHYSICS2D"
         }
-    ]
+    ],
+    "noEngineReferences": false
 }
