@@ -34,5 +34,6 @@ public class AppBuildSettings : HybridCLR.Editor.ScriptableSingleton<AppBuildSet
     public int CompressImgToolFastLv = 1;  //取值1-10, 数值越大压缩的速度越快,但压缩比会稍微降低
     public float CompressImgToolQualityLv = 80; //pngquant压缩质量等级,数值越小压缩后图片越小
     public float CompressImgToolQualityMinLv = 0;
+    public string AppBuildDir = "../BuildApp";
 }
 #endif

@@ -79,11 +79,11 @@
     <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\EditorUtilityExtension.cs" />
     <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\DataTableGenerator\DataTableProcessor.DataProcessorUtility.cs" />
     <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\Common\AppBuildSettings.cs" />
-    <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\UI\UnityEditorToolbar.cs" />
+    <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\EditorTools\UnityEditorToolbar.cs" />
     <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\ConstEditor.cs" />
     <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\MyGameTools.cs" />
     <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\DataTableGenerator\DataTableProcessor.DataProcessor.cs" />
-    <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\UI\AppBuildEidtor.cs" />
+    <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\EditorTools\AppBuildEidtor.cs" />
     <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\DataTableGenerator\DataTableProcessor.DecimalProcessor.cs" />
     <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\DataTableUpdater.cs" />
     <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\MyGameTools.HybridCLR.cs" />
@@ -97,7 +97,7 @@
     <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\DataTableGenerator\DataTableProcessor.DoubleProcessor.cs" />
     <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\DataTableGenerator\DataTableProcessor.StringProcessor.cs" />
     <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\DataTableGenerator\DataTableProcessor.RectProcessor.cs" />
-    <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\UI\EditorToolbarExtension.cs" />
+    <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\EditorTools\EditorToolbarExtension.cs" />
     <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\DataTableGenerator\DataTableProcessor.BoolProcessor.cs" />
     <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\AssetBuildHandler.cs" />
     <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\DataTableGenerator\DataTableProcessor.Vector4Processor.cs" />
