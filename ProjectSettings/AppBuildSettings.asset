@@ -36,3 +36,4 @@ MonoBehaviour:
   CompressImgToolFastLv: 1
   CompressImgToolQualityLv: 65.50848
   CompressImgToolQualityMinLv: 0
+  AppBuildDir: BuildApp

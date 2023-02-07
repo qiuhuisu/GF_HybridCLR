@@ -512,6 +512,24 @@ namespace UnityGameFramework.Editor.ResourceTools
                 EditorGUILayout.EndHorizontal();
                 EditorGUILayout.BeginHorizontal();
                 {
+                    EditorGUILayout.LabelField("App Build Path", GUILayout.Width(160f));
+                    AppBuildSettings.Instance.AppBuildDir = EditorGUILayout.TextField(AppBuildSettings.Instance.AppBuildDir);
+                    if (GUILayout.Button("Select Path", GUILayout.Width(160f)))
+                    {
+                        string projectRoot = Directory.GetParent(Application.dataPath).FullName;
+                        var appBuildDir = string.IsNullOrWhiteSpace(AppBuildSettings.Instance.AppBuildDir) ? projectRoot : AppBuildSettings.Instance.AppBuildDir;
+                        var openPath = Directory.Exists(appBuildDir) ? appBuildDir : projectRoot;
+                        string path = EditorUtility.OpenFolderPanel("Select App Build Path", openPath, "");
+                        if (!string.IsNullOrWhiteSpace(path))
+                        {
+                            AppBuildSettings.Instance.AppBuildDir = Path.GetRelativePath(projectRoot, path);
+                        }
+                        GUIUtility.ExitGUI();
+                    }
+                    EditorGUILayout.EndHorizontal();
+                }
+                EditorGUILayout.BeginHorizontal();
+                {
                     PlayerSettings.Android.useCustomKeystore = EditorGUILayout.ToggleLeft("Use Custom Keystore", PlayerSettings.Android.useCustomKeystore, GUILayout.Width(160f));
                     EditorGUI.BeginDisabledGroup(!PlayerSettings.Android.useCustomKeystore);
                     {
@@ -946,8 +964,10 @@ namespace UnityGameFramework.Editor.ResourceTools
             BuildTargetGroup buildTargetGroup = EditorUserBuildSettings.selectedBuildTargetGroup;
             int subtarget = (int)Utility.Assembly.GetType("UnityEditor.EditorUserBuildSettings").GetMethod("GetSelectedSubtargetFor", BindingFlags.Static | BindingFlags.NonPublic).Invoke(null, new object[] { buildTarget });
 
-            // Pick location for the build
-            string newLocation = "";
+            string buildLocation = GetBuildLocation(buildTargetGroup, buildTarget, subtarget, options.options);
+            bool isDir = !Path.HasExtension(buildLocation);
+            if (string.IsNullOrWhiteSpace(buildLocation) || (isDir && !Directory.Exists(buildLocation)))
+                throw new BuildMethodException("Build location for buildTarget " + buildTarget + " is not valid.");
 
             //Check if Lz4 is supported for the current buildtargetgroup and enable it if need be
             if ((bool)Utility.Assembly.GetType("UnityEditor.PostprocessBuildPlayer").GetMethod("SupportsLz4Compression", BindingFlags.Static | BindingFlags.Public).Invoke(null, new object[] { buildTargetGroup, buildTarget }))
@@ -985,43 +1005,17 @@ namespace UnityGameFramework.Editor.ResourceTools
             if (!string.IsNullOrEmpty(connectID) && developmentBuild)
                 options.options |= BuildOptions.CustomConnectionID;
 
-            bool updateExistingBuild = false;
-            if ((bool)Utility.Assembly.GetType("UnityEditor.BuildPlayerWindow.DefaultBuildMethods").GetMethod("IsInstallInBuildFolderOption", BindingFlags.Static | BindingFlags.NonPublic).Invoke(null,null))
+            var checkFunc = typeof(UnityEditor.BuildPlayerWindow.DefaultBuildMethods).GetMethod("IsInstallInBuildFolderOption", BindingFlags.Static | BindingFlags.NonPublic);
+
+            if ((bool)checkFunc.Invoke(null, null))
             {
                 options.options |= BuildOptions.InstallInBuildFolder;
             }
-            else if ((options.options & BuildOptions.PatchPackage) == 0)
-            {
-                newLocation = EditorUserBuildSettings.GetBuildLocation(buildTarget);
-
-                if (newLocation.Length == 0)
-                {
-                    throw new BuildMethodException("Build location for buildTarget " + buildTarget + " is not valid.");
-                }
-                
-                switch (BuildPipeline.BuildCanBeAppended(buildTarget, newLocation))
-                {
-                    case CanAppendBuild.Unsupported:
-                        break;
-                    case CanAppendBuild.Yes:
-                        updateExistingBuild = true;
-                        break;
-                    case CanAppendBuild.No:
-                        newLocation = EditorUserBuildSettings.GetBuildLocation(buildTarget);
-                        if (!(bool)Utility.Assembly.GetType("UnityEditor.BuildPlayerWindow").GetMethod("BuildLocationIsValid", BindingFlags.Static | BindingFlags.NonPublic).Invoke(null, new object[] { newLocation }))
-                            throw new BuildMethodException("Build location for buildTarget " + buildTarget + " is not valid.");
-
-                        break;
-                }
-            }
-
-            if (updateExistingBuild)
-                options.options |= BuildOptions.AcceptExternalModificationsToPlayer;
 
             options.target = buildTarget;
             options.subtarget = subtarget;
             options.targetGroup = buildTargetGroup;
-            options.locationPathName = EditorUserBuildSettings.GetBuildLocation(buildTarget);
+            options.locationPathName = buildLocation;
             options.assetBundleManifestPath = Utility.Assembly.GetType("UnityEditor.PostprocessBuildPlayer").GetMethod("GetStreamingAssetsBundleManifestPath", BindingFlags.Static | BindingFlags.NonPublic).Invoke(null, null) as string;
 
             // Build a list of scenes that are enabled
@@ -1040,24 +1034,19 @@ namespace UnityGameFramework.Editor.ResourceTools
             return options;
         }
 
-        private static bool AutoPickBuildLocation(BuildTargetGroup targetGroup, BuildTarget target, int subtarget, BuildOptions options, out bool updateExistingBuild)
+        private static string GetBuildLocation(BuildTargetGroup targetGroup, BuildTarget target, int subtarget, BuildOptions options)
         {
-            updateExistingBuild = false;
-            string defaultFolder = UtilityBuiltin.ResPath.GetCombinePath(AppBuildSettings.Instance.AppBuildDir, target.ToString());
-            // test_releaseDev_v1.0.apk
-            string defaultName = Utility.Text.Format("{0}{1}{2}_v{3}", Application.productName, AppSettings.Instance.DebugMode ? "debug":"release", EditorUserBuildSettings.development ? "Dev":string.Empty, Application.version);
-            
+            string defaultFolder = UtilityBuiltin.ResPath.GetCombinePath(Directory.GetParent(Application.dataPath).FullName, AppBuildSettings.Instance.AppBuildDir, target.ToString());
+            string defaultName = Utility.Text.Format("{0}_{1}{2}_v{3}", Application.productName, AppSettings.Instance.DebugMode ? "debug" : "release", EditorUserBuildSettings.development ? "Dev" : string.Empty, Application.version);
 
-            string extension = Utility.Assembly.GetType("UnityEditor.PostprocessBuildPlayer").GetMethod("GetExtensionForBuildTarget").Invoke(null,new object[] { targetGroup, target, subtarget, options }) as string;
-
+            string extension = Utility.Assembly.GetType("UnityEditor.PostprocessBuildPlayer").GetMethod("GetExtensionForBuildTarget", new Type[] { typeof(BuildTargetGroup), typeof(BuildTarget), typeof(int), typeof(BuildOptions) }).Invoke(null, new object[] { targetGroup, target, subtarget, options }) as string;
             string buildPath = defaultFolder;
             if (!string.IsNullOrEmpty(extension))
             {
                 string appFileName = Utility.Text.Format("{0}.{1}", defaultName, extension);
                 buildPath = UtilityBuiltin.ResPath.GetCombinePath(defaultFolder, appFileName);
             }
-            EditorUserBuildSettings.SetBuildLocation(target, buildPath);
-            return true;
+            return buildPath;
         }
     }
 }
