@@ -165,21 +165,7 @@ public class UIFormBaseEditor : Editor
     /// <returns></returns>
     private static Type GetSampleType(string fullName)
     {
-        Type result = null;
-        var assemblyArr = AppDomain.CurrentDomain.GetAssemblies();
-        foreach (var item in assemblyArr)
-        {
-            foreach (var tp in item.GetTypes())
-            {
-                if (tp.FullName.CompareTo(fullName) == 0)
-                {
-                    result = tp;
-                    break;
-                }
-            }
-            if (result != null) break;
-        }
-
+        var result = Utility.Assembly.GetType(fullName);
         return result;
     }
     private static T GetPrefabRootComponent<T>() where T : Component
@@ -441,6 +427,7 @@ public class UIFormBaseEditor : Editor
             AssetDatabase.Refresh();
             return;
         }
+
         var matchResult = Regex.Match(monoScript.text, Utility.Text.Format("partial[\\s]+class[\\s]+{0}", uiFormClassName));
         string scriptPath = AssetDatabase.GetAssetPath(monoScript);
         if (!matchResult.Success)
