@@ -49,15 +49,12 @@ public class PlayerEntity : SampleEntity
     }
     private void Fire()
     {
-        if (Input.GetKey(KeyCode.A))
+        if (Time.time - lastFireTime > fireInterval)
         {
-            if (Time.time - lastFireTime > fireInterval)
-            {
-                lastFireTime = Time.time;
-                var fireParms = EntityParams.Acquire(firePoint.position, firePoint.eulerAngles);
-                fireParms.Set<VarFloat>("LifeTime", 1.5f);
-                GF.Entity.ShowEntity<BulletEntity>("Effect/Trail", Const.EntityGroup.Effect, fireParms);
-            }
+            lastFireTime = Time.time;
+            var fireParms = EntityParams.Acquire(firePoint.position, firePoint.eulerAngles);
+            fireParms.Set<VarFloat>("LifeTime", 1.5f);
+            GF.Entity.ShowEntity<BulletEntity>("Effect/Trail", Const.EntityGroup.Effect, fireParms);
         }
     }
     private void Move()
