@@ -23,7 +23,6 @@
   <assembly fullname="DOTween">
     <type fullname="DG.Tweening.Core.DOGetter`1" preserve="all" />
     <type fullname="DG.Tweening.Core.DOSetter`1" preserve="all" />
-    <type fullname="DG.Tweening.Core.DOTweenSettings" preserve="all" />
     <type fullname="DG.Tweening.Core.TweenerCore`3" preserve="all" />
     <type fullname="DG.Tweening.DOTween" preserve="all" />
     <type fullname="DG.Tweening.DOVirtual" preserve="all" />
@@ -159,29 +158,15 @@
     <type fullname="UnityEngine.Rendering.Universal.CameraExtensions" preserve="all" />
     <type fullname="UnityEngine.Rendering.Universal.CameraRenderType" preserve="all" />
     <type fullname="UnityEngine.Rendering.Universal.UniversalAdditionalCameraData" preserve="all" />
-    <type fullname="UnityEngine.Rendering.Universal.UniversalRendererData" preserve="all" />
-    <type fullname="UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset" preserve="all" />
-    <type fullname="UnityEngine.Rendering.Universal.UniversalRenderPipelineGlobalSettings" preserve="all" />
   </assembly>
   <assembly fullname="Unity.TextMeshPro">
     <type fullname="TMPro.TextMeshPro" preserve="all" />
     <type fullname="TMPro.TextMeshProUGUI" preserve="all" />
-    <type fullname="TMPro.TMP_FontAsset" preserve="all" />
-    <type fullname="TMPro.TMP_InputField" preserve="all" />
-    <type fullname="TMPro.TMP_Settings" preserve="all" />
-    <type fullname="TMPro.TMP_SpriteAsset" preserve="all" />
-    <type fullname="TMPro.TMP_StyleSheet" preserve="all" />
-    <type fullname="TMPro.TMP_SubMeshUI" preserve="all" />
     <type fullname="TMPro.TMP_Text" preserve="all" />
   </assembly>
   <assembly fullname="UnityEngine.AndroidJNIModule">
     <type fullname="UnityEngine.AndroidJavaClass" preserve="all" />
     <type fullname="UnityEngine.AndroidJavaObject" preserve="all" />
-  </assembly>
-  <assembly fullname="UnityEngine.AnimationModule">
-    <type fullname="UnityEngine.Animation" preserve="all" />
-    <type fullname="UnityEngine.AnimationClip" preserve="all" />
-    <type fullname="UnityEngine.Animator" preserve="all" />
   </assembly>
   <assembly fullname="UnityEngine.CoreModule">
     <type fullname="UnityEngine.AddComponentMenu" preserve="all" />
@@ -194,7 +179,6 @@
     <type fullname="UnityEngine.Component" preserve="all" />
     <type fullname="UnityEngine.Coroutine" preserve="all" />
     <type fullname="UnityEngine.CreateAssetMenuAttribute" preserve="all" />
-    <type fullname="UnityEngine.Cubemap" preserve="all" />
     <type fullname="UnityEngine.Debug" preserve="all" />
     <type fullname="UnityEngine.DepthTextureMode" preserve="all" />
     <type fullname="UnityEngine.Events.UnityAction" preserve="all" />
@@ -209,10 +193,7 @@
     <type fullname="UnityEngine.HideInInspector" preserve="all" />
     <type fullname="UnityEngine.KeyCode" preserve="all" />
     <type fullname="UnityEngine.LayerMask" preserve="all" />
-    <type fullname="UnityEngine.Material" preserve="all" />
     <type fullname="UnityEngine.Mathf" preserve="all" />
-    <type fullname="UnityEngine.MeshFilter" preserve="all" />
-    <type fullname="UnityEngine.MeshRenderer" preserve="all" />
     <type fullname="UnityEngine.MonoBehaviour" preserve="all" />
     <type fullname="UnityEngine.NetworkReachability" preserve="all" />
     <type fullname="UnityEngine.Object" preserve="all" />
@@ -222,12 +203,10 @@
     <type fullname="UnityEngine.RectOffset" preserve="all" />
     <type fullname="UnityEngine.RectTransform" preserve="all" />
     <type fullname="UnityEngine.Renderer" preserve="all" />
-    <type fullname="UnityEngine.RenderTexture" preserve="all" />
     <type fullname="UnityEngine.RuntimePlatform" preserve="all" />
     <type fullname="UnityEngine.Screen" preserve="all" />
     <type fullname="UnityEngine.ScriptableObject" preserve="all" />
     <type fullname="UnityEngine.SerializeField" preserve="all" />
-    <type fullname="UnityEngine.Shader" preserve="all" />
     <type fullname="UnityEngine.Space" preserve="all" />
     <type fullname="UnityEngine.Sprite" preserve="all" />
     <type fullname="UnityEngine.TextAsset" preserve="all" />
@@ -245,9 +224,6 @@
     <type fullname="UnityEngine.WaitForEndOfFrame" preserve="all" />
     <type fullname="UnityEngine.WaitForSeconds" preserve="all" />
   </assembly>
-  <assembly fullname="UnityEngine.IMGUIModule">
-    <type fullname="UnityEngine.GUISkin" preserve="all" />
-  </assembly>
   <assembly fullname="UnityEngine.InputLegacyModule">
     <type fullname="UnityEngine.Input" preserve="all" />
     <type fullname="UnityEngine.Touch" preserve="all" />
@@ -255,7 +231,6 @@
   </assembly>
   <assembly fullname="UnityEngine.ParticleSystemModule">
     <type fullname="UnityEngine.ParticleSystem" preserve="all" />
-    <type fullname="UnityEngine.ParticleSystemRenderer" preserve="all" />
   </assembly>
   <assembly fullname="UnityEngine.Physics2DModule">
     <type fullname="UnityEngine.Rigidbody2D" preserve="all" />
@@ -263,11 +238,9 @@
   <assembly fullname="UnityEngine.PhysicsModule">
     <type fullname="UnityEngine.CharacterController" preserve="all" />
     <type fullname="UnityEngine.CollisionFlags" preserve="all" />
-    <type fullname="UnityEngine.MeshCollider" preserve="all" />
     <type fullname="UnityEngine.Physics" preserve="all" />
   </assembly>
   <assembly fullname="UnityEngine.TextRenderingModule">
-    <type fullname="UnityEngine.Font" preserve="all" />
     <type fullname="UnityEngine.TextAnchor" preserve="all" />
     <type fullname="UnityEngine.TextMesh" preserve="all" />
   </assembly>
@@ -285,33 +258,21 @@
     <type fullname="UnityEngine.UI.CanvasScaler" preserve="all" />
     <type fullname="UnityEngine.UI.CanvasScaler/ScaleMode" preserve="all" />
     <type fullname="UnityEngine.UI.CanvasScaler/ScreenMatchMode" preserve="all" />
-    <type fullname="UnityEngine.UI.ContentSizeFitter" preserve="all" />
     <type fullname="UnityEngine.UI.Graphic" preserve="all" />
     <type fullname="UnityEngine.UI.GraphicRaycaster" preserve="all" />
-    <type fullname="UnityEngine.UI.GridLayoutGroup" preserve="all" />
-    <type fullname="UnityEngine.UI.HorizontalLayoutGroup" preserve="all" />
     <type fullname="UnityEngine.UI.Image" preserve="all" />
     <type fullname="UnityEngine.UI.LayoutElement" preserve="all" />
     <type fullname="UnityEngine.UI.LayoutGroup" preserve="all" />
     <type fullname="UnityEngine.UI.LayoutUtility" preserve="all" />
-    <type fullname="UnityEngine.UI.Mask" preserve="all" />
-    <type fullname="UnityEngine.UI.Outline" preserve="all" />
-    <type fullname="UnityEngine.UI.RawImage" preserve="all" />
-    <type fullname="UnityEngine.UI.RectMask2D" preserve="all" />
-    <type fullname="UnityEngine.UI.ScrollRect" preserve="all" />
     <type fullname="UnityEngine.UI.Selectable" preserve="all" />
-    <type fullname="UnityEngine.UI.Shadow" preserve="all" />
     <type fullname="UnityEngine.UI.Slider" preserve="all" />
     <type fullname="UnityEngine.UI.Text" preserve="all" />
     <type fullname="UnityEngine.UI.Toggle" preserve="all" />
     <type fullname="UnityEngine.UI.Toggle/ToggleEvent" preserve="all" />
-    <type fullname="UnityEngine.UI.ToggleGroup" preserve="all" />
-    <type fullname="UnityEngine.UI.VerticalLayoutGroup" preserve="all" />
   </assembly>
   <assembly fullname="UnityEngine.UIModule">
     <type fullname="UnityEngine.Canvas" preserve="all" />
     <type fullname="UnityEngine.CanvasGroup" preserve="all" />
-    <type fullname="UnityEngine.CanvasRenderer" preserve="all" />
   </assembly>
   <assembly fullname="UnityEngine.UnityWebRequestModule">
     <type fullname="UnityEngine.WWWForm" preserve="all" />
@@ -329,12 +290,10 @@
     <type fullname="UnityGameFramework.Runtime.DownloadComponent" preserve="all" />
     <type fullname="UnityGameFramework.Runtime.DownloadFailureEventArgs" preserve="all" />
     <type fullname="UnityGameFramework.Runtime.DownloadSuccessEventArgs" preserve="all" />
-    <type fullname="UnityGameFramework.Runtime.EditorResourceComponent" preserve="all" />
     <type fullname="UnityGameFramework.Runtime.Entity" preserve="all" />
     <type fullname="UnityGameFramework.Runtime.EntityComponent" preserve="all" />
     <type fullname="UnityGameFramework.Runtime.EntityLogic" preserve="all" />
     <type fullname="UnityGameFramework.Runtime.EventComponent" preserve="all" />
-    <type fullname="UnityGameFramework.Runtime.FileSystemComponent" preserve="all" />
     <type fullname="UnityGameFramework.Runtime.FsmComponent" preserve="all" />
     <type fullname="UnityGameFramework.Runtime.GameEntry" preserve="all" />
     <type fullname="UnityGameFramework.Runtime.GameFrameworkComponent" preserve="all" />
@@ -349,12 +308,9 @@
     <type fullname="UnityGameFramework.Runtime.LoadSceneUpdateEventArgs" preserve="all" />
     <type fullname="UnityGameFramework.Runtime.LocalizationComponent" preserve="all" />
     <type fullname="UnityGameFramework.Runtime.Log" preserve="all" />
-    <type fullname="UnityGameFramework.Runtime.NetworkComponent" preserve="all" />
-    <type fullname="UnityGameFramework.Runtime.ObjectPoolComponent" preserve="all" />
     <type fullname="UnityGameFramework.Runtime.OpenUIFormFailureEventArgs" preserve="all" />
     <type fullname="UnityGameFramework.Runtime.OpenUIFormSuccessEventArgs" preserve="all" />
     <type fullname="UnityGameFramework.Runtime.ProcedureComponent" preserve="all" />
-    <type fullname="UnityGameFramework.Runtime.ReferencePoolComponent" preserve="all" />
     <type fullname="UnityGameFramework.Runtime.ResourceComponent" preserve="all" />
     <type fullname="UnityGameFramework.Runtime.SceneComponent" preserve="all" />
     <type fullname="UnityGameFramework.Runtime.SettingComponent" preserve="all" />

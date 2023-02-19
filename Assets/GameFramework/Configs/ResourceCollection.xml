@@ -12,42 +12,107 @@
       <Resource Name="Scene" LoadType="2" Packed="False" />
       <Resource Name="ScriptableAssets" LoadType="0" Packed="False" />
       <Resource Name="SharedAssets" LoadType="2" Packed="False" />
+      <Resource Name="UITex" LoadType="0" Packed="False" />
     </Resources>
     <Assets>
       <Asset Guid="065910b5c8a1bd045933f446c4f89c78" ResourceName="Prefabs/UI" />
+      <Asset Guid="06fe425ea0fdb6f4c93573dfc9a28ba8" ResourceName="UITex" />
       <Asset Guid="08a8d5b49699a084da7af4a5f8264756" ResourceName="Config" />
+      <Asset Guid="09cb9635ef43f7c4683859595129f4a6" ResourceName="UITex" />
+      <Asset Guid="0b2403529bfe2c24db8262fe423286fe" ResourceName="UITex" />
       <Asset Guid="0b69b108d75f47940881a60045f21976" ResourceName="Prefabs/UI" />
+      <Asset Guid="0cc251efe85cbb445a20978480a49066" ResourceName="UITex" />
+      <Asset Guid="1202a129144cc8c49940190a9594dceb" ResourceName="UITex" />
+      <Asset Guid="120f43dcc602e0c43b64aba96395df95" ResourceName="UITex" />
+      <Asset Guid="1358d597fda83d4498eb3b4a4ee61147" ResourceName="UITex" />
       <Asset Guid="13b0b1255d7d6cf44a4d1987723460ef" ResourceName="ScriptableAssets" />
+      <Asset Guid="13e54d3fb741a094f9c72221e99b0763" ResourceName="UITex" />
+      <Asset Guid="16ae0093c23528e4298f0dc31a052b9b" ResourceName="UITex" />
+      <Asset Guid="17b267fc55b957c4f8bbd9a62209560e" ResourceName="UITex" />
+      <Asset Guid="192465d17c5c1904da8e1e6b1194d5fc" ResourceName="UITex" />
+      <Asset Guid="19e76b756ef6a154fa1b52aab8542e50" ResourceName="UITex" />
       <Asset Guid="1caa4c6fdc3281642b46f7c82c497dc5" ResourceName="Prefabs/GFExtension" />
+      <Asset Guid="21900432b584b474b842b0892e9cb33b" ResourceName="UITex" />
       <Asset Guid="2379a25eae5295042b43589e929570fd" ResourceName="DataTable" />
+      <Asset Guid="2617eebd731029646b776681549037e7" ResourceName="UITex" />
+      <Asset Guid="263d269b4f092ed4ead13c6f314fef27" ResourceName="UITex" />
+      <Asset Guid="29491a212c206fa4b8111718353b4c26" ResourceName="UITex" />
       <Asset Guid="2cdf1b85fd520ef46b11f580e9443e78" ResourceName="Language" />
+      <Asset Guid="2e0bc12769d35ee4ca40aa7d42e7415e" ResourceName="UITex" />
       <Asset Guid="2f01263863577c74cb1a605c8766e743" ResourceName="DataTable" />
+      <Asset Guid="3123bec83a60dc04ab65071f7fca75c2" ResourceName="UITex" />
+      <Asset Guid="3c6062bdf7d52654c8f9ee90f9a353d0" ResourceName="UITex" />
+      <Asset Guid="3c7d0d96fa3d2c64a92992fc8526e84b" ResourceName="UITex" />
       <Asset Guid="3fdcbb5b7d730f341bf585839b5502a5" ResourceName="Prefabs/UI" />
       <Asset Guid="4035a8c10ba45d545802a8da357cd161" ResourceName="DataTable" />
+      <Asset Guid="4634df808333b6c468e9f11b1f833339" ResourceName="UITex" />
+      <Asset Guid="4758b0e986fec6446a311bdee53fdacf" ResourceName="UITex" />
+      <Asset Guid="47cd2e4c176807e49a8dfc260261aa30" ResourceName="UITex" />
       <Asset Guid="48bb5f55d8670e349b6e614913f9d910" ResourceName="SharedAssets" />
+      <Asset Guid="4ddc40ac42ffad8499763b6396b97009" ResourceName="UITex" />
+      <Asset Guid="4f88dbea395bbf2449d1504853aeab47" ResourceName="UITex" />
+      <Asset Guid="569d29a3e2f25074db64a18e4c59ae1d" ResourceName="UITex" />
+      <Asset Guid="56f896f916cd04c4c845b2db5aabcf76" ResourceName="UITex" />
+      <Asset Guid="58a6d142f2cc869469956f50c0079383" ResourceName="UITex" />
       <Asset Guid="66210d36a4cf7514e8d9e60ae298c2c4" ResourceName="DataTable" />
       <Asset Guid="6792e8ab386017841ab27626b9753bec" ResourceName="Prefabs/UI" />
       <Asset Guid="68e6db2ebdc24f95958faec2be5558d6" ResourceName="SharedAssets" />
+      <Asset Guid="68f770b7635434640963c800bcda5a8e" ResourceName="UITex" />
+      <Asset Guid="6974d8c4f9b8a034d9186528799c246f" ResourceName="UITex" />
       <Asset Guid="6a4e2eebc9726fd49952a02518d04a6b" ResourceName="Prefabs/UI" />
       <Asset Guid="6be38d7fc85a442489bc513d73291793" ResourceName="HotfixDlls" />
+      <Asset Guid="6e3b348eedb0e27429a549657833a8de" ResourceName="UITex" />
       <Asset Guid="73d884ecdd851124aaca044feebbe87d" ResourceName="DataTable" />
       <Asset Guid="743d91e4e5cb9bc478f0ab99fbd8f7d1" ResourceName="Prefabs/UI" />
+      <Asset Guid="7538c635fc0515141887937d6d92adc5" ResourceName="UITex" />
+      <Asset Guid="788191f95a7ed584abb784bc88300574" ResourceName="UITex" />
+      <Asset Guid="796f36c1ff43726499a5651d3aae8037" ResourceName="UITex" />
+      <Asset Guid="7df4d09170365524fa0291cba23c96d4" ResourceName="UITex" />
       <Asset Guid="7f86a4819db475c4cafa306e5fc6f856" ResourceName="DataTable" />
       <Asset Guid="7fa753003c0b5b24faded9b639aabaef" ResourceName="Prefabs/UI" />
       <Asset Guid="81ed03a317f6d6a43aa694d24e6a8f64" ResourceName="DataTable" />
       <Asset Guid="83bdadb9e1d24a94e8498def13d4804c" ResourceName="Language" />
+      <Asset Guid="85ac1469739568c49974e98c59ec6e9b" ResourceName="UITex" />
+      <Asset Guid="85fe4f50961acb948bb0c680bc7b39fa" ResourceName="UITex" />
+      <Asset Guid="87f94b1a84b94c9409a090fc3c91e104" ResourceName="UITex" />
       <Asset Guid="8a192a5e08f98e144aa94e041e4373d3" ResourceName="SharedAssets" />
+      <Asset Guid="8b4c39c535d5f954f84ad93038d5dd3c" ResourceName="UITex" />
+      <Asset Guid="8b5409ff9d4a95e4a9459304d691caf7" ResourceName="UITex" />
+      <Asset Guid="8eff1211db010a346bb8d36dbeda32e7" ResourceName="UITex" />
+      <Asset Guid="8fa9b2afec56a2a42bfc903cf497ade3" ResourceName="UITex" />
+      <Asset Guid="9183f7a341bcf7d459619fee3c549f46" ResourceName="UITex" />
+      <Asset Guid="91913d220cc8fdc4d94eca8dfaedd841" ResourceName="UITex" />
+      <Asset Guid="9440c6b6c516a894a903ace7bc286e57" ResourceName="UITex" />
+      <Asset Guid="94bc5984e919cda4eb68ad10a6fd360b" ResourceName="UITex" />
+      <Asset Guid="97e1ed39e974a4043bea3688aa073ecf" ResourceName="UITex" />
+      <Asset Guid="a45a985b6e9256b46923192b28f1bbe0" ResourceName="UITex" />
+      <Asset Guid="a60a3268313db884bab4a2402b4950a4" ResourceName="UITex" />
       <Asset Guid="a8043c8d11e46d648bb702e4a3572406" ResourceName="Prefabs/Entity" />
+      <Asset Guid="ae35d0b2b5931b24194dc6c67b698d0c" ResourceName="UITex" />
+      <Asset Guid="b11c2d92f5ebcbc47b566cf1933c743e" ResourceName="UITex" />
+      <Asset Guid="b757dbdd925b3de41a90d86b9a1962f8" ResourceName="UITex" />
+      <Asset Guid="b8be6c58a78f358469da18e942068713" ResourceName="UITex" />
+      <Asset Guid="ba927c1755d02544db4dec72f83e6c31" ResourceName="UITex" />
+      <Asset Guid="be40484937700db4db4ce3dd0d480168" ResourceName="UITex" />
+      <Asset Guid="be8dcba39942f95489351916350f3482" ResourceName="UITex" />
+      <Asset Guid="c511f09ff69c5fc4997f208576430d82" ResourceName="UITex" />
       <Asset Guid="c7a26b8d1ff63834298841254b2332c4" ResourceName="Prefabs/UI" />
       <Asset Guid="ca4765c7a3113644e9f87e202a7ff91d" ResourceName="Scene" />
       <Asset Guid="cc32c779cab3251448e9e3a10de243e9" ResourceName="HotfixDlls" />
+      <Asset Guid="ce71ad02195cbe6408731d8eccbbeddd" ResourceName="UITex" />
+      <Asset Guid="d545e67f5d552b64dbd6c175e0864a24" ResourceName="UITex" />
+      <Asset Guid="d5e53a97cc182824b989c8a23ea44d16" ResourceName="UITex" />
+      <Asset Guid="d715baeda82be8a439754b4b8a7298d1" ResourceName="UITex" />
       <Asset Guid="d78fcd5d7c7ec164ea79ab6dc8124c0b" ResourceName="DataTable" />
       <Asset Guid="d946c3960d3e44847a45f42524ec6aeb" ResourceName="Config" />
+      <Asset Guid="da84429bd44d3974493b04575ea84719" ResourceName="UITex" />
+      <Asset Guid="deba515c8fd121544a94ca9d1b571c1b" ResourceName="UITex" />
       <Asset Guid="e09d64781b233da4c8e75adde91c9652" ResourceName="Prefabs/Entity" />
       <Asset Guid="e81571591a3393745a08aee12b114309" ResourceName="HotfixDlls" />
       <Asset Guid="ec835c8e8455a4e3eab94be7baf9c04a" ResourceName="Prefabs/UI" />
       <Asset Guid="fb3663d475cbeb74ba97e229b86d2504" ResourceName="Prefabs/Entity" />
       <Asset Guid="fca0697f771517f41a13845450b0f97a" ResourceName="Prefabs/Entity" />
+      <Asset Guid="fdf37af8ff23cd648911899d250a1b3e" ResourceName="UITex" />
     </Assets>
   </ResourceCollection>
 </UnityGameFramework>

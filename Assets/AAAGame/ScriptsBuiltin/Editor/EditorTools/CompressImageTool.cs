@@ -14,6 +14,11 @@ using System.Text;
 public class CompressImageTool : EditorToolBase
 {
     public override string ToolName => "图片压缩工具";
+    enum CompressMode
+    {
+        RawFile, //压缩原文件
+        UnityAsset //Unity自带压缩
+    }
     enum ItemType
     {
         NoSupport,
@@ -21,16 +26,34 @@ public class CompressImageTool : EditorToolBase
         Folder//文件夹
     }
     readonly string[] SupportImgTypes = { ".png", ".jpg", ".webp" };
+
     GUIContent dragAreaContent;
     GUIStyle centerLabelStyle;
     ReorderableList srcScrollList;
     Vector2 srcScrollPos;
     ReorderableList tinypngKeyScrollList;
     Vector2 tinypngScrollListPos;
-
-
+    TextureImporterSettings compressSettings;
+    TextureImporterPlatformSettings compressPlatformSettings;
+    int[] formatValues;
+    string[] formatDisplayOptions;
     int selectOjbWinId = "CompressImageTool".GetHashCode();
     private bool settingFoldout = true;
+
+    readonly string[] tabButtons = {"原文件压缩", "Unity内置压缩" };
+    readonly int[] maxTextureSizeOptionValues = { 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384 };
+    readonly string[] maxTextureSizeDisplayOptions = { "32", "64", "128", "256", "512", "1024", "2048", "4096", "8192", "16384" };
+    private bool overrideTextureType;
+    private bool overrideMeshType;
+    private bool overrideAlphaIsTransparency;
+    private bool overrideReadable;
+    private bool overrideGenerateMipMaps;
+    private bool overrideWrapMode;
+    private bool overrideFilterMode;
+    private bool overrideForTarget;
+    private bool overrideMaxSize;
+    private bool overrideFormat;
+    private bool overrideCompresserQuality;
 #if UNITY_EDITOR_WIN
     const string pngquantTool = "Tools/CompressImageTools/pngquant_win/pngquant.exe";
 
@@ -51,14 +74,11 @@ public class CompressImageTool : EditorToolBase
         srcScrollList.onAddCallback = AddItem;
         srcScrollList.drawElementCallback = DrawItems;
         srcScrollList.elementHeight = EditorGUIUtility.singleLineHeight;
-
-        tinypngKeyScrollList = new ReorderableList(AppBuildSettings.Instance.CompressImgToolKeys, typeof(string), true, true, true, true);
-        tinypngKeyScrollList.drawHeaderCallback = DrawTinypngKeyScrollListHeader;
-        tinypngKeyScrollList.drawElementCallback = DrawTinypngKeyItem;
+        SwitchUIPanel((CompressMode)AppBuildSettings.Instance.CompressImgMode);
     }
     private void OnDisable()
     {
-        AppBuildSettings.Save();
+        SaveSettings();
     }
     private void DrawTinypngKeyItem(Rect rect, int index, bool isActive, bool isFocused)
     {
@@ -76,7 +96,32 @@ public class CompressImageTool : EditorToolBase
     private void OnGUI()
     {
         EditorGUILayout.BeginVertical();
-        EditorGUILayout.Space(10);
+        //EditorGUILayout.Space(10);
+        EditorGUILayout.BeginHorizontal("box");
+        {
+            EditorGUI.BeginChangeCheck();
+            AppBuildSettings.Instance.CompressImgMode = GUILayout.Toolbar(AppBuildSettings.Instance.CompressImgMode, tabButtons);
+            if (EditorGUI.EndChangeCheck())
+            {
+                SwitchUIPanel((CompressMode)AppBuildSettings.Instance.CompressImgMode);
+            }
+            EditorGUILayout.EndHorizontal();
+        }
+        switch ((CompressMode)AppBuildSettings.Instance.CompressImgMode)
+        {
+            case CompressMode.RawFile:
+                DrawCompressRawFilePanel();
+                break;
+            case CompressMode.UnityAsset:
+                DrawCompressUnityAssetPanel();
+                break;
+        }
+
+        EditorGUILayout.EndVertical();
+    }
+
+    private void DrawCompressUnityAssetPanel()
+    {
         srcScrollPos = EditorGUILayout.BeginScrollView(srcScrollPos);
         srcScrollList.DoLayoutList();
         EditorGUILayout.EndScrollView();
@@ -84,7 +129,246 @@ public class CompressImageTool : EditorToolBase
         EditorGUILayout.Space(10);
         if (settingFoldout = EditorGUILayout.Foldout(settingFoldout, "展开设置项:"))
         {
-            DrawSettingsPanel();
+            DrawUnityAssetModeSettingsPanel();
+        }
+        EditorGUILayout.BeginHorizontal("box");
+        {
+            if (GUILayout.Button("开始压缩", GUILayout.Height(30)))
+            {
+                StartCompressUnityAssetMode();
+            }
+
+            if (GUILayout.Button("保存设置", GUILayout.Height(30), GUILayout.MaxWidth(100)))
+            {
+                SaveSettings();
+            }
+            EditorGUILayout.EndHorizontal();
+        }
+    }
+
+    private void StartCompressUnityAssetMode()
+    {
+        var imgList = GetAllImages();
+        if (imgList == null || imgList.Count < 1)
+        {
+            return;
+        }
+        int totalCount = imgList.Count;
+        for (int i = 0; i < totalCount; i++)
+        {
+            var assetName = imgList[i];
+            var texImporter = AssetImporter.GetAtPath(assetName) as TextureImporter;
+            if (EditorUtility.DisplayCancelableProgressBar($"压缩进度({i}/{totalCount})", assetName, i / (float)totalCount))
+            {
+                break;
+            }
+            if (texImporter == null) continue;
+            var texSetting = new TextureImporterSettings();
+            texImporter.ReadTextureSettings(texSetting);
+
+            var texPlatformSetting = texImporter.GetPlatformTextureSettings(EditorUserBuildSettings.activeBuildTarget.ToString());
+            bool hasChange = false;
+            if (overrideTextureType && texSetting.textureType != compressSettings.textureType)
+            {
+                texSetting.textureType = compressSettings.textureType;
+                hasChange = true;
+            }
+            if (overrideMeshType && texSetting.spriteMeshType != compressSettings.spriteMeshType)
+            {
+                texSetting.spriteMeshType = compressSettings.spriteMeshType;
+                hasChange = true;
+            }
+            if (overrideAlphaIsTransparency && texSetting.alphaIsTransparency != compressSettings.alphaIsTransparency)
+            {
+                texSetting.alphaIsTransparency = compressSettings.alphaIsTransparency;
+                hasChange = true;
+            }
+            if (overrideReadable && texSetting.readable != compressSettings.readable)
+            {
+                texSetting.readable = compressSettings.readable;
+                hasChange = true;
+            }
+            if (overrideGenerateMipMaps && texSetting.mipmapEnabled != compressSettings.mipmapEnabled)
+            {
+                texSetting.mipmapEnabled = compressSettings.mipmapEnabled;
+                hasChange = true;
+            }
+            if (overrideWrapMode && texSetting.wrapMode != compressSettings.wrapMode)
+            {
+                texSetting.wrapMode = compressSettings.wrapMode;
+                hasChange = true;
+            }
+            if (overrideFilterMode && texSetting.filterMode != compressSettings.filterMode)
+            {
+                texSetting.filterMode = compressSettings.filterMode;
+                hasChange = true;
+            }
+            if (overrideForTarget && texPlatformSetting.overridden != compressPlatformSettings.overridden)
+            {
+                texPlatformSetting.overridden = compressPlatformSettings.overridden;
+                hasChange = true;
+            }
+            if (overrideMaxSize && texPlatformSetting.maxTextureSize != compressPlatformSettings.maxTextureSize)
+            {
+                texPlatformSetting.maxTextureSize = compressPlatformSettings.maxTextureSize;
+                hasChange = true;
+            }
+            if (overrideFormat && texPlatformSetting.format != compressPlatformSettings.format)
+            {
+                texPlatformSetting.format = compressPlatformSettings.format;
+                hasChange = true;
+            }
+            if (overrideCompresserQuality && texPlatformSetting.compressionQuality != compressPlatformSettings.compressionQuality)
+            {
+                texPlatformSetting.compressionQuality = compressPlatformSettings.compressionQuality;
+                hasChange = true;
+            }
+            if (hasChange)
+            {
+                texImporter.SetTextureSettings(texSetting);
+                texImporter.SetPlatformTextureSettings(texPlatformSetting);
+                texImporter.SaveAndReimport();
+            }
+        }
+        EditorUtility.ClearProgressBar();
+    }
+
+    private void DrawUnityAssetModeSettingsPanel()
+    {
+        //Texture Type
+        EditorGUILayout.BeginHorizontal();
+        {
+            overrideTextureType = EditorGUILayout.ToggleLeft("Texture Type", overrideTextureType, GUILayout.Width(150));
+            EditorGUI.BeginDisabledGroup(!overrideTextureType);
+            {
+                compressSettings.textureType = (TextureImporterType)EditorGUILayout.EnumPopup(compressSettings.textureType);
+                EditorGUI.EndDisabledGroup();
+            }
+            EditorGUILayout.EndHorizontal();
+        }
+        //Sprite Mesh Type
+        EditorGUILayout.BeginHorizontal();
+        {
+            overrideMeshType = EditorGUILayout.ToggleLeft("Mesh Type", overrideMeshType, GUILayout.Width(150));
+            EditorGUI.BeginDisabledGroup(!overrideMeshType);
+            {
+                compressSettings.spriteMeshType = (SpriteMeshType)EditorGUILayout.EnumPopup(compressSettings.spriteMeshType);
+                EditorGUI.EndDisabledGroup();
+            }
+            EditorGUILayout.EndHorizontal();
+        }
+        //Alpha Is Transparency
+        EditorGUILayout.BeginHorizontal();
+        {
+            overrideAlphaIsTransparency = EditorGUILayout.ToggleLeft("Alpha Is Transparency", overrideAlphaIsTransparency, GUILayout.Width(150));
+            EditorGUI.BeginDisabledGroup(!overrideAlphaIsTransparency);
+            {
+                compressSettings.alphaIsTransparency = EditorGUILayout.ToggleLeft("Enable", compressSettings.alphaIsTransparency);
+                EditorGUI.EndDisabledGroup();
+            }
+            EditorGUILayout.EndHorizontal();
+        }
+        //Read/Write
+        EditorGUILayout.BeginHorizontal();
+        {
+            overrideReadable = EditorGUILayout.ToggleLeft("Read/Write", overrideReadable, GUILayout.Width(150));
+            EditorGUI.BeginDisabledGroup(!overrideReadable);
+            {
+                compressSettings.readable = EditorGUILayout.ToggleLeft("Enable", compressSettings.readable);
+                EditorGUI.EndDisabledGroup();
+            }
+            EditorGUILayout.EndHorizontal();
+        }
+        //Generate Mip Maps
+        EditorGUILayout.BeginHorizontal();
+        {
+            overrideGenerateMipMaps = EditorGUILayout.ToggleLeft("Generate Mip Maps", overrideGenerateMipMaps, GUILayout.Width(150));
+            EditorGUI.BeginDisabledGroup(!overrideGenerateMipMaps);
+            {
+                compressSettings.mipmapEnabled = EditorGUILayout.ToggleLeft("Enable", compressSettings.mipmapEnabled);
+                EditorGUI.EndDisabledGroup();
+            }
+            EditorGUILayout.EndHorizontal();
+        }
+        //Wrap Mode
+        EditorGUILayout.BeginHorizontal();
+        {
+            overrideWrapMode = EditorGUILayout.ToggleLeft("Wrap Mode", overrideWrapMode, GUILayout.Width(150));
+            EditorGUI.BeginDisabledGroup(!overrideWrapMode);
+            {
+                compressSettings.wrapMode = (TextureWrapMode)EditorGUILayout.EnumPopup(compressSettings.wrapMode);
+                EditorGUI.EndDisabledGroup();
+            }
+            EditorGUILayout.EndHorizontal();
+        }
+        //Filter Mode
+        EditorGUILayout.BeginHorizontal();
+        {
+            overrideFilterMode = EditorGUILayout.ToggleLeft("Filter Mode", overrideFilterMode, GUILayout.Width(150));
+            EditorGUI.BeginDisabledGroup(!overrideFilterMode);
+            {
+                compressSettings.filterMode = (UnityEngine.FilterMode)EditorGUILayout.EnumPopup(compressSettings.filterMode);
+                EditorGUI.EndDisabledGroup();
+            }
+            EditorGUILayout.EndHorizontal();
+        }
+
+        //override for current platform
+        EditorGUILayout.BeginHorizontal();
+        {
+            overrideForTarget = EditorGUILayout.ToggleLeft($"Override For {EditorUserBuildSettings.activeBuildTarget}", overrideForTarget, GUILayout.Width(150));
+            EditorGUI.BeginDisabledGroup(!overrideForTarget);
+            {
+                compressPlatformSettings.overridden = EditorGUILayout.ToggleLeft("Enable", compressPlatformSettings.overridden);
+                EditorGUI.EndDisabledGroup();
+            }
+            EditorGUILayout.EndHorizontal();
+        }
+        //Max Size
+        EditorGUILayout.BeginHorizontal();
+        {
+            overrideMaxSize = EditorGUILayout.ToggleLeft("Max Size", overrideMaxSize, GUILayout.Width(150));
+            EditorGUI.BeginDisabledGroup(!overrideMaxSize);
+            {
+                compressPlatformSettings.maxTextureSize = EditorGUILayout.IntPopup(compressPlatformSettings.maxTextureSize, maxTextureSizeDisplayOptions, maxTextureSizeOptionValues);
+                EditorGUI.EndDisabledGroup();
+            }
+            EditorGUILayout.EndHorizontal();
+        }
+        //Format
+        EditorGUILayout.BeginHorizontal();
+        {
+            overrideFormat = EditorGUILayout.ToggleLeft("Format", overrideFormat, GUILayout.Width(150));
+            EditorGUI.BeginDisabledGroup(!overrideFormat);
+            {
+                compressPlatformSettings.format = (TextureImporterFormat)EditorGUILayout.IntPopup((int)compressPlatformSettings.format, formatDisplayOptions, formatValues);
+                EditorGUI.EndDisabledGroup();
+            }
+            EditorGUILayout.EndHorizontal();
+        }
+        //Compresser Quality
+        EditorGUILayout.BeginHorizontal();
+        {
+            overrideCompresserQuality = EditorGUILayout.ToggleLeft("Compresser Quality", overrideCompresserQuality, GUILayout.Width(150));
+            EditorGUI.BeginDisabledGroup(!overrideCompresserQuality);
+            {
+                compressPlatformSettings.compressionQuality = EditorGUILayout.IntSlider(compressPlatformSettings.compressionQuality, 0, 100);
+                EditorGUI.EndDisabledGroup();
+            }
+            EditorGUILayout.EndHorizontal();
+        }
+    }
+
+    private void DrawCompressRawFilePanel()
+    {
+        srcScrollPos = EditorGUILayout.BeginScrollView(srcScrollPos);
+        srcScrollList.DoLayoutList();
+        EditorGUILayout.EndScrollView();
+        DrawDropArea();
+        EditorGUILayout.Space(10);
+        if (settingFoldout = EditorGUILayout.Foldout(settingFoldout, "展开设置项:"))
+        {
+            DrawRawFileModeSettingsPanel();
         }
         EditorGUILayout.BeginHorizontal("box");
         {
@@ -106,11 +390,36 @@ public class CompressImageTool : EditorToolBase
             }
             EditorGUILayout.EndHorizontal();
         }
-        EditorGUILayout.EndVertical();
     }
 
+    private void SwitchUIPanel(CompressMode mCompressMode)
+    {
+        switch (mCompressMode)
+        {
+            case CompressMode.RawFile:
+                {
+                    tinypngKeyScrollList = new ReorderableList(AppBuildSettings.Instance.CompressImgToolKeys, typeof(string), true, true, true, true);
+                    tinypngKeyScrollList.drawHeaderCallback = DrawTinypngKeyScrollListHeader;
+                    tinypngKeyScrollList.drawElementCallback = DrawTinypngKeyItem;
+                }
+                break;
+            case CompressMode.UnityAsset:
+                {
+                    compressSettings = new TextureImporterSettings();
+                    compressPlatformSettings = new TextureImporterPlatformSettings();
 
-    private void DrawSettingsPanel()
+                    var getOptionsFunc = Utility.Assembly.GetType("UnityEditor.TextureImportValidFormats").GetMethod("GetPlatformTextureFormatValuesAndStrings", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
+                    var paramsObjs = new object[] { TextureImporterType.Sprite, EditorUserBuildSettings.activeBuildTarget, null, null };
+                    getOptionsFunc.Invoke(null, paramsObjs);
+
+                    formatValues = paramsObjs[2] as int[];
+                    formatDisplayOptions = paramsObjs[3] as string[];
+                }
+                break;
+        }
+    }
+
+    private void DrawRawFileModeSettingsPanel()
     {
         tinypngScrollListPos = EditorGUILayout.BeginScrollView(tinypngScrollListPos, GUILayout.Height(110));
         {
@@ -500,7 +809,7 @@ public class CompressImageTool : EditorToolBase
             foreach (var item in allFiles)
             {
                 var fileName = Utility.Path.GetRegularPath(Path.GetRelativePath(baseFolder, item));
-                if (ArrayUtility.Contains(SupportImgTypes, Path.GetExtension(fileName).ToLower()) && !images.Contains(fileName))
+                if (CheckSupportImageFile(fileName) && !images.Contains(fileName))
                 {
                     images.Add(fileName);
                 }
@@ -557,6 +866,33 @@ public class CompressImageTool : EditorToolBase
 
         AppBuildSettings.Instance.CompressImgToolItemList.Add(obj);
     }
+    private bool CheckSupportImageFile(string fileName)
+    {
+        switch ((CompressMode)AppBuildSettings.Instance.CompressImgMode)
+        {
+            case CompressMode.RawFile:
+                {
+                    var ext = Path.GetExtension(fileName).ToLower();
+                    if (ArrayUtility.Contains(SupportImgTypes, ext))
+                    {
+                        return true;
+                    }
+                }
+                break;
+            case CompressMode.UnityAsset:
+                {
+                    var assetObj = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(fileName);
+                    if (assetObj != null)
+                    {
+                        var itemTp = assetObj.GetType();
+                        return itemTp == typeof(Sprite) || itemTp == typeof(Texture) || itemTp == typeof(Texture2D);
+                    }
+
+                }
+                break;
+        }
+        return false;
+    }
     private ItemType CheckItemType(UnityEngine.Object item)
     {
         if (item == null) return ItemType.NoSupport;
@@ -565,11 +901,7 @@ public class CompressImageTool : EditorToolBase
         {
             return ItemType.Folder;
         }
-        var ext = Path.GetExtension(name).ToLower();
-        if (ArrayUtility.Contains(SupportImgTypes, ext))
-        {
-            return ItemType.Image;
-        }
+        if (CheckSupportImageFile(name)) return ItemType.Image;
 
         return ItemType.NoSupport;
     }

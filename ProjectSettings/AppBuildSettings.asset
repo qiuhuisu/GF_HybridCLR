@@ -31,9 +31,11 @@ MonoBehaviour:
   CompressImgToolKeys:
   - VM39XwW9WBmz2LxPZQSyVgQb15kdKngB
   - f3sYcGWPjkmgVYmcPfWqJw6bt6BLvmYf
-  CompressImgToolItemList: []
+  CompressImgToolItemList:
+  - {fileID: 102900000, guid: b7834bc9b41a4484bb5e7a0446570d46, type: 3}
   CompressImgToolOffline: 1
   CompressImgToolFastLv: 1
   CompressImgToolQualityLv: 65.50848
   CompressImgToolQualityMinLv: 0
   AppBuildDir: BuildApp
+  CompressImgMode: 0

@@ -35,5 +35,6 @@ public class AppBuildSettings : HybridCLR.Editor.ScriptableSingleton<AppBuildSet
     public float CompressImgToolQualityLv = 80; //pngquant压缩质量等级,数值越小压缩后图片越小
     public float CompressImgToolQualityMinLv = 0;
     public string AppBuildDir = "../BuildApp";
+    public int CompressImgMode = 0;//图片压缩模式。0:原图压缩模式; 1:Unity内置压缩模式
 }
 #endif

@@ -28,7 +28,6 @@ MonoBehaviour:
   - mscorlib
   - System.Core
   - System
-  collectAssetReferenceTypes: 1
   outputLinkFile: HybridCLRData/Generated/link.xml
   outputAOTGenericReferenceFile: HybridCLRData/Generated/AOTGenericReferences.cs
   maxGenericReferenceIteration: 5

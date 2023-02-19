@@ -41,6 +41,7 @@ public partial class MyGameTools : EditorWindow
         GUILayout.Space(30);
         GUILayout.EndVertical();
     }
+
     [MenuItem("Game Framework/GameTools/Clear Missing Scripts【清除Prefab丢失脚本】")]
     public static void ClearMissingScripts()
     {
@@ -193,7 +194,7 @@ public partial class MyGameTools : EditorWindow
         File.WriteAllText(ConstEditor.UIViewScriptFile, sBuilder.ToString());
         Debug.LogFormat("-------------------成功生成UIViews.cs-----------------");
     }
-    
+
 
     /// <summary>
     /// 批量替换字体文件
@@ -334,7 +335,7 @@ public partial class MyGameTools : EditorWindow
             {
                 throw e;
             }
-            
+
         }
         if (File.Exists(tmpExcelFile))
         {
@@ -365,7 +366,7 @@ public partial class MyGameTools : EditorWindow
             string savePath = UtilityBuiltin.ResPath.GetCombinePath(ConstEditor.GameConfigPath, Utility.Text.Format("{0}.txt", Path.GetFileNameWithoutExtension(excelFileName)));
             try
             {
-                if(Excel2TxtFile(excelFileName, savePath))
+                if (Excel2TxtFile(excelFileName, savePath))
                 {
                     Debug.LogFormat("------------导出Config表成功:{0}", savePath);
                 }
@@ -435,7 +436,7 @@ public partial class MyGameTools : EditorWindow
         }
         AssetDatabase.Refresh();
     }
-    private static string[] GetABTestExcelFiles(string excelDir,string[] files)
+    private static string[] GetABTestExcelFiles(string excelDir, string[] files)
     {
         string[] excelFiles = Directory.GetFiles(excelDir, "*.xlsx", SearchOption.TopDirectoryOnly);
         string[] result = new string[0];

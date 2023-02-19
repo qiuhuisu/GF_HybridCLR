@@ -9,7 +9,7 @@
       <AdditionalCompressionSelected>True</AdditionalCompressionSelected>
       <ForceRebuildAssetBundleSelected>True</ForceRebuildAssetBundleSelected>
       <BuildEventHandlerTypeName>UnityGameFramework.Editor.AssetBuildHandler</BuildEventHandlerTypeName>
-      <OutputDirectory>D:/Workspace/GF_HybridCLR/AB</OutputDirectory>
+      <OutputDirectory>D:/Workspace/UnityProjects/GF_HybridCLR/AB</OutputDirectory>
       <OutputPackageSelected>False</OutputPackageSelected>
       <OutputFullSelected>True</OutputFullSelected>
       <OutputPackedSelected>False</OutputPackedSelected>
