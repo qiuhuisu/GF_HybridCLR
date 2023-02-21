@@ -77,8 +77,7 @@ public partial class MyGameTools : EditorWindow
     /// </summary>
     public static void GenerateGroupEnumScript()
     {
-        DirectoryInfo assetDir = new DirectoryInfo(Application.dataPath);
-        var excelDir = UtilityBuiltin.ResPath.GetCombinePath(assetDir.Parent.FullName, "DataTables");
+        var excelDir = ConstEditor.DataTableExcelPath;
         if (!Directory.Exists(excelDir))
         {
             Debug.LogErrorFormat("Excel DataTable directory is not exists:{0}", excelDir);
@@ -91,13 +90,12 @@ public partial class MyGameTools : EditorWindow
         foreach (var excel in groupExcels)
         {
             var excelFileName = UtilityBuiltin.ResPath.GetCombinePath(excelDir, excel);
-            var excelFileInfo = new FileInfo(excelFileName);
-            if (!excelFileInfo.Exists)
+            if (!File.Exists(excelFileName))
             {
                 Debug.LogErrorFormat("Excel is not exists:{0}", excelFileName);
                 return;
             }
-            var excelPackage = new ExcelPackage(excelFileInfo);
+            var excelPackage = new ExcelPackage(excelFileName);
             var excelSheet = excelPackage.Workbook.Worksheets[0];
             List<string> groupList = new List<string>();
             for (int rowIndex = excelSheet.Dimension.Start.Row; rowIndex <= excelSheet.Dimension.End.Row; rowIndex++)
@@ -112,8 +110,13 @@ public partial class MyGameTools : EditorWindow
             }
             excelSheet.Dispose();
             excelPackage.Dispose();
-            var className = excelFileInfo.Name.Substring(0, excelFileInfo.Name.Length - "Table".Length - excelFileInfo.Extension.Length);
 
+            string className = Path.GetFileNameWithoutExtension(excelFileName);
+            string endWithStr = "Table";
+            if (className.EndsWith(endWithStr))
+            {
+                className = className.Substring(0, className.Length - endWithStr.Length);
+            }
             sBuilder.AppendLine(Utility.Text.Format("\tpublic enum {0}", className));
             sBuilder.AppendLine("\t{");
             for (int i = 0; i < groupList.Count; i++)
@@ -148,19 +151,19 @@ public partial class MyGameTools : EditorWindow
     /// </summary>
     public static void GenerateUIViewScript()
     {
-        DirectoryInfo assetDir = new DirectoryInfo(Application.dataPath);
-        var excelDir = UtilityBuiltin.ResPath.GetCombinePath(assetDir.Parent.FullName, "DataTables");
+        var excelDir = ConstEditor.DataTableExcelPath;
         if (!Directory.Exists(excelDir))
         {
+            Debug.LogError($"生成UIView代码失败! 不存在文件夹:{excelDir}");
             return;
         }
         var excelFileName = UtilityBuiltin.ResPath.GetCombinePath(excelDir, ConstEditor.UITableExcel);
-        var excelFileInfo = new FileInfo(excelFileName);
-        if (!excelFileInfo.Exists)
+        if (!File.Exists(excelFileName))
         {
+            Debug.LogError($"{excelFileName} 文件不存在!");
             return;
         }
-        var excelPackage = new ExcelPackage(excelFileInfo);
+        var excelPackage = new ExcelPackage(excelFileName);
         var excelSheet = excelPackage.Workbook.Worksheets[0];
         Dictionary<int, string> uiViewDic = new Dictionary<int, string>();
         for (int rowIndex = excelSheet.Dimension.Start.Row; rowIndex <= excelSheet.Dimension.End.Row; rowIndex++)
@@ -303,13 +306,11 @@ public partial class MyGameTools : EditorWindow
     {
         bool result = false;
         var fileInfo = new FileInfo(excelFileName);
-        string tmpExcelFile;
-
-        tmpExcelFile = UtilityBuiltin.ResPath.GetCombinePath(fileInfo.Directory.FullName, Utility.Text.Format("{0}.temp", fileInfo.Name));
+        string tmpExcelFile = UtilityBuiltin.ResPath.GetCombinePath(fileInfo.Directory.FullName, Utility.Text.Format("{0}.temp", fileInfo.Name));
+        Debug.Log($">>>>>>>>Excel2Txt: excel:{excelFileName}, outTxtFile:{outTxtFile}");
         File.Copy(excelFileName, tmpExcelFile, true);
 
-        var excelFileInfo = new FileInfo(tmpExcelFile);
-        using (var excelPackage = new ExcelPackage(excelFileInfo))
+        using (var excelPackage = new ExcelPackage(tmpExcelFile))
         {
             var excelSheet = excelPackage.Workbook.Worksheets[0];
             string excelTxt = string.Empty;
@@ -360,10 +361,12 @@ public partial class MyGameTools : EditorWindow
         {
             excelFiles = GetABTestExcelFiles(configDir, files);
         }
-        for (int i = 0; i < excelFiles.Length; i++)
+        int totalExcelCount = excelFiles.Length;
+        for (int i = 0; i < totalExcelCount; i++)
         {
             var excelFileName = excelFiles[i];
             string savePath = UtilityBuiltin.ResPath.GetCombinePath(ConstEditor.GameConfigPath, Utility.Text.Format("{0}.txt", Path.GetFileNameWithoutExtension(excelFileName)));
+            EditorUtility.DisplayProgressBar($"{i}/{totalExcelCount}", $"{excelFileName} -> {savePath}", i / (float)totalExcelCount);
             try
             {
                 if (Excel2TxtFile(excelFileName, savePath))
@@ -377,6 +380,7 @@ public partial class MyGameTools : EditorWindow
                 throw;
             }
         }
+        EditorUtility.ClearProgressBar();
         AssetDatabase.Refresh();
     }
     public static async void RefreshAllDataTable(string[] files = null)
@@ -397,15 +401,19 @@ public partial class MyGameTools : EditorWindow
         {
             excelFiles = GetABTestExcelFiles(excelDir, files);
         }
-        for (int i = 0; i < excelFiles.Length; i++)
+        int totalExcelCount = excelFiles.Length;
+        for (int i = 0; i < totalExcelCount; i++)
         {
             var excelFileName = excelFiles[i];
             var fileName = Path.GetFileNameWithoutExtension(excelFileName);
             string savePath = UtilityBuiltin.ResPath.GetCombinePath(ConstEditor.DataTablePath, Utility.Text.Format("{0}.txt", fileName));
-
+            EditorUtility.DisplayProgressBar($"Excel -> txt: ({i}/{totalExcelCount})", $"{excelFileName} -> {savePath}", i / (float)totalExcelCount);
             try
             {
-                Excel2TxtFile(excelFileName, savePath);
+                if(Excel2TxtFile(excelFileName, savePath))
+                {
+                    Debug.Log($"------------Excel -> txt:{excelFileName} -> {savePath}");
+                }
             }
             catch (System.Exception e)
             {
@@ -414,26 +422,29 @@ public partial class MyGameTools : EditorWindow
             }
 
         }
-
+        EditorUtility.ClearProgressBar();
         //生成数据表代码
         var appConfig = await AppConfigs.GetInstanceSync();
-        foreach (var dataTableName in appConfig.DataTables)
+        int dataTbCount = appConfig.DataTables.Length;
+        for (int i = 0; i < dataTbCount; i++)
         {
+            var dataTableName = appConfig.DataTables[i];
             string tbTxtFile = Utility.Path.GetRegularPath(Path.Combine(ConstEditor.DataTablePath, dataTableName + ".txt"));
+            EditorUtility.DisplayProgressBar($"进度:({i}/{dataTbCount})", $"生成代码:{dataTableName}", i / (float)dataTbCount);
             if (!File.Exists(tbTxtFile))
             {
                 continue;
             }
-            var dataTable = dataTableName;
-            DataTableProcessor dataTableProcessor = DataTableGenerator.CreateDataTableProcessor(dataTable);
-            if (!DataTableGenerator.CheckRawData(dataTableProcessor, dataTable))
+            DataTableProcessor dataTableProcessor = DataTableGenerator.CreateDataTableProcessor(dataTableName);
+            if (!DataTableGenerator.CheckRawData(dataTableProcessor, dataTableName))
             {
-                Debug.LogError(Utility.Text.Format("Check raw data failure. DataTableName='{0}'", dataTable));
+                Debug.LogError(Utility.Text.Format("Check raw data failure. DataTableName='{0}'", dataTableName));
                 break;
             }
 
-            DataTableGenerator.GenerateCodeFile(dataTableProcessor, dataTable);
+            DataTableGenerator.GenerateCodeFile(dataTableProcessor, dataTableName);
         }
+        EditorUtility.ClearProgressBar();
         AssetDatabase.Refresh();
     }
     private static string[] GetABTestExcelFiles(string excelDir, string[] files)
