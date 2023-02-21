@@ -105,6 +105,7 @@
     <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\EditorInitSettings.cs" />
     <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\DataTableGenerator\DataTableProcessor.IdProcessor.cs" />
     <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\DataTableGenerator\DataTableProcessor.Vector3Processor.cs" />
+    <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\EditorTools\AnimCompressor.cs" />
     <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\DataTableGenerator\DataTableProcessor.UIntProcessor.cs" />
     <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\EditorTools\CompressImageTool.cs" />
     <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\MyGameTools.AssetBundleEditor.cs" />

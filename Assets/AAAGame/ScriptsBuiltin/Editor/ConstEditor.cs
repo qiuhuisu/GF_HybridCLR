@@ -31,8 +31,19 @@ public class ConstEditor
     public static readonly string UpdatePrefixUri = "https://gitcode.net/topgamesopen/gf_hybridclr_hotfix/-/raw/master";//默认资源下载地址
     internal static readonly string AppUpdateUrl = "https://play.google.com/store/apps/details?id=";
 
-    public static string DataTableExcelPath => UtilityBuiltin.ResPath.GetCombinePath(Directory.GetParent(Application.dataPath).FullName, "DataTables");
-    public static string ConfigExcelPath => UtilityBuiltin.ResPath.GetCombinePath(Directory.GetParent(Application.dataPath).FullName, "Configs");
+    /// <summary>
+    /// 数据表Excel目录
+    /// </summary>
+    public static string DataTableExcelPath => UtilityBuiltin.ResPath.GetCombinePath(Directory.GetParent(Application.dataPath).FullName, "AAAGameData/DataTables");
+    /// <summary>
+    /// 配置表Excel目录
+    /// </summary>
+    public static string ConfigExcelPath => UtilityBuiltin.ResPath.GetCombinePath(Directory.GetParent(Application.dataPath).FullName, "AAAGameData/Configs");
+    /// <summary>
+    /// 语言国际化Excel目录
+    /// </summary>
+    public static string LanguageExcelPath => UtilityBuiltin.ResPath.GetCombinePath(Directory.GetParent(Application.dataPath).FullName, "AAAGameData/Languages");
+
     public const string DataTablePath = "Assets/AAAGame/DataTable";
     public const string GameConfigPath = "Assets/AAAGame/Config";
     public const string DataTableCodePath = "Assets/AAAGame/Scripts/DataTable";
