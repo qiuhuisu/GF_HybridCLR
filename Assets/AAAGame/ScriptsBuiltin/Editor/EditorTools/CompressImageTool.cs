@@ -40,6 +40,26 @@ public class CompressImageTool : EditorToolBase
     int selectOjbWinId = "CompressImageTool".GetHashCode();
     private bool settingFoldout = true;
 
+    Dictionary<BuildTarget, TextureImporterFormat[]> texFormatsForPlatforms = new Dictionary<BuildTarget, TextureImporterFormat[]>
+    {
+        [BuildTarget.Android] = new[] { TextureImporterFormat.ETC2_RGBA8Crunched, TextureImporterFormat.ASTC_6x6 },
+        [BuildTarget.StandaloneWindows] = new[] { TextureImporterFormat.DXT5Crunched, TextureImporterFormat.DXT5 },
+        [BuildTarget.StandaloneWindows64] = new[] { TextureImporterFormat.DXT5Crunched, TextureImporterFormat.DXT5 }
+    };
+    //无透明通道的贴图压缩格式
+    Dictionary<BuildTarget, TextureImporterFormat> texNoAlphaFormatPlatforms = new Dictionary<BuildTarget, TextureImporterFormat>
+    {
+        [BuildTarget.Android] = TextureImporterFormat.ETC_RGB4Crunched,
+        [BuildTarget.StandaloneWindows] = TextureImporterFormat.DXT1Crunched,
+        [BuildTarget.StandaloneWindows64] = TextureImporterFormat.DXT1Crunched,
+    };
+    Dictionary<BuildTarget, int> texMaxSizePlatforms = new Dictionary<BuildTarget, int>
+    {
+        [BuildTarget.Android] = 2048,
+        [BuildTarget.StandaloneWindows] = 4096,
+        [BuildTarget.StandaloneWindows64] = 4096
+    };
+
     readonly string[] tabButtons = {"原文件压缩", "Unity内置压缩" };
     readonly int[] maxTextureSizeOptionValues = { 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384 };
     readonly string[] maxTextureSizeDisplayOptions = { "32", "64", "128", "256", "512", "1024", "2048", "4096", "8192", "16384" };
@@ -232,7 +252,74 @@ public class CompressImageTool : EditorToolBase
         }
         EditorUtility.ClearProgressBar();
     }
+    private void AutoCompressUnityAssetMode()
+    {
+        var targetFormats = texFormatsForPlatforms[EditorUserBuildSettings.activeBuildTarget];
+        var noAlphaFormat = texNoAlphaFormatPlatforms[EditorUserBuildSettings.activeBuildTarget];
+        var getSizeFunc = Utility.Assembly.GetType("UnityEditor.TextureUtil").GetMethod("GetStorageMemorySizeLong", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
 
+        var fileList = GetAllImages();
+        int totalCount = fileList.Count;
+        for (int i = 0; i < totalCount; i++)
+        {
+            var fileName = fileList[i];
+            if (EditorUtility.DisplayCancelableProgressBar($"进度({i}/{totalCount})", fileName, i / (float)totalCount))
+            {
+                break;
+            }
+            var texImporter = AssetImporter.GetAtPath(fileName) as TextureImporter;
+            TextureImporterSettings texSettings = new TextureImporterSettings();
+            texImporter.ReadTextureSettings(texSettings);
+            if (!texSettings.alphaIsTransparency || Path.GetExtension(fileName).ToLower().CompareTo(".jpg") == 0)
+            {
+                var platformSettings = texImporter.GetPlatformTextureSettings(EditorUserBuildSettings.activeBuildTarget.ToString());
+                platformSettings.overridden = true;
+                platformSettings.format = noAlphaFormat;
+
+                texImporter.SetPlatformTextureSettings(platformSettings);
+                texImporter.SaveAndReimport();
+                continue;
+            }
+            long minTexSize = -1;
+            TextureImporterFormat? minTexFormat = null;
+            int maxTexSize = texMaxSizePlatforms[EditorUserBuildSettings.activeBuildTarget];
+            foreach (var tFormat in targetFormats)
+            {
+                var platformSettings = texImporter.GetPlatformTextureSettings(EditorUserBuildSettings.activeBuildTarget.ToString());
+                platformSettings.overridden = true;
+                platformSettings.format = tFormat;
+                platformSettings.maxTextureSize = maxTexSize;
+                texImporter.SetPlatformTextureSettings(platformSettings);
+                texImporter.SaveAndReimport();
+
+                var tex = AssetDatabase.LoadAssetAtPath<Texture>(fileName);
+                var texSize = (long)getSizeFunc.Invoke(null, new object[] { tex });
+                if (minTexSize < 0)
+                {
+                    minTexSize = texSize;
+                    minTexFormat = tFormat;
+                }
+
+                if (texSize < minTexSize)
+                {
+                    minTexSize = texSize;
+                    minTexFormat = tFormat;
+                }
+            }
+            if (minTexFormat != null)
+            {
+                Debug.Log($"---------:贴图:{fileName}, 最小格式:{minTexFormat.Value}");
+                var platformSettings = texImporter.GetPlatformTextureSettings(EditorUserBuildSettings.activeBuildTarget.ToString());
+                if (platformSettings.format != minTexFormat.Value)
+                {
+                    platformSettings.format = minTexFormat.Value;
+                    texImporter.SetPlatformTextureSettings(platformSettings);
+                    texImporter.SaveAndReimport();
+                }
+            }
+        }
+        EditorUtility.ClearProgressBar();
+    }
     private void DrawUnityAssetModeSettingsPanel()
     {
         //Texture Type
