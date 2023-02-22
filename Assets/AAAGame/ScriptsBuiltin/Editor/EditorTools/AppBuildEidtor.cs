@@ -12,6 +12,7 @@ using System.Linq;
 using static UnityEditor.BuildPlayerWindow;
 using System.Collections;
 using UnityEditor.Build.Reporting;
+using UnityEditor.Build;
 
 namespace UnityGameFramework.Editor.ResourceTools
 {
@@ -38,8 +39,7 @@ namespace UnityGameFramework.Editor.ResourceTools
         private GUIContent hybridclrSettingBtContent;
         private Vector2 scrollPosition;
         private GUIStyle dropDownBtStyle;
-        private string finalBuildName;
-        private string tempBuildName;
+
         public static void Open()
         {
             AppBuildEidtor window = GetWindow<AppBuildEidtor>("App Builder", true);
@@ -49,13 +49,13 @@ namespace UnityGameFramework.Editor.ResourceTools
             window.minSize = new Vector2(800f, 750f);
 #endif
         }
-        private void Awake()
-        {
-            BuildPlayerWindow.RegisterGetBuildPlayerOptionsHandler(CustomBuildOptions);
-        }
 
         private void OnEnable()
         {
+            if(Utility.Assembly.GetType("UnityEditor.BuildPlayerWindow").GetField("getBuildPlayerOptionsHandler", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null) == null)
+            {
+                RegisterGetBuildPlayerOptionsHandler(CustomBuildOptions);
+            }
             hotfixUrlContent = new GUIContent("Update Prefix Uri", "热更新资源服务器地址");
             applicableVerContent = new GUIContent("Applicable Version", "资源适用的客户端版本号,多版本用'|'分割");
             forceUpdateAppContent = new GUIContent("Force Update", "是否强制更新App");
@@ -69,9 +69,12 @@ namespace UnityGameFramework.Editor.ResourceTools
             hybridclrSettingBtContent = EditorGUIUtility.TrTextContentWithIcon("Hotfix Settings", "打开HybridCLR Settings界面", "Settings");
             saveBtContent = EditorGUIUtility.TrTextContentWithIcon("Save", "保存设置", "SaveAs@2x");
 
-            string tgStyleName = "DropDownToggleButton";
-            dropDownBtStyle = GUI.skin.FindStyle(tgStyleName) ?? EditorGUIUtility.GetBuiltinSkin(EditorSkin.Inspector).FindStyle(tgStyleName);
-
+            var dropDownToggleButton = EditorGUIUtility.GetBuiltinSkin(EditorSkin.Inspector).FindStyle("DropDownToggleButton");
+            dropDownBtStyle = new GUIStyle(dropDownToggleButton);
+            dropDownBtStyle.normal.textColor = Color.white;
+            dropDownBtStyle.alignment = TextAnchor.MiddleCenter;
+            dropDownBtStyle.hover.textColor = Color.white;
+            dropDownBtStyle.active.textColor = Color.white;
 
             if (AppSettings.Instance == null)
             {
@@ -378,8 +381,10 @@ namespace UnityGameFramework.Editor.ResourceTools
                     {
                         if (GUILayout.Button(buildResBtContent, GUILayout.Height(35)))
                         {
-                            BuildHotfix();
-
+                            if (EditorUtility.DisplayDialog("Build Resources", Utility.Text.Format("Resources Version: {0}", m_Controller.InternalResourceVersion), "Build", "Cancel"))
+                            {
+                                BuildHotfix();
+                            }
                         }
                         DrawBuildAppButton();
                     }
@@ -416,8 +421,11 @@ namespace UnityGameFramework.Editor.ResourceTools
             }
             else if (GUI.Button(buildRect, buildAppBtContent, dropDownBtStyle))
             {
-                BuildApp(false);
-                GUIUtility.ExitGUI();
+                if (EditorUtility.DisplayDialog("Build App", Utility.Text.Format("App Version: {0}", Application.version), "Build", "Cancel"))
+                {
+                    BuildApp(false);
+                    GUIUtility.ExitGUI();
+                }
             }
         }
 
@@ -717,25 +725,28 @@ namespace UnityGameFramework.Editor.ResourceTools
             var buildWin = Utility.Assembly.GetType("UnityEditor.BuildPlayerWindow");
             if (buildWin != null)
             {
+                buildWin.GetField("buildCompletionHandler", BindingFlags.Static | BindingFlags.NonPublic).SetValue(buildWin, new Action<BuildReport>(OnPostprocessBuild));
                 var buildFunc = buildWin.GetMethod("CallBuildMethods", System.Reflection.BindingFlags.Static | BindingFlags.NonPublic);
-                buildFunc?.Invoke(null, new object[] { false, BuildOptions.ShowBuiltPlayer });
-                var buildHandler = buildWin.GetField("buildCompletionHandler", BindingFlags.Static | BindingFlags.NonPublic);
-                buildHandler?.SetValue(buildWin, new Action<BuildReport>(OnBuildAppCompleted));
+                buildFunc.Invoke(null, new object[] { false, BuildOptions.ShowBuiltPlayer });
             }
         }
 
-        private void OnBuildAppCompleted(BuildReport obj)
+        private void OnPostprocessBuild(BuildReport report)
         {
-            if (obj == null || string.IsNullOrEmpty(obj.summary.outputPath))
+            if (report.summary.result != BuildResult.Succeeded)
             {
-                Debug.LogError("Build App Failed.");
+                Debug.LogError("Build App Failed:" + report.summary.result.ToString());
                 return;
             }
 
-            Debug.Log($">>>>>>>>>>>>>>>>>Build outputPath:{obj.summary.outputPath}");
-            if (File.Exists(obj.summary.outputPath))
+            if (File.Exists(report.summary.outputPath))
             {
-                File.Move(obj.summary.outputPath, finalBuildName);
+                var desFile = GetRenamedApp(report.summary.outputPath);
+                if (File.Exists(desFile))
+                {
+                    File.Delete(desFile);
+                }
+                File.Move(report.summary.outputPath, desFile);
             }
         }
 
@@ -984,10 +995,11 @@ namespace UnityGameFramework.Editor.ResourceTools
             BuildTargetGroup buildTargetGroup = EditorUserBuildSettings.selectedBuildTargetGroup;
             int subtarget = (int)Utility.Assembly.GetType("UnityEditor.EditorUserBuildSettings").GetMethod("GetSelectedSubtargetFor", BindingFlags.Static | BindingFlags.NonPublic).Invoke(null, new object[] { buildTarget });
 
-            string buildLocation = tempBuildName = GetBuildLocation(buildTargetGroup, buildTarget, subtarget, options.options, out finalBuildName);
+            string buildLocation = GetBuildLocation(buildTargetGroup, buildTarget, subtarget, options.options);
+
             bool isDir = !Path.HasExtension(buildLocation);
             if (string.IsNullOrWhiteSpace(buildLocation) || (isDir && !Directory.Exists(buildLocation)))
-                throw new BuildMethodException("Build location for buildTarget " + buildTarget + " is not valid.");
+                throw new BuildMethodException("Build location for buildTarget " + buildTarget + " is not valid:" + buildLocation);
 
             //Check if Lz4 is supported for the current buildtargetgroup and enable it if need be
             if ((bool)Utility.Assembly.GetType("UnityEditor.PostprocessBuildPlayer").GetMethod("SupportsLz4Compression", BindingFlags.Static | BindingFlags.Public).Invoke(null, new object[] { buildTargetGroup, buildTarget }))
@@ -1053,13 +1065,20 @@ namespace UnityGameFramework.Editor.ResourceTools
             options.scenes = scenesList.ToArray(typeof(string)) as string[];
             return options;
         }
+        private string GetRenamedApp(string appFile)
+        {
+            var dir = Path.GetDirectoryName(appFile);
+            var name = Path.GetFileNameWithoutExtension(appFile);
+            var ext = Path.GetExtension(appFile);
 
-        private static string GetBuildLocation(BuildTargetGroup targetGroup, BuildTarget target, int subtarget, BuildOptions options, out string finalName)
+            var finalName = Utility.Text.Format("{0}_{1}{2}_v{3}{4}", name, AppSettings.Instance.DebugMode ? "debug" : "release", EditorUserBuildSettings.development ? "Dev" : string.Empty, Application.version, ext);
+            return Path.Combine(dir, finalName);
+        }
+        private static string GetBuildLocation(BuildTargetGroup targetGroup, BuildTarget target, int subtarget, BuildOptions options)
         {
             string defaultFolder = UtilityBuiltin.ResPath.GetCombinePath(Directory.GetParent(Application.dataPath).FullName, AppBuildSettings.Instance.AppBuildDir, target.ToString());
             string defaultName = Application.productName;
             //打出包后给包重命名
-            finalName = Utility.Text.Format("{0}_{1}{2}_v{3}", defaultName, AppSettings.Instance.DebugMode ? "debug" : "release", EditorUserBuildSettings.development ? "Dev" : string.Empty, Application.version);
 
             string extension = Utility.Assembly.GetType("UnityEditor.PostprocessBuildPlayer").GetMethod("GetExtensionForBuildTarget", new Type[] { typeof(BuildTargetGroup), typeof(BuildTarget), typeof(int), typeof(BuildOptions) }).Invoke(null, new object[] { targetGroup, target, subtarget, options }) as string;
             string buildPath = defaultFolder;
@@ -1070,5 +1089,6 @@ namespace UnityGameFramework.Editor.ResourceTools
             }
             return buildPath;
         }
+
     }
 }
