@@ -157,7 +157,10 @@ public class CompressImageTool : EditorToolBase
             {
                 StartCompressUnityAssetMode();
             }
-
+            if (GUILayout.Button("自动压缩格式", GUILayout.Height(30), GUILayout.MaxWidth(150)))
+            {
+                AutoCompressUnityAssetMode();
+            }
             if (GUILayout.Button("保存设置", GUILayout.Height(30), GUILayout.MaxWidth(100)))
             {
                 SaveSettings();
@@ -252,8 +255,12 @@ public class CompressImageTool : EditorToolBase
         }
         EditorUtility.ClearProgressBar();
     }
+    /// <summary>
+    /// 自动选择压缩比最大的格式
+    /// </summary>
     private void AutoCompressUnityAssetMode()
     {
+        int maxTexSize = texMaxSizePlatforms[EditorUserBuildSettings.activeBuildTarget];
         var targetFormats = texFormatsForPlatforms[EditorUserBuildSettings.activeBuildTarget];
         var noAlphaFormat = texNoAlphaFormatPlatforms[EditorUserBuildSettings.activeBuildTarget];
         var getSizeFunc = Utility.Assembly.GetType("UnityEditor.TextureUtil").GetMethod("GetStorageMemorySizeLong", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
@@ -270,25 +277,24 @@ public class CompressImageTool : EditorToolBase
             var texImporter = AssetImporter.GetAtPath(fileName) as TextureImporter;
             TextureImporterSettings texSettings = new TextureImporterSettings();
             texImporter.ReadTextureSettings(texSettings);
-            if (!texSettings.alphaIsTransparency || Path.GetExtension(fileName).ToLower().CompareTo(".jpg") == 0)
+            if (texImporter.textureType == TextureImporterType.NormalMap || !texSettings.alphaIsTransparency || Path.GetExtension(fileName).ToLower().CompareTo(".jpg") == 0)
             {
                 var platformSettings = texImporter.GetPlatformTextureSettings(EditorUserBuildSettings.activeBuildTarget.ToString());
                 platformSettings.overridden = true;
                 platformSettings.format = noAlphaFormat;
-
+                if (platformSettings.maxTextureSize > maxTexSize) platformSettings.maxTextureSize = maxTexSize;
                 texImporter.SetPlatformTextureSettings(platformSettings);
                 texImporter.SaveAndReimport();
                 continue;
             }
             long minTexSize = -1;
             TextureImporterFormat? minTexFormat = null;
-            int maxTexSize = texMaxSizePlatforms[EditorUserBuildSettings.activeBuildTarget];
             foreach (var tFormat in targetFormats)
             {
                 var platformSettings = texImporter.GetPlatformTextureSettings(EditorUserBuildSettings.activeBuildTarget.ToString());
                 platformSettings.overridden = true;
                 platformSettings.format = tFormat;
-                platformSettings.maxTextureSize = maxTexSize;
+                if (platformSettings.maxTextureSize > maxTexSize) platformSettings.maxTextureSize = maxTexSize;
                 texImporter.SetPlatformTextureSettings(platformSettings);
                 texImporter.SaveAndReimport();
 
