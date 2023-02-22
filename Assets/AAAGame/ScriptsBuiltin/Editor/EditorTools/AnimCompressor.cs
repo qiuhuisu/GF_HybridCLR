@@ -1,9 +1,3 @@
-//****************************************************************************
-//
-//  动画文件(AnimationClip)压缩工具
-//
-//  Create by jiangcheng_m
-//
 //  注意:同一个模型的动画文件必须放到同一个文件夹下
 //  压缩原理
 //  1.分析得到同一个模型被缩放的所有骨骼
@@ -17,7 +11,6 @@ using UnityEngine;
 using UnityEditor;
 using System.IO;
 using System.Text.RegularExpressions;
-using Microsoft.Cci;
 
 namespace CompressTool
 {
@@ -294,29 +287,39 @@ namespace CompressTool
         private static List<CompressOpt> mCompressOptList;
         private static int mIndex = 0;
 
-        [MenuItem("Assets/TA/Compress AnimationClip Float", priority = 2002)]
+        //[MenuItem("Tools/编辑器工具扩展/压缩动画浮点精度", priority = 2002)]
         static void OptimizeFloat()
         {
-            var selectObjs = AssetDatabase.FindAssets("t:AnimationClip");
+            var selectObjs = AssetDatabase.FindAssets("t:AnimationClip", new string[] { "Assets/AssetsPackage" });
             string pattern = @"(\d+\.\d+)";
 
-
+            int totalCount = selectObjs.Length;
+            int finishCount = 0;
             foreach (var item in selectObjs)
             {
                 var itmName = AssetDatabase.GUIDToAssetPath(item);
                 if (File.GetAttributes(itmName) != FileAttributes.ReadOnly)
                 {
-                    var allTxt = File.ReadAllText(itmName);
-                    // 将匹配到的浮点型数字替换为精确到3位小数的浮点型数字
-                    string outputString = Regex.Replace(allTxt, pattern, match =>
-                    float.Parse(match.Value).ToString("F3"));
-                    File.WriteAllText(itmName, outputString);
-                    Debug.LogFormat("----->压缩动画浮点精度:{0}", itmName);
+                    if (Path.GetExtension(itmName).ToLower().CompareTo(".anim") == 0)
+                    {
+                        finishCount++;
+                        if (EditorUtility.DisplayCancelableProgressBar(string.Format("压缩浮点精度({0}/{1})", finishCount, totalCount), itmName, finishCount / (float)totalCount))
+                        {
+                            break;
+                        }
+                        var allTxt = File.ReadAllText(itmName);
+                        // 将匹配到的浮点型数字替换为精确到3位小数的浮点型数字
+                        string outputString = Regex.Replace(allTxt, pattern, match =>
+                        float.Parse(match.Value).ToString("F3"));
+                        File.WriteAllText(itmName, outputString);
+                        Debug.LogFormat("----->压缩动画浮点精度:{0}", itmName);
+                    }
                 }
             }
+            EditorUtility.ClearProgressBar();
             AssetDatabase.Refresh();
         }
-        [MenuItem("Assets/TA/Compress AnimationClip", priority = 2001)]
+        [MenuItem("Game Framework/GameTools/AnimationClip Compressor【压缩动画】", priority = 2001)]
         public static void Optimize()
         {
             Dictionary<string, AnimClipDirectory> animClipPaths = new Dictionary<string, AnimClipDirectory>();
@@ -396,6 +399,7 @@ namespace CompressTool
                 GC.Collect();
                 AssetDatabase.SaveAssets();
                 EditorApplication.update = null;
+                OptimizeFloat();
             }
 
 

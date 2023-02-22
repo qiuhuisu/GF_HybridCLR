@@ -220,7 +220,7 @@ public class AppConfigsInspector : Editor
 
         EditorGUILayout.Space(10);
         EditorGUILayout.BeginHorizontal();
-        if (GUILayout.Button("Refresh", GUILayout.Height(30)))
+        if (GUILayout.Button("Reload", GUILayout.Height(30)))
         {
             ReloadScrollView(appConfig);
         }
