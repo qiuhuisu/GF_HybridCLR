@@ -11,6 +11,7 @@ using System.Text;
 using System.Linq;
 using static UnityEditor.BuildPlayerWindow;
 using System.Collections;
+using UnityEditor.Build.Reporting;
 
 namespace UnityGameFramework.Editor.ResourceTools
 {
@@ -37,7 +38,8 @@ namespace UnityGameFramework.Editor.ResourceTools
         private GUIContent hybridclrSettingBtContent;
         private Vector2 scrollPosition;
         private GUIStyle dropDownBtStyle;
-
+        private string finalBuildName;
+        private string tempBuildName;
         public static void Open()
         {
             AppBuildEidtor window = GetWindow<AppBuildEidtor>("App Builder", true);
@@ -717,8 +719,26 @@ namespace UnityGameFramework.Editor.ResourceTools
             {
                 var buildFunc = buildWin.GetMethod("CallBuildMethods", System.Reflection.BindingFlags.Static | BindingFlags.NonPublic);
                 buildFunc?.Invoke(null, new object[] { false, BuildOptions.ShowBuiltPlayer });
+                var buildHandler = buildWin.GetField("buildCompletionHandler", BindingFlags.Static | BindingFlags.NonPublic);
+                buildHandler?.SetValue(buildWin, new Action<BuildReport>(OnBuildAppCompleted));
             }
         }
+
+        private void OnBuildAppCompleted(BuildReport obj)
+        {
+            if (obj == null || string.IsNullOrEmpty(obj.summary.outputPath))
+            {
+                Debug.LogError("Build App Failed.");
+                return;
+            }
+
+            Debug.Log($">>>>>>>>>>>>>>>>>Build outputPath:{obj.summary.outputPath}");
+            if (File.Exists(obj.summary.outputPath))
+            {
+                File.Move(obj.summary.outputPath, finalBuildName);
+            }
+        }
+
         /// <summary>
         /// 生成或删除热更dlls防裁剪的link.xml
         /// 单机模式时需把热更dlls打到包里
@@ -964,7 +984,7 @@ namespace UnityGameFramework.Editor.ResourceTools
             BuildTargetGroup buildTargetGroup = EditorUserBuildSettings.selectedBuildTargetGroup;
             int subtarget = (int)Utility.Assembly.GetType("UnityEditor.EditorUserBuildSettings").GetMethod("GetSelectedSubtargetFor", BindingFlags.Static | BindingFlags.NonPublic).Invoke(null, new object[] { buildTarget });
 
-            string buildLocation = GetBuildLocation(buildTargetGroup, buildTarget, subtarget, options.options);
+            string buildLocation = tempBuildName = GetBuildLocation(buildTargetGroup, buildTarget, subtarget, options.options, out finalBuildName);
             bool isDir = !Path.HasExtension(buildLocation);
             if (string.IsNullOrWhiteSpace(buildLocation) || (isDir && !Directory.Exists(buildLocation)))
                 throw new BuildMethodException("Build location for buildTarget " + buildTarget + " is not valid.");
@@ -1034,10 +1054,12 @@ namespace UnityGameFramework.Editor.ResourceTools
             return options;
         }
 
-        private static string GetBuildLocation(BuildTargetGroup targetGroup, BuildTarget target, int subtarget, BuildOptions options)
+        private static string GetBuildLocation(BuildTargetGroup targetGroup, BuildTarget target, int subtarget, BuildOptions options, out string finalName)
         {
             string defaultFolder = UtilityBuiltin.ResPath.GetCombinePath(Directory.GetParent(Application.dataPath).FullName, AppBuildSettings.Instance.AppBuildDir, target.ToString());
-            string defaultName = Utility.Text.Format("{0}_{1}{2}_v{3}", Application.productName, AppSettings.Instance.DebugMode ? "debug" : "release", EditorUserBuildSettings.development ? "Dev" : string.Empty, Application.version);
+            string defaultName = Application.productName;
+            //打出包后给包重命名
+            finalName = Utility.Text.Format("{0}_{1}{2}_v{3}", defaultName, AppSettings.Instance.DebugMode ? "debug" : "release", EditorUserBuildSettings.development ? "Dev" : string.Empty, Application.version);
 
             string extension = Utility.Assembly.GetType("UnityEditor.PostprocessBuildPlayer").GetMethod("GetExtensionForBuildTarget", new Type[] { typeof(BuildTargetGroup), typeof(BuildTarget), typeof(int), typeof(BuildOptions) }).Invoke(null, new object[] { targetGroup, target, subtarget, options }) as string;
             string buildPath = defaultFolder;
