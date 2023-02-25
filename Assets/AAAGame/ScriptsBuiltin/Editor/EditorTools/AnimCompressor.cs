@@ -1,9 +1,9 @@
-//  ×¢Òâ:Í¬Ò»¸öÄ£ĞÍµÄ¶¯»­ÎÄ¼ş±ØĞë·Åµ½Í¬Ò»¸öÎÄ¼ş¼ĞÏÂ
-//  Ñ¹ËõÔ­Àí
-//  1.·ÖÎöµÃµ½Í¬Ò»¸öÄ£ĞÍ±»Ëõ·ÅµÄËùÓĞ¹Ç÷À
-//  2.Í¨¹ı1µÄ½á¹ûÉ¾³ı¶¯»­ÎÄ¼şÖĞÃ»ÓĞËõ·ÅµÄ¹Ç÷ÀµÄlocalscaleÊôĞÔºÍÇúÏß
-//  3.É¾³ıÄÚÈİÏà²îÍò·ÖÖ®Ò»µÄÖĞ¼ä¹Ø¼üÖ¡Ö»±£ÁôÊ×Î»Á½Ö¡(¼õÉÙ²ÉÑùÆµÂÊ)
-//  4.ÓÅ»¯Ö¡ÊôĞÔÖµ¾«¶È
+//  æ³¨æ„:åŒä¸€ä¸ªæ¨¡å‹çš„åŠ¨ç”»æ–‡ä»¶å¿…é¡»æ”¾åˆ°åŒä¸€ä¸ªæ–‡ä»¶å¤¹ä¸‹
+//  å‹ç¼©åŸç†
+//  1.åˆ†æå¾—åˆ°åŒä¸€ä¸ªæ¨¡å‹è¢«ç¼©æ”¾çš„æ‰€æœ‰éª¨éª¼
+//  2.é€šè¿‡1çš„ç»“æœåˆ é™¤åŠ¨ç”»æ–‡ä»¶ä¸­æ²¡æœ‰ç¼©æ”¾çš„éª¨éª¼çš„localscaleå±æ€§å’Œæ›²çº¿
+//  3.åˆ é™¤å†…å®¹ç›¸å·®ä¸‡åˆ†ä¹‹ä¸€çš„ä¸­é—´å…³é”®å¸§åªä¿ç•™é¦–ä½ä¸¤å¸§(å‡å°‘é‡‡æ ·é¢‘ç‡)
+//  4.ä¼˜åŒ–å¸§å±æ€§å€¼ç²¾åº¦
 //****************************************************************************
 using System;
 using System.Collections.Generic;
@@ -18,24 +18,24 @@ namespace CompressTool
     {
         public static class FILTER
         {
-            //Ëõ·ÅÊôĞÔÌŞ³ı(±ä»¯Îó²î·¶Î§ x ·ÖÖ®Ò»)
+            //ç¼©æ”¾å±æ€§å‰”é™¤(å˜åŒ–è¯¯å·®èŒƒå›´ x åˆ†ä¹‹ä¸€)
             public readonly static int ERR_RANGE_SCALE_PROPERTY = 1000;
-            //ÏàÍ¬¹Ø¼üÖ¡ÌŞ(³ıÎó²î·¶Î§ X ·ÖÖ®Ò»)
+            //ç›¸åŒå…³é”®å¸§å‰”(é™¤è¯¯å·®èŒƒå›´ X åˆ†ä¹‹ä¸€)
             public readonly static int ERR_RANGE_SAME_FRAME = 10000;
         }
 
-        //¾«¶ÈÑ¹Ëõ(¸ù¾İÇúÏß±ä»¯ÆÂ¶ÈÑ¹Ëõ,ÆÂ¶ÈÔ½´ó¾«¶ÈÔ½¸ß,ÆÂ¶ÈÔ½Ğ¡¾«¶ÈÔ½Ğ¡)
+        //ç²¾åº¦å‹ç¼©(æ ¹æ®æ›²çº¿å˜åŒ–å¡åº¦å‹ç¼©,å¡åº¦è¶Šå¤§ç²¾åº¦è¶Šé«˜,å¡åº¦è¶Šå°ç²¾åº¦è¶Šå°)
         public static class ACCURACY
         {
-            //¾«¶È1¼¶ ÆÂ¶È·§Öµ
+            //ç²¾åº¦1çº§ å¡åº¦é˜€å€¼
             public readonly static float THRESHOLD1 = 0;
-            //¾«¶È2¼¶ ÆÂ¶È·§Öµ
+            //ç²¾åº¦2çº§ å¡åº¦é˜€å€¼
             public readonly static float THRESHOLD2 = 0.1f;
-            //¾«¶È1¼¶(Ğ¡Êıµãºó3Î»)
+            //ç²¾åº¦1çº§(å°æ•°ç‚¹å3ä½)
             public readonly static string LEVEL1 = "f3";
-            //¾«¶È2¼¶(Ğ¡Êıµãºó4Î»)
+            //ç²¾åº¦2çº§(å°æ•°ç‚¹å4ä½)
             public readonly static string LEVEL2 = "f4";
-            //¾«¶È3¼¶(Ğ¡Êıµãºó5Î»)
+            //ç²¾åº¦3çº§(å°æ•°ç‚¹å5ä½)
             public readonly static string LEVEL3 = "f5";
         }
     }
@@ -76,7 +76,7 @@ namespace CompressTool
             return string.Format("{0}/{1}", path, name);
         }
 
-        //»ñÈ¡ÇúÏßÆÂ¶È
+        //è·å–æ›²çº¿å¡åº¦
         private float GetCurveThreshold(string path, string propertyName)
         {
             var curveKey = GetCurveKey(path, propertyName);
@@ -85,7 +85,7 @@ namespace CompressTool
             return threshold;
         }
 
-        //ÉèÖÃÇúÏßÆÂ¶È
+        //è®¾ç½®æ›²çº¿å¡åº¦
         private void SetCurveThreshold(string path, string propertyName, float threshold)
         {
             var curveKey = GetCurveKey(path, propertyName);
@@ -95,7 +95,7 @@ namespace CompressTool
                 mGradientVals[curveKey] = threshold;
         }
 
-        //»ñÈ¡ÇúÏßÑ¹Ëõ¾«¶È
+        //è·å–æ›²çº¿å‹ç¼©ç²¾åº¦
         private string GetCompressAccuracy(string path, string propertyName)
         {
             var threshold = GetCurveThreshold(path, propertyName);
@@ -121,7 +121,7 @@ namespace CompressTool
                     var keys = curve.keys;
                     if (name.Contains("scale"))
                     {
-                        //ÓÅ»¯scaleÇúÏß
+                        //ä¼˜åŒ–scaleæ›²çº¿
                         if (!mScaleBonePaths.Contains(curveBinding.path))
                         {
                             AnimationUtility.SetEditorCurve(AnimClip, curveBinding, null);
@@ -132,7 +132,7 @@ namespace CompressTool
                     float bottomVal = 999999;
                     float topVal = -999999;
 
-                    //ÓÅ»¯²ÉÑùµãÊıÁ¿
+                    //ä¼˜åŒ–é‡‡æ ·ç‚¹æ•°é‡
                     List<Keyframe> newFrames = new List<Keyframe>();
                     if (keys.Length > 0)
                     {
@@ -159,7 +159,7 @@ namespace CompressTool
                         }
 
                         if (newFrames.Count == 1)
-                            newFrames.Add(keys[keys.Length - 1]);//×îÉÙÁ½Ö¡
+                            newFrames.Add(keys[keys.Length - 1]);//æœ€å°‘ä¸¤å¸§
 
                         if (newFrames.Count != keys.Length)
                         {
@@ -172,7 +172,7 @@ namespace CompressTool
                     SetCurveThreshold(curveBinding.path, curveBinding.propertyName, Mathf.Max(threshold, topVal - bottomVal));
                 }
 
-                //ÓÅ»¯¾«¶È
+                //ä¼˜åŒ–ç²¾åº¦
                 AnimationClipCurveData[] curves = AnimationUtility.GetAllCurves(AnimClip);
                 if (curves != null && curves.Length > 0)
                 {
@@ -188,7 +188,7 @@ namespace CompressTool
                         {
                             Keyframe key = keyFrames[j];
                             key.value = float.Parse(key.value.ToString(accuracy));
-                            //ÇĞÏß¹Ì¶¨¾«¶È
+                            //åˆ‡çº¿å›ºå®šç²¾åº¦
                             key.inTangent = float.Parse(key.inTangent.ToString("f3"));
                             key.outTangent = float.Parse(key.outTangent.ToString("f3"));
                             keyFrames[j] = key;
@@ -219,7 +219,7 @@ namespace CompressTool
             AnimClipPaths.Add(animClipPath);
         }
 
-        //·ÖÎö±»Ëõ·ÅµÄËùÓĞ¹Ç÷ÀÂ·¾¶
+        //åˆ†æè¢«ç¼©æ”¾çš„æ‰€æœ‰éª¨éª¼è·¯å¾„
         public void Analyse()
         {
             HashSet<string> scaleBonePaths = new HashSet<string>();
@@ -244,13 +244,13 @@ namespace CompressTool
                             if (keyFrames.Length > 0)
                             {
                                 var frist = keyFrames[0].value;
-                                if (Mathf.Abs(frist - 1f) * SETTING.FILTER.ERR_RANGE_SCALE_PROPERTY > 1f) //Èç¹ûµÚÒ»Ö¡´óĞ¡±äÁË
+                                if (Mathf.Abs(frist - 1f) * SETTING.FILTER.ERR_RANGE_SCALE_PROPERTY > 1f) //å¦‚æœç¬¬ä¸€å¸§å¤§å°å˜äº†
                                     isScaleChanged = true;
                                 else
                                 {
                                     for (int k = 1; k < keyFrames.Length; k++)
                                     {
-                                        if (Mathf.Abs(keyFrames[k].value - frist) * SETTING.FILTER.ERR_RANGE_SCALE_PROPERTY > 1f) //Èç¹û²îÒì³¬¹ıÇ§·ÖÖ®Ò»,Ôò²»¿ÉÉ¾³ı
+                                        if (Mathf.Abs(keyFrames[k].value - frist) * SETTING.FILTER.ERR_RANGE_SCALE_PROPERTY > 1f) //å¦‚æœå·®å¼‚è¶…è¿‡åƒåˆ†ä¹‹ä¸€,åˆ™ä¸å¯åˆ é™¤
                                         {
                                             isScaleChanged = true;
                                             break;
@@ -287,7 +287,7 @@ namespace CompressTool
         private static List<CompressOpt> mCompressOptList;
         private static int mIndex = 0;
 
-        //[MenuItem("Tools/±à¼­Æ÷¹¤¾ßÀ©Õ¹/Ñ¹Ëõ¶¯»­¸¡µã¾«¶È", priority = 2002)]
+        //[MenuItem("Tools/ç¼–è¾‘å™¨å·¥å…·æ‰©å±•/å‹ç¼©åŠ¨ç”»æµ®ç‚¹ç²¾åº¦", priority = 2002)]
         static void OptimizeFloat()
         {
             var selectObjs = AssetDatabase.FindAssets("t:AnimationClip", new string[] { "Assets/AssetsPackage" });
@@ -303,23 +303,23 @@ namespace CompressTool
                     if (Path.GetExtension(itmName).ToLower().CompareTo(".anim") == 0)
                     {
                         finishCount++;
-                        if (EditorUtility.DisplayCancelableProgressBar(string.Format("Ñ¹Ëõ¸¡µã¾«¶È({0}/{1})", finishCount, totalCount), itmName, finishCount / (float)totalCount))
+                        if (EditorUtility.DisplayCancelableProgressBar(string.Format("å‹ç¼©æµ®ç‚¹ç²¾åº¦({0}/{1})", finishCount, totalCount), itmName, finishCount / (float)totalCount))
                         {
                             break;
                         }
                         var allTxt = File.ReadAllText(itmName);
-                        // ½«Æ¥Åäµ½µÄ¸¡µãĞÍÊı×ÖÌæ»»Îª¾«È·µ½3Î»Ğ¡ÊıµÄ¸¡µãĞÍÊı×Ö
+                        // å°†åŒ¹é…åˆ°çš„æµ®ç‚¹å‹æ•°å­—æ›¿æ¢ä¸ºç²¾ç¡®åˆ°3ä½å°æ•°çš„æµ®ç‚¹å‹æ•°å­—
                         string outputString = Regex.Replace(allTxt, pattern, match =>
                         float.Parse(match.Value).ToString("F3"));
                         File.WriteAllText(itmName, outputString);
-                        Debug.LogFormat("----->Ñ¹Ëõ¶¯»­¸¡µã¾«¶È:{0}", itmName);
+                        Debug.LogFormat("----->å‹ç¼©åŠ¨ç”»æµ®ç‚¹ç²¾åº¦:{0}", itmName);
                     }
                 }
             }
             EditorUtility.ClearProgressBar();
             AssetDatabase.Refresh();
         }
-        [MenuItem("Game Framework/GameTools/AnimationClip Compressor¡¾Ñ¹Ëõ¶¯»­¡¿", priority = 2001)]
+        [MenuItem("Game Framework/GameTools/AnimationClip Compressorã€å‹ç¼©åŠ¨ç”»ã€‘", priority = 2001)]
         public static void Optimize()
         {
             Dictionary<string, AnimClipDirectory> animClipPaths = new Dictionary<string, AnimClipDirectory>();
@@ -355,7 +355,7 @@ namespace CompressTool
             if (mCurProcess == ProcessType.Analyse)
             {
                 AnimClipDirectory animClipDirectory = mAnimClipDirectoryList[mIndex];
-                bool isCancel = EditorUtility.DisplayCancelableProgressBar(string.Format("ÕıÔÚ¶ÁÈ¡AnimationClipÎÄ¼ş¼ĞĞÅÏ¢[{0}/{1}])", mIndex, mAnimClipDirectoryList.Count), animClipDirectory.Path, (float)mIndex / (float)mAnimClipDirectoryList.Count);
+                bool isCancel = EditorUtility.DisplayCancelableProgressBar(string.Format("æ­£åœ¨è¯»å–AnimationClipæ–‡ä»¶å¤¹ä¿¡æ¯[{0}/{1}])", mIndex, mAnimClipDirectoryList.Count), animClipDirectory.Path, (float)mIndex / (float)mAnimClipDirectoryList.Count);
                 if (isCancel)
                     mCurProcess = ProcessType.Compress;
                 else
@@ -378,7 +378,7 @@ namespace CompressTool
             else if (mCurProcess == ProcessType.Compress)
             {
                 CompressOpt compressOpt = mCompressOptList[mIndex];
-                bool isCancel = EditorUtility.DisplayCancelableProgressBar(string.Format("ÕıÔÚÑ¹ËõAnimationClipÎÄ¼ş[{0}/{1}]", mIndex, mCompressOptList.Count), compressOpt.AnimClipPath, (float)mIndex / (float)mCompressOptList.Count);
+                bool isCancel = EditorUtility.DisplayCancelableProgressBar(string.Format("æ­£åœ¨å‹ç¼©AnimationClipæ–‡ä»¶[{0}/{1}]", mIndex, mCompressOptList.Count), compressOpt.AnimClipPath, (float)mIndex / (float)mCompressOptList.Count);
                 if (isCancel)
                     mCurProcess = ProcessType.Finish;
                 else
