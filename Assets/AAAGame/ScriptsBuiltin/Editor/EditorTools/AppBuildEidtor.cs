@@ -738,7 +738,7 @@ namespace UnityGameFramework.Editor.ResourceTools
                 Debug.LogError("Build App Failed:" + report.summary.result.ToString());
                 return;
             }
-
+            
             if (File.Exists(report.summary.outputPath))
             {
                 var desFile = GetRenamedApp(report.summary.outputPath);

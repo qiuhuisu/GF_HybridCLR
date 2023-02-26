@@ -6,6 +6,9 @@ using System;
 using System.Text.RegularExpressions;
 using UnityEngine.UI;
 using System.IO;
+using Mono.Cecil;
+using System.Linq;
+using dnlib.DotNet;
 
 [EditorToolMenu("资源/语言国际化扫描工具", 2)]
 public class LocalizationStringEditor : EditorToolBase
@@ -36,7 +39,30 @@ public class LocalizationStringEditor : EditorToolBase
         EditorGUILayout.BeginHorizontal();
         if (GUILayout.Button("Rescan All"))
         {
-            
+            var dllName = Directory.GetFiles(HybridCLR.Editor.SettingsUtil.GetHotUpdateDllsOutputDirByTarget(EditorUserBuildSettings.activeBuildTarget), "*.dll", SearchOption.AllDirectories).First(dll =>
+            {
+                return Path.GetFileNameWithoutExtension(dll).CompareTo("Hotfix") == 0;
+            });
+            if (!string.IsNullOrEmpty(dllName))
+            {
+                var def = AssemblyDefinition.ReadAssembly(dllName);
+                var module = def.Modules[0];
+                foreach (var item in module.Types)
+                {
+                    foreach (var method in item.Methods)
+                    {
+                        if (!method.HasBody) continue;
+                        foreach (var instruction in method.Body.Instructions)
+                        {
+                            if (instruction.Operand is MethodReference methodRef && methodRef.FullName.StartsWith("System.String LocalizationExtension::GetText"))
+                            {
+                                Debug.LogFormat("{0}", method.FullName);
+                            }
+                        }
+                    }
+                }
+
+            }
         }
         if (GUILayout.Button("Save All"))
         {
@@ -61,13 +87,13 @@ public class LocalizationStringEditor : EditorToolBase
     {
         string[] dirs = { "Assets/AAAGame/Prefabs" };
         var assetGUIDs = AssetDatabase.FindAssets("t:Prefab", dirs);
-        
+
         List<UnityGameFramework.Runtime.UIStringKey> keyList = new List<UnityGameFramework.Runtime.UIStringKey>();
         int totalCount = assetGUIDs.Length;
         for (int i = 0; i < totalCount; i++)
         {
             string path = AssetDatabase.GUIDToAssetPath(assetGUIDs[i]);
-            if(EditorUtility.DisplayCancelableProgressBar($"扫描进度({i}/{totalCount})", path, i / (float)totalCount))
+            if (EditorUtility.DisplayCancelableProgressBar($"扫描进度({i}/{totalCount})", path, i / (float)totalCount))
             {
                 break;
             }
