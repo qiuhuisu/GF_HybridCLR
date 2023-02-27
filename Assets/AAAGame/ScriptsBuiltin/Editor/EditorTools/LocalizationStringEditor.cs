@@ -9,6 +9,8 @@ using System.IO;
 using Mono.Cecil;
 using System.Linq;
 using dnlib.DotNet;
+using GameFramework;
+using Mono.Cecil.Cil;
 
 [EditorToolMenu("资源/语言国际化扫描工具", 2)]
 public class LocalizationStringEditor : EditorToolBase
@@ -39,30 +41,7 @@ public class LocalizationStringEditor : EditorToolBase
         EditorGUILayout.BeginHorizontal();
         if (GUILayout.Button("Rescan All"))
         {
-            var dllName = Directory.GetFiles(HybridCLR.Editor.SettingsUtil.GetHotUpdateDllsOutputDirByTarget(EditorUserBuildSettings.activeBuildTarget), "*.dll", SearchOption.AllDirectories).First(dll =>
-            {
-                return Path.GetFileNameWithoutExtension(dll).CompareTo("Hotfix") == 0;
-            });
-            if (!string.IsNullOrEmpty(dllName))
-            {
-                var def = AssemblyDefinition.ReadAssembly(dllName);
-                var module = def.Modules[0];
-                foreach (var item in module.Types)
-                {
-                    foreach (var method in item.Methods)
-                    {
-                        if (!method.HasBody) continue;
-                        foreach (var instruction in method.Body.Instructions)
-                        {
-                            if (instruction.Operand is MethodReference methodRef && methodRef.FullName.StartsWith("System.String LocalizationExtension::GetText"))
-                            {
-                                Debug.LogFormat("{0}", method.FullName);
-                            }
-                        }
-                    }
-                }
-
-            }
+            ScanAllLocalizationString();
         }
         if (GUILayout.Button("Save All"))
         {
@@ -77,7 +56,7 @@ public class LocalizationStringEditor : EditorToolBase
     void ScanAllLocalizationString()
     {
         Dictionary<string, string> lanMap = new Dictionary<string, string>();
-        ScanPrefabLocalizationString(lanMap);
+        //ScanPrefabLocalizationString(lanMap);
         ScanCodeLocalizationString(lanMap);
     }
     /// <summary>
@@ -135,25 +114,64 @@ public class LocalizationStringEditor : EditorToolBase
     /// <returns></returns>
     private List<string> ScanLocalizationStringInScripts(string dirName)
     {
-        var scriptGuidArr = AssetDatabase.FindAssets("t:Script", new string[] { dirName });
         List<string> result = new List<string>();
-        foreach (var scriptGuid in scriptGuidArr)
+        //var scriptGuidArr = AssetDatabase.FindAssets("t:Script", new string[] { dirName });
+        //foreach (var scriptGuid in scriptGuidArr)
+        //{
+        //    var scriptName = AssetDatabase.GUIDToAssetPath(scriptGuid);
+        //    var codeText = File.ReadAllText(scriptName);
+        //    var matches = Regex.Matches(codeText, LocalizationStrPattern);
+        //    foreach (Match match in matches)
+        //    {
+        //        if (!match.Success)
+        //        {
+        //            continue;
+        //        }
+        //        var lanKey = match.Result("$1");
+        //        if (!result.Contains(lanKey))
+        //        {
+        //            result.Add(lanKey);
+        //        }
+        //    }
+        //}
+        var asmbArr = Utility.Assembly.GetAssemblies().Where(asmb =>
         {
-            var scriptName = AssetDatabase.GUIDToAssetPath(scriptGuid);
-            var codeText = File.ReadAllText(scriptName);
-            var matches = Regex.Matches(codeText, LocalizationStrPattern);
-            foreach (Match match in matches)
+            var asmbName = asmb.GetName().Name;
+            return asmbName.CompareTo(Path.GetFileNameWithoutExtension(ConstEditor.BuiltinAssembly)) == 0 || asmbName.CompareTo(Path.GetFileNameWithoutExtension(ConstEditor.HotfixAssembly)) == 0;
+        });
+        foreach (var asmb in asmbArr)
+        {
+            var def = AssemblyDefinition.ReadAssembly(asmb.Location);
+            foreach (var module in def.Modules)
             {
-                if (!match.Success)
+                foreach (var itmType in module.Types)
                 {
-                    continue;
-                }
-                var lanKey = match.Result("$1");
-                if (!result.Contains(lanKey))
-                {
-                    result.Add(lanKey);
+                    foreach (var method in itmType.Methods)
+                    {
+                        if (!method.HasBody) continue;
+
+
+                        Dictionary<VariableDefinition, object> localVariableValues = new Dictionary<VariableDefinition, object>();
+                        foreach (var instruction in method.Body.Instructions)
+                        {
+                            if (instruction.Operand is MethodReference methodRef && methodRef.FullName.StartsWith("System.String LocalizationExtension::GetText"))
+                            {
+                                Debug.Log($"----------Type:{itmType.Name}.{method.Name}");
+                                var previous = instruction.Previous;
+                                if (previous.OpCode == OpCodes.Ldstr)
+                                {
+                                    Debug.LogFormat(">>>>>>>>>>>>常量:{0}", previous.Operand);
+                                }
+                                else
+                                {
+                                    
+                                }
+                            }
+                        }
+                    }
                 }
             }
+
         }
         return result;
     }
