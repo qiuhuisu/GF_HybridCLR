@@ -9,6 +9,8 @@ using TinifyAPI;
 using GameFramework;
 using System.Threading.Tasks;
 using System.Text;
+using UnityEditor.U2D;
+using UnityEngine.U2D;
 
 [EditorToolMenu("资源/图片压缩工具", 2)]
 public class CompressImageTool : EditorToolBase
@@ -168,7 +170,88 @@ public class CompressImageTool : EditorToolBase
             EditorGUILayout.EndHorizontal();
         }
     }
+    private void AutoCompressAtlas()
+    {
+        var atlasFiles = GetAllAtlas();
+        int totalCount = atlasFiles.Count;
+        for (int i = 0; i < totalCount; i++)
+        {
+            var atlasFile = atlasFiles[i];
+            if (EditorUtility.DisplayCancelableProgressBar($"压缩图集({i}/{totalCount})", atlasFile, i / (float)totalCount))
+            {
+                break;
+            }
+            var atlas = AssetDatabase.LoadAssetAtPath<SpriteAtlas>(atlasFile);
+            if (atlas.isVariant) continue;
 
+            var atlasVariant = UtilityBuiltin.ResPath.GetCombinePath(Path.GetDirectoryName(atlasFile), $"{Path.GetFileNameWithoutExtension(atlasFile)}_Variant{Path.GetExtension(atlasFile)}");
+            SpriteAtlas varAtlas;
+            if (File.Exists(atlasVariant))
+            {
+                varAtlas = AssetDatabase.LoadAssetAtPath<SpriteAtlas>(atlasVariant);
+            }
+            else
+            {
+                AssetDatabase.CreateAsset(new SpriteAtlas(), atlasVariant);
+                varAtlas = AssetDatabase.LoadAssetAtPath<SpriteAtlas>(atlasVariant);
+            }
+            atlas.SetIncludeInBuild(false);
+            var atlasSettings = atlas.GetPackingSettings();
+            atlasSettings.padding = 2;
+            atlas.SetPackingSettings(atlasSettings);
+            var platformSettings = atlas.GetPlatformSettings(EditorUserBuildSettings.activeBuildTarget.ToString());
+            platformSettings.overridden = true;
+            platformSettings.format = texFormatsForPlatforms[EditorUserBuildSettings.activeBuildTarget][0];
+            atlas.SetPlatformSettings(platformSettings);
+            EditorUtility.SetDirty(atlas);
+
+            varAtlas.SetIsVariant(true);
+            varAtlas.SetMasterAtlas(atlas);
+            varAtlas.SetIncludeInBuild(true);
+            varAtlas.SetVariantScale(0.5f);
+            var pSettings = varAtlas.GetPlatformSettings(EditorUserBuildSettings.activeBuildTarget.ToString());
+            pSettings.overridden = true;
+            pSettings.format = platformSettings.format;
+            varAtlas.SetPlatformSettings(pSettings);
+            EditorUtility.SetDirty(varAtlas);
+            AssetDatabase.SaveAssetIfDirty(varAtlas);
+            SpriteAtlasUtility.PackAtlases(new SpriteAtlas[] { varAtlas }, EditorUserBuildSettings.activeBuildTarget);
+        }
+        EditorUtility.ClearProgressBar();
+    }
+    private List<string> GetAllAtlas()
+    {
+        var list = new List<string>();
+        foreach (var item in AppBuildSettings.Instance.CompressImgToolItemList)
+        {
+            var itemPath = Utility.Path.GetRegularPath(AssetDatabase.GetAssetPath(item));
+            if (File.Exists(itemPath) && Path.GetExtension(itemPath).ToLower().CompareTo(".spriteatlas") == 0)//图集
+            {
+                if (!list.Contains(itemPath))
+                {
+                    list.Add(itemPath);
+                }
+            }
+            if (Directory.Exists(itemPath))
+            {
+                var guids = AssetDatabase.FindAssets("t:spriteatlas", new string[] { itemPath });
+                foreach (var guid in guids)
+                {
+                    string spAtlasName = Utility.Path.GetRegularPath(AssetDatabase.GUIDToAssetPath(guid));
+                    if (!list.Contains(spAtlasName))
+                    {
+                        list.Add(spAtlasName);
+                    }
+                }
+            }
+        }
+        list.RemoveAll(x =>
+        {
+            var asset = AssetDatabase.LoadAssetAtPath<SpriteAtlas>(x);
+            return asset == null || asset.isVariant;
+        });
+        return list;
+    }
     private void StartCompressUnityAssetMode()
     {
         var imgList = GetAllImages();
