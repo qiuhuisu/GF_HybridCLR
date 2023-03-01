@@ -173,17 +173,18 @@ namespace CompressTool
                 }
 
                 //优化精度
-                AnimationClipCurveData[] curves = AnimationUtility.GetAllCurves(AnimClip);
+                var curves = AnimationUtility.GetCurveBindings(AnimClip);
                 if (curves != null && curves.Length > 0)
                 {
                     for (int i = 0; i < curves.Length; i++)
                     {
-                        AnimationClipCurveData curveDate = curves[i];
-                        if (curveDate.curve == null || curveDate.curve.keys == null)
+                        var curve = curves[i];
+                        AnimationCurve animCurve = AnimationUtility.GetEditorCurve(AnimClip, curve);
+                        if (animCurve == null || animCurve.keys == null)
                             continue;
 
-                        string accuracy = GetCompressAccuracy(curveDate.path, curveDate.propertyName);
-                        Keyframe[] keyFrames = curveDate.curve.keys;
+                        string accuracy = GetCompressAccuracy(curve.path, curve.propertyName);
+                        Keyframe[] keyFrames = animCurve.keys;
                         for (int j = 0; j < keyFrames.Length; j++)
                         {
                             Keyframe key = keyFrames[j];
@@ -193,8 +194,8 @@ namespace CompressTool
                             key.outTangent = float.Parse(key.outTangent.ToString("f3"));
                             keyFrames[j] = key;
                         }
-                        curveDate.curve.keys = keyFrames;
-                        AnimClip.SetCurve(curveDate.path, curveDate.type, curveDate.propertyName, curveDate.curve);
+                        animCurve.keys = keyFrames;
+                        AnimClip.SetCurve(curve.path, curve.type, curve.propertyName, animCurve);
                     }
                 }
             }
@@ -228,7 +229,7 @@ namespace CompressTool
                 var assetPath = AnimClipPaths[i];
                 AnimationClip clip = AssetDatabase.LoadAssetAtPath<AnimationClip>(assetPath);
                 CompressOpts.Add(new CompressOpt(clip, assetPath));
-                AnimationClipCurveData[] curves = AnimationUtility.GetAllCurves(clip);
+                var curves = AnimationUtility.GetCurveBindings(clip);
                 if (curves != null && curves.Length > 0)
                 {
                     for (int j = 0; j < curves.Length; j++)
@@ -236,10 +237,11 @@ namespace CompressTool
                         string name = curves[j].propertyName.ToLower();
                         if (name.Contains("scale"))
                         {
-                            AnimationClipCurveData curveDate = curves[j];
-                            if (curveDate.curve == null || curveDate.curve.keys == null)
+                            var curveDate = curves[j];
+                            var animCurve = AnimationUtility.GetEditorCurve(clip, curveDate);
+                            if (animCurve == null || animCurve.keys == null)
                                 continue;
-                            var keyFrames = curveDate.curve.keys;
+                            var keyFrames = animCurve.keys;
                             bool isScaleChanged = false;
                             if (keyFrames.Length > 0)
                             {
