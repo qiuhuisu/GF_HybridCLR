@@ -16,10 +16,12 @@ using UnityEngine.U2D;
 public class CompressImageTool : EditorToolBase
 {
     public override string ToolName => "图片压缩工具";
-    enum CompressMode
+    enum CompressToolMode
     {
         RawFile, //压缩原文件
-        UnityAsset //Unity自带压缩
+        UnityAsset, //Unity自带压缩
+        Atlas,      //创建图集
+        AtlasVariation//创建图集变体
     }
     enum ItemType
     {
@@ -96,7 +98,7 @@ public class CompressImageTool : EditorToolBase
         srcScrollList.onAddCallback = AddItem;
         srcScrollList.drawElementCallback = DrawItems;
         srcScrollList.elementHeight = EditorGUIUtility.singleLineHeight;
-        SwitchUIPanel((CompressMode)AppBuildSettings.Instance.CompressImgMode);
+        SwitchUIPanel((CompressToolMode)AppBuildSettings.Instance.CompressImgMode);
     }
     private void OnDisable()
     {
@@ -125,16 +127,16 @@ public class CompressImageTool : EditorToolBase
             AppBuildSettings.Instance.CompressImgMode = GUILayout.Toolbar(AppBuildSettings.Instance.CompressImgMode, tabButtons);
             if (EditorGUI.EndChangeCheck())
             {
-                SwitchUIPanel((CompressMode)AppBuildSettings.Instance.CompressImgMode);
+                SwitchUIPanel((CompressToolMode)AppBuildSettings.Instance.CompressImgMode);
             }
             EditorGUILayout.EndHorizontal();
         }
-        switch ((CompressMode)AppBuildSettings.Instance.CompressImgMode)
+        switch ((CompressToolMode)AppBuildSettings.Instance.CompressImgMode)
         {
-            case CompressMode.RawFile:
+            case CompressToolMode.RawFile:
                 DrawCompressRawFilePanel();
                 break;
-            case CompressMode.UnityAsset:
+            case CompressToolMode.UnityAsset:
                 DrawCompressUnityAssetPanel();
                 break;
         }
@@ -568,18 +570,18 @@ public class CompressImageTool : EditorToolBase
         }
     }
 
-    private void SwitchUIPanel(CompressMode mCompressMode)
+    private void SwitchUIPanel(CompressToolMode mCompressMode)
     {
         switch (mCompressMode)
         {
-            case CompressMode.RawFile:
+            case CompressToolMode.RawFile:
                 {
                     tinypngKeyScrollList = new ReorderableList(AppBuildSettings.Instance.CompressImgToolKeys, typeof(string), true, true, true, true);
                     tinypngKeyScrollList.drawHeaderCallback = DrawTinypngKeyScrollListHeader;
                     tinypngKeyScrollList.drawElementCallback = DrawTinypngKeyItem;
                 }
                 break;
-            case CompressMode.UnityAsset:
+            case CompressToolMode.UnityAsset:
                 {
                     compressSettings = new TextureImporterSettings();
                     compressPlatformSettings = new TextureImporterPlatformSettings();
@@ -1044,9 +1046,9 @@ public class CompressImageTool : EditorToolBase
     }
     private bool CheckSupportImageFile(string fileName)
     {
-        switch ((CompressMode)AppBuildSettings.Instance.CompressImgMode)
+        switch ((CompressToolMode)AppBuildSettings.Instance.CompressImgMode)
         {
-            case CompressMode.RawFile:
+            case CompressToolMode.RawFile:
                 {
                     var ext = Path.GetExtension(fileName).ToLower();
                     if (ArrayUtility.Contains(SupportImgTypes, ext))
@@ -1055,7 +1057,7 @@ public class CompressImageTool : EditorToolBase
                     }
                 }
                 break;
-            case CompressMode.UnityAsset:
+            case CompressToolMode.UnityAsset:
                 {
                     var assetObj = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(fileName);
                     if (assetObj != null)
