@@ -41,10 +41,14 @@ public class CompressImageToolLogic
         var pSettings = varAtlas.GetPlatformSettings(EditorUserBuildSettings.activeBuildTarget.ToString());
         pSettings.overridden = true;
         pSettings.format = platformSettings.format;
+        
         varAtlas.SetPlatformSettings(pSettings);
         EditorUtility.SetDirty(varAtlas);
         AssetDatabase.SaveAssetIfDirty(varAtlas);
-        SpriteAtlasUtility.PackAtlases(new SpriteAtlas[] { varAtlas }, EditorUserBuildSettings.activeBuildTarget);
+    }
+    public static void PackAtlases(SpriteAtlas[] spriteAtlas)
+    {
+        SpriteAtlasUtility.PackAtlases(spriteAtlas, EditorUserBuildSettings.activeBuildTarget);
     }
     public static void GenerateAtlasVariant(List<string> atlasFiles, TextureImporterFormat format)
     {

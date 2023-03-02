@@ -12,7 +12,7 @@ public class MenuProcedure : ProcedureBase
     MenuUIForm menuUIForm;
 
     IFsm<IProcedureManager> procedure;
-
+    string str2 = "Hi!";
     protected override void OnEnter(IFsm<IProcedureManager> procedureOwner)
     {
         base.OnEnter(procedureOwner);
@@ -21,6 +21,9 @@ public class MenuProcedure : ProcedureBase
         GF.Event.Subscribe(OpenUIFormSuccessEventArgs.EventId, OnOpenUIFormSuccess);//订阅UI打开事件, UI打开成功时触发
         ShowLevel();//加载关卡
         Log.Info(UtilityBuiltin.Json.ToJson(Vector3.one));
+
+        string str = "HelloWorld!";
+        GF.Localization.GetText(str);
     }
     protected override void OnUpdate(IFsm<IProcedureManager> procedureOwner, float elapseSeconds, float realElapseSeconds)
     {

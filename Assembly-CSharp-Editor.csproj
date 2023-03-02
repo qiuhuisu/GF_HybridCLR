@@ -85,6 +85,7 @@
     <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\DataTableGenerator\DataTableProcessor.DataProcessor.cs" />
     <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\EditorTools\AppBuildEidtor.cs" />
     <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\DataTableGenerator\DataTableProcessor.DecimalProcessor.cs" />
+    <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\EditorTools\CompressImageToolLogic.cs" />
     <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\DataTableUpdater.cs" />
     <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\MyGameTools.HybridCLR.cs" />
     <Compile Include="Assets\AAAGame\ScriptsBuiltin\Editor\DataTableGenerator\DataTableGenerator.cs" />

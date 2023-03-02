@@ -12,16 +12,16 @@ using System.Text;
 using UnityEditor.U2D;
 using UnityEngine.U2D;
 
-[EditorToolMenu("资源/图片压缩工具", 2)]
+[EditorToolMenu("资源/图片资源优化工具", 2)]
 public class CompressImageTool : EditorToolBase
 {
-    public override string ToolName => "图片压缩工具";
+    public override string ToolName => "图片资源优化工具";
     enum CompressToolMode
     {
         RawFile, //压缩原文件
         UnityAsset, //Unity自带压缩
         Atlas,      //创建图集
-        AtlasVariation//创建图集变体
+        AtlasVariant //图集变体
     }
     enum ItemType
     {
@@ -64,7 +64,7 @@ public class CompressImageTool : EditorToolBase
         [BuildTarget.StandaloneWindows64] = 4096
     };
 
-    readonly string[] tabButtons = {"原文件压缩", "Unity内置压缩" };
+    string[] tabButtons = { "原文件压缩", "Unity压缩" };
     readonly int[] maxTextureSizeOptionValues = { 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384 };
     readonly string[] maxTextureSizeDisplayOptions = { "32", "64", "128", "256", "512", "1024", "2048", "4096", "8192", "16384" };
     private bool overrideTextureType;
@@ -87,7 +87,12 @@ public class CompressImageTool : EditorToolBase
 
     private void OnEnable()
     {
-        dragAreaContent = new GUIContent("拖拽到此添加图片文件/文件夹");
+        if (EditorSettings.spritePackerMode != SpritePackerMode.Disabled)
+        {
+            ArrayUtility.Add(ref tabButtons, "创建图集");
+            ArrayUtility.Add(ref tabButtons, "图集变体");
+        }
+        dragAreaContent = new GUIContent("拖拽到此添加文件/文件夹");
         centerLabelStyle = new GUIStyle();
         centerLabelStyle.alignment = TextAnchor.MiddleCenter;
         centerLabelStyle.fontSize = 25;
@@ -120,7 +125,6 @@ public class CompressImageTool : EditorToolBase
     private void OnGUI()
     {
         EditorGUILayout.BeginVertical();
-        //EditorGUILayout.Space(10);
         EditorGUILayout.BeginHorizontal("box");
         {
             EditorGUI.BeginChangeCheck();
@@ -131,21 +135,6 @@ public class CompressImageTool : EditorToolBase
             }
             EditorGUILayout.EndHorizontal();
         }
-        switch ((CompressToolMode)AppBuildSettings.Instance.CompressImgMode)
-        {
-            case CompressToolMode.RawFile:
-                DrawCompressRawFilePanel();
-                break;
-            case CompressToolMode.UnityAsset:
-                DrawCompressUnityAssetPanel();
-                break;
-        }
-
-        EditorGUILayout.EndVertical();
-    }
-
-    private void DrawCompressUnityAssetPanel()
-    {
         srcScrollPos = EditorGUILayout.BeginScrollView(srcScrollPos);
         srcScrollList.DoLayoutList();
         EditorGUILayout.EndScrollView();
@@ -153,8 +142,58 @@ public class CompressImageTool : EditorToolBase
         EditorGUILayout.Space(10);
         if (settingFoldout = EditorGUILayout.Foldout(settingFoldout, "展开设置项:"))
         {
-            DrawUnityAssetModeSettingsPanel();
+            switch ((CompressToolMode)AppBuildSettings.Instance.CompressImgMode)
+            {
+                case CompressToolMode.RawFile:
+                    DrawRawFileModeSettingsPanel();
+                    break;
+                case CompressToolMode.UnityAsset:
+                    DrawUnityAssetModeSettingsPanel();
+                    break;
+                case CompressToolMode.Atlas:
+                    DrawCreateAtlasVariantSettingsPanel();
+                    break;
+                case CompressToolMode.AtlasVariant:
+                    DrawCreateAtlasVariantSettingsPanel();
+                    break;
+            }
         }
+        switch ((CompressToolMode)AppBuildSettings.Instance.CompressImgMode)
+        {
+            case CompressToolMode.RawFile:
+                DrawCompressRawFileButtonsPanel();
+                break;
+            case CompressToolMode.UnityAsset:
+                DrawCompressUnityButtonsPanel();
+                break;
+            case CompressToolMode.Atlas:
+                DrawCreateAtlasButtonsPanel();
+                break;
+            case CompressToolMode.AtlasVariant:
+                DrawCreateAtlasVariantButtonsPanel();
+                break;
+        }
+
+        EditorGUILayout.EndVertical();
+    }
+
+    private void DrawCreateAtlasVariantButtonsPanel()
+    {
+
+    }
+
+    private void DrawCreateAtlasButtonsPanel()
+    {
+
+    }
+
+    private void DrawCreateAtlasVariantSettingsPanel()
+    {
+
+    }
+
+    private void DrawCompressUnityButtonsPanel()
+    {
         EditorGUILayout.BeginHorizontal("box");
         {
             if (GUILayout.Button("开始压缩", GUILayout.Height(30)))
@@ -537,17 +576,8 @@ public class CompressImageTool : EditorToolBase
         }
     }
 
-    private void DrawCompressRawFilePanel()
+    private void DrawCompressRawFileButtonsPanel()
     {
-        srcScrollPos = EditorGUILayout.BeginScrollView(srcScrollPos);
-        srcScrollList.DoLayoutList();
-        EditorGUILayout.EndScrollView();
-        DrawDropArea();
-        EditorGUILayout.Space(10);
-        if (settingFoldout = EditorGUILayout.Foldout(settingFoldout, "展开设置项:"))
-        {
-            DrawRawFileModeSettingsPanel();
-        }
         EditorGUILayout.BeginHorizontal("box");
         {
             if (GUILayout.Button("开始压缩", GUILayout.Height(30)))
@@ -1000,7 +1030,7 @@ public class CompressImageTool : EditorToolBase
         var dragRect = EditorGUILayout.BeginVertical("box");
         {
             GUILayout.FlexibleSpace();
-            EditorGUILayout.LabelField(dragAreaContent, centerLabelStyle);
+            EditorGUILayout.LabelField(dragAreaContent, centerLabelStyle, GUILayout.MinHeight(200));
             if (dragRect.Contains(Event.current.mousePosition))
             {
                 if (Event.current.type == EventType.DragUpdated)
@@ -1098,7 +1128,7 @@ public class CompressImageTool : EditorToolBase
 
     private void DrawScrollListHeader(Rect rect)
     {
-        GUI.Label(rect, "添加要压缩的图片或图片目录:");
+        GUI.Label(rect, "添加要处理的文件或文件夹:");
     }
     private void OnSelectAsset(UnityEngine.Object obj)
     {
