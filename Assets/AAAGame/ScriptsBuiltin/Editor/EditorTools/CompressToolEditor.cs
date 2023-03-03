@@ -12,16 +12,17 @@ using System.Text;
 using UnityEditor.U2D;
 using UnityEngine.U2D;
 
-[EditorToolMenu("资源/图片资源优化工具", 2)]
-public class CompressImageTool : EditorToolBase
+[EditorToolMenu("资源/压缩(优化)工具", 2)]
+public class CompressToolEditor : EditorToolBase
 {
     public override string ToolName => "图片资源优化工具";
     enum CompressToolMode
     {
-        RawFile, //压缩原文件
+        RawFile = 0, //压缩原文件
         UnityAsset, //Unity自带压缩
         Atlas,      //创建图集
-        AtlasVariant //图集变体
+        AtlasVariant, //图集变体
+        AnimationClip //优化动画
     }
     enum ItemType
     {
@@ -63,8 +64,8 @@ public class CompressImageTool : EditorToolBase
         [BuildTarget.StandaloneWindows] = 4096,
         [BuildTarget.StandaloneWindows64] = 4096
     };
-
-    string[] tabButtons = { "原文件压缩", "Unity压缩" };
+    //EditorSettings.spritePackerMode != SpritePackerMode.Disabled
+    string[] tabButtons = { "原文件压缩", "Unity压缩", "创建图集", "图集变体", "动画压缩" };
     readonly int[] maxTextureSizeOptionValues = { 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384 };
     readonly string[] maxTextureSizeDisplayOptions = { "32", "64", "128", "256", "512", "1024", "2048", "4096", "8192", "16384" };
     private bool overrideTextureType;
@@ -87,11 +88,6 @@ public class CompressImageTool : EditorToolBase
 
     private void OnEnable()
     {
-        if (EditorSettings.spritePackerMode != SpritePackerMode.Disabled)
-        {
-            ArrayUtility.Add(ref tabButtons, "创建图集");
-            ArrayUtility.Add(ref tabButtons, "图集变体");
-        }
         dragAreaContent = new GUIContent("拖拽到此添加文件/文件夹");
         centerLabelStyle = new GUIStyle();
         centerLabelStyle.alignment = TextAnchor.MiddleCenter;
