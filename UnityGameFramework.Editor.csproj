@@ -397,19 +397,19 @@
       <HintPath>Assets\Plugins\DOTween\Editor\DOTweenEditor.dll</HintPath>
     </Reference>
     <Reference Include="System.Text.Encodings.Web">
-      <HintPath>Assets\Plugins\TinyPng\System.Text.Encodings.Web.dll</HintPath>
+      <HintPath>Assets\Plugins\CompressImageLibs\System.Text.Encodings.Web.dll</HintPath>
     </Reference>
     <Reference Include="LZ4">
       <HintPath>Library\PackageCache\com.focus-creative-games.hybridclr_unity@141ff18a7e\Plugins\LZ4.dll</HintPath>
     </Reference>
     <Reference Include="System.Text.Json">
-      <HintPath>Assets\Plugins\TinyPng\System.Text.Json.dll</HintPath>
+      <HintPath>Assets\Plugins\CompressImageLibs\System.Text.Json.dll</HintPath>
     </Reference>
     <Reference Include="Tinify">
-      <HintPath>Assets\Plugins\TinyPng\Tinify.dll</HintPath>
+      <HintPath>Assets\Plugins\CompressImageLibs\Tinify.dll</HintPath>
     </Reference>
     <Reference Include="SixLabors.ImageSharp">
-      <HintPath>Assets\Plugins\TinyPng\SixLabors.ImageSharp.dll</HintPath>
+      <HintPath>Assets\Plugins\CompressImageLibs\SixLabors.ImageSharp.dll</HintPath>
     </Reference>
     <Reference Include="Unity.VisualScripting.IonicZip">
       <HintPath>Library\PackageCache\com.unity.visualscripting@1.8.0\Editor\VisualScripting.Core\Dependencies\DotNetZip\Unity.VisualScripting.IonicZip.dll</HintPath>
@@ -463,7 +463,7 @@
       <HintPath>Library\PackageCache\com.unity.burst@1.8.2\Unity.Burst.CodeGen\Unity.Burst.Cecil.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime.CompilerServices.Unsafe">
-      <HintPath>Assets\Plugins\TinyPng\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+      <HintPath>Assets\Plugins\CompressImageLibs\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Burst.Cecil.Rocks">
       <HintPath>Library\PackageCache\com.unity.burst@1.8.2\Unity.Burst.CodeGen\Unity.Burst.Cecil.Rocks.dll</HintPath>
@@ -472,7 +472,7 @@
       <HintPath>Library\PackageCache\com.unity.visualscripting@1.8.0\Runtime\VisualScripting.Flow\Dependencies\NCalc\Unity.VisualScripting.Antlr3.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Bcl.AsyncInterfaces">
-      <HintPath>Assets\Plugins\TinyPng\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
+      <HintPath>Assets\Plugins\CompressImageLibs\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
     </Reference>
     <Reference Include="EPPlus">
       <HintPath>Assets\Plugins\EPPlus_v6.0.8\EPPlus.dll</HintPath>

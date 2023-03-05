@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: AppSettings
   m_EditorClassIdentifier: 
   DebugMode: 0
-  ResourceMode: 2
+  ResourceMode: 1

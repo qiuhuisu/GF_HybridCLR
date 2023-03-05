@@ -494,9 +494,9 @@ namespace UnityGameFramework.Editor.ResourceTools
             {
                 EditorGUILayout.LabelField("Build App Settings:", EditorStyles.boldLabel, GUILayout.Width(160));
 #if UNITY_ANDROID
-                AppBuildSettings.Instance.BuildForGooglePlay = EditorUserBuildSettings.buildAppBundle = EditorGUILayout.ToggleLeft("Build App Bundle(GP)", AppBuildSettings.Instance.BuildForGooglePlay);
+                EditorUserBuildSettings.buildAppBundle = EditorGUILayout.ToggleLeft("Build App Bundle(GP)", EditorUserBuildSettings.buildAppBundle);
 #endif
-                AppBuildSettings.Instance.DevelopmentBuild = EditorUserBuildSettings.development = EditorGUILayout.ToggleLeft("Development Build", AppBuildSettings.Instance.DevelopmentBuild);
+                EditorUserBuildSettings.development = EditorGUILayout.ToggleLeft("Development Build", EditorUserBuildSettings.development);
                 AppSettings.Instance.DebugMode = EditorGUILayout.ToggleLeft("Debug Mode", AppSettings.Instance.DebugMode);
                 if (GUILayout.Button(playerSettingBtContent))
                 {
@@ -973,7 +973,7 @@ namespace UnityGameFramework.Editor.ResourceTools
             EditorUtility.ClearProgressBar();
             Debug.Log(Utility.Text.Format("Build resources for '{0}' complete.", platform.ToString()));
 
-            if (AppBuildSettings.Instance.RevealFolder)
+            if (AppBuildSettings.Instance.RevealFolder && AppSettings.Instance.ResourceMode != ResourceMode.Package)
             {
                 EditorUtility.RevealInFinder(UtilityBuiltin.ResPath.GetCombinePath(GetResourceOupoutPathByMode(AppSettings.Instance.ResourceMode), platform.ToString()));
             }

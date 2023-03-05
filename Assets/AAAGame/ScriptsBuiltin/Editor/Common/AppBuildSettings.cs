@@ -21,8 +21,8 @@ public class AppBuildSettings : HybridCLR.Editor.ScriptableSingleton<AppBuildSet
     public string AndroidKeyAliasName;
     public string KeyAliasPass;
 
-    public bool DevelopmentBuild = false;
-    public bool BuildForGooglePlay = false;
+    //public bool DevelopmentBuild = false;
+    //public bool BuildForGooglePlay = false;
 
     //图片压缩工具设置项
     public string CompressImgToolBackupDir;
