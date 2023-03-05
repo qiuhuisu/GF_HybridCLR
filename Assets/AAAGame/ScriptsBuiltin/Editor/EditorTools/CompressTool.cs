@@ -1,14 +1,42 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEditor.U2D;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.U2D;
 using System.IO;
-using GameFramework;
-
+using System.Text;
+using System.Threading.Tasks;
+using TinifyAPI;
 namespace GameFramework.Editor
 {
+    //public class TextureSettings : IReference
+    //{
+    //    public TextureImporterType? TextureType;
+    //    public SpriteMeshType? MeshType;
+    //    public bool? AlphaIsTransparency;
+    //    public bool? Readable;
+    //    public bool? GenerateMipMaps;
+    //    public WrapMode? WrapMode;
+    //    public FilterMode? FilterMode;
+    //    public bool? overrideForTarget;
+    //    public int? MaxSize;
+    //    public TextureImporterFormat? TexFormat;
+    //    public int? CompresserQuality;
+
+    //    public void Clear()
+    //    {
+    //        TextureType = null;
+    //        MeshType = null;
+    //        AlphaIsTransparency = null;
+    //        Readable = null;
+    //        GenerateMipMaps = null;
+    //        WrapMode = null;
+    //        FilterMode = null;
+    //        overrideForTarget = null;
+    //        MaxSize = null;
+    //        TexFormat = null;
+    //        CompresserQuality = null;
+    //    }
+    //}
     public class AtlasSettings : IReference
     {
         public bool? includeInBuild = null;
@@ -68,12 +96,110 @@ namespace GameFramework.Editor
     }
     public class CompressTool
     {
+#if UNITY_EDITOR_WIN
+        const string pngquantTool = "Tools/CompressImageTools/pngquant_win/pngquant.exe";
+#elif UNITY_EDITOR_OSX
+        const string pngquantTool = "Tools/CompressImageTools/pngquant_mac/pngquant";
+#endif
+        /// <summary>
+        /// 使用TinyPng在线压缩,支持png,jpg,webp
+        /// </summary>
+        public static async Task<bool> CompressOnlineAsync(string imgFileName, string outputFileName, string tinypngKey)
+        {
+            if (string.IsNullOrWhiteSpace(tinypngKey))
+            {
+                return false;
+            }
+            Tinify.Key = tinypngKey;
+            var srcImg = TinifyAPI.Tinify.FromFile(imgFileName);
+            await srcImg.ToFile(outputFileName);
+            return srcImg.IsCompletedSuccessfully;
+        }
+
+        /// <summary>
+        /// 使用pngquant离线压缩,只支持png
+        /// </summary>
+        public static bool CompressImageOffline(string imgFileName, string outputFileName)
+        {
+            var fileExt = Path.GetExtension(imgFileName).ToLower();
+            switch (fileExt)
+            {
+                case ".png":
+                    return CompressPngOffline(imgFileName, outputFileName);
+                case ".jpg":
+                    return CompressJpgOffline(imgFileName, outputFileName);
+            }
+            return false;
+        }
+        /// <summary>
+        /// 使用ImageSharp压缩jpg图片
+        /// </summary>
+        /// <param name="imgFileName"></param>
+        /// <param name="outputFileName"></param>
+        /// <returns></returns>
+        private static bool CompressJpgOffline(string imgFileName, string outputFileName)
+        {
+            using (var img = SixLabors.ImageSharp.Image.Load(imgFileName))
+            {
+                var encoder = new SixLabors.ImageSharp.Formats.Jpeg.JpegEncoder()
+                {
+                    Quality = (int)AppBuildSettings.Instance.CompressImgToolQualityLv
+                };
+                using (var outputStream = new FileStream(outputFileName, FileMode.Create))
+                {
+                    img.Save(outputStream, encoder);
+                }
+
+            }
+
+            return true;
+        }
+        /// <summary>
+        /// 使用pngquant压缩png图片
+        /// </summary>
+        /// <param name="imgFileName"></param>
+        /// <param name="outputFileName"></param>
+        /// <returns></returns>
+        private static bool CompressPngOffline(string imgFileName, string outputFileName)
+        {
+            string pngquant = Path.Combine(Directory.GetParent(Application.dataPath).FullName, pngquantTool);
+
+            StringBuilder strBuilder = new StringBuilder();
+            strBuilder.AppendFormat(" --force --quality {0}-{1}", (int)AppBuildSettings.Instance.CompressImgToolQualityMinLv, (int)AppBuildSettings.Instance.CompressImgToolQualityLv);
+            strBuilder.AppendFormat(" --speed {0}", AppBuildSettings.Instance.CompressImgToolFastLv);
+            strBuilder.AppendFormat(" --output \"{0}\"", outputFileName);
+            strBuilder.AppendFormat(" -- \"{0}\"", imgFileName);
+
+            var proceInfo = new System.Diagnostics.ProcessStartInfo(pngquant, strBuilder.ToString());
+            proceInfo.CreateNoWindow = true;
+            proceInfo.UseShellExecute = false;
+            bool success;
+            using (var proce = System.Diagnostics.Process.Start(proceInfo))
+            {
+                proce.WaitForExit();
+                success = proce.ExitCode == 0;
+                if (!success)
+                {
+                    Debug.LogWarningFormat("离线压缩图片:{0}失败,ExitCode:{1}", imgFileName, proce.ExitCode);
+                }
+            }
+            return success;
+        }
+        /// <summary>
+        /// 创建图集
+        /// </summary>
+        /// <param name="atlasFilePath"></param>
+        /// <param name="settings"></param>
+        /// <param name="objectsForPack"></param>
+        /// <param name="createAtlasVariant"></param>
+        /// <param name="atlasVariantScale"></param>
+        /// <returns></returns>
         public static SpriteAtlas CreateAtlas(string atlasFilePath, AtlasSettings settings, UnityEngine.Object[] objectsForPack, bool createAtlasVariant = false, float atlasVariantScale = 1f)
         {
             var atlas = new SpriteAtlas();
             atlas.SetIncludeInBuild(settings.includeInBuild ?? true);
             atlas.Add(objectsForPack);
-            
+
             AssetDatabase.CreateAsset(atlas, atlasFilePath);
 
             var atlasAsset = AssetDatabase.LoadAssetAtPath<SpriteAtlas>(atlasFilePath);
