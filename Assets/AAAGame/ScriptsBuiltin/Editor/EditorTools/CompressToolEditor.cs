@@ -97,6 +97,10 @@ namespace GameFramework.Editor
         private int atlasSpriteSizeLimit;//像素在多少之内的图片打进图集
         readonly int[] paddingOptionValues = { 2, 4, 8 };
         readonly string[] paddingDisplayOptions = { "2", "4", "8" };
+
+        //动画
+        int floatPrecision = 3;//浮点型保留小数点个数
+
         private void OnEnable()
         {
             dragAreaContent = new GUIContent("拖拽到此添加文件/文件夹");
@@ -167,6 +171,9 @@ namespace GameFramework.Editor
                     case CompressToolMode.AtlasVariant:
                         DrawCreateAtlasVariantSettingsPanel();
                         break;
+                    case CompressToolMode.AnimationClip:
+                        DrawCompressAnimClipSettingsPanel();
+                        break;
                 }
             }
             switch ((CompressToolMode)AppBuildSettings.Instance.CompressImgMode)
@@ -189,6 +196,16 @@ namespace GameFramework.Editor
             }
 
             EditorGUILayout.EndVertical();
+        }
+
+        private void DrawCompressAnimClipSettingsPanel()
+        {
+            //floatPrecision
+            EditorGUILayout.BeginVertical("box");
+            {
+
+                EditorGUILayout.EndHorizontal();
+            }
         }
 
         private void DrawCompressAnimClipButtonsPanel()
@@ -390,7 +407,7 @@ namespace GameFramework.Editor
                 }
                 EditorGUILayout.EndVertical();
             }
-            
+
         }
 
         private void DrawCreateAtlasVariantButtonsPanel()
@@ -444,10 +461,98 @@ namespace GameFramework.Editor
 
         private void DrawCreateAtlasVariantSettingsPanel()
         {
-            EditorGUI.BeginDisabledGroup(EditorSettings.spritePackerMode == SpritePackerMode.Disabled);
+            EditorGUILayout.BeginVertical("box");
             {
+                //Include In Build
+                EditorGUILayout.BeginHorizontal();
+                {
+                    overrideAtlasIncludeInBuild = EditorGUILayout.ToggleLeft("Include In Build", overrideAtlasIncludeInBuild, GUILayout.Width(170));
+                    EditorGUI.BeginDisabledGroup(!overrideAtlasIncludeInBuild);
+                    {
+                        atlasSettings.includeInBuild = EditorGUILayout.Toggle(atlasSettings.includeInBuild ?? true);
+                        EditorGUI.EndDisabledGroup();
+                    }
+                    EditorGUILayout.EndHorizontal();
+                }
+                //Variant Scale
+                EditorGUILayout.BeginHorizontal();
+                {
+                    generateAtlasVariant = EditorGUILayout.ToggleLeft("Scale", generateAtlasVariant, GUILayout.Width(170));
+                    EditorGUI.BeginDisabledGroup(!generateAtlasVariant);
+                    {
+                        atlasSettings.variantScale = EditorGUILayout.Slider(atlasSettings.variantScale, 0, 1f);
+                        EditorGUI.EndDisabledGroup();
+                    }
+                    EditorGUILayout.EndHorizontal();
+                }
+                //ReadWrite
+                EditorGUILayout.BeginHorizontal();
+                {
+                    overrideAtlasReadWrite = EditorGUILayout.ToggleLeft("Read/Write", overrideAtlasReadWrite, GUILayout.Width(170));
+                    EditorGUI.BeginDisabledGroup(!overrideAtlasReadWrite);
+                    {
+                        atlasSettings.readWrite = EditorGUILayout.Toggle(atlasSettings.readWrite ?? false);
+                        EditorGUI.EndDisabledGroup();
+                    }
+                    EditorGUILayout.EndHorizontal();
+                }
+                //mipMaps
+                EditorGUILayout.BeginHorizontal();
+                {
+                    overrideAtlasMipMaps = EditorGUILayout.ToggleLeft("Generate Mip Maps", overrideAtlasMipMaps, GUILayout.Width(170));
+                    EditorGUI.BeginDisabledGroup(!overrideAtlasMipMaps);
+                    {
+                        atlasSettings.mipMaps = EditorGUILayout.Toggle(atlasSettings.mipMaps ?? false);
+                        EditorGUI.EndDisabledGroup();
+                    }
+                    EditorGUILayout.EndHorizontal();
+                }
+                //sRGB
+                EditorGUILayout.BeginHorizontal();
+                {
+                    overrideAtlasSRGB = EditorGUILayout.ToggleLeft("sRGB", overrideAtlasSRGB, GUILayout.Width(170));
+                    EditorGUI.BeginDisabledGroup(!overrideAtlasSRGB);
+                    {
+                        atlasSettings.sRGB = EditorGUILayout.Toggle(atlasSettings.sRGB ?? true);
+                        EditorGUI.EndDisabledGroup();
+                    }
+                    EditorGUILayout.EndHorizontal();
+                }
+                //filterMode
+                EditorGUILayout.BeginHorizontal();
+                {
+                    overrideAtlasFilterMode = EditorGUILayout.ToggleLeft("Filter Mode", overrideAtlasFilterMode, GUILayout.Width(170));
+                    EditorGUI.BeginDisabledGroup(!overrideAtlasFilterMode);
+                    {
+                        atlasSettings.filterMode = (FilterMode)EditorGUILayout.EnumPopup(atlasSettings.filterMode ?? FilterMode.Bilinear);
+                        EditorGUI.EndDisabledGroup();
+                    }
+                    EditorGUILayout.EndHorizontal();
+                }
 
-                EditorGUI.EndDisabledGroup();
+                //TextureFormat
+                EditorGUILayout.BeginHorizontal();
+                {
+                    overrideAtlasTexFormat = EditorGUILayout.ToggleLeft("Texture Format", overrideAtlasTexFormat, GUILayout.Width(170));
+                    EditorGUI.BeginDisabledGroup(!overrideAtlasTexFormat);
+                    {
+                        atlasSettings.texFormat = (TextureImporterFormat)EditorGUILayout.IntPopup((int)(atlasSettings.texFormat ?? (TextureImporterFormat)formatValues[0]), formatDisplayOptions, formatValues);
+                        EditorGUI.EndDisabledGroup();
+                    }
+                    EditorGUILayout.EndHorizontal();
+                }
+                //CompressQuality
+                EditorGUILayout.BeginHorizontal();
+                {
+                    overrideAtlasCompressQuality = EditorGUILayout.ToggleLeft("Compress Quality", overrideAtlasCompressQuality, GUILayout.Width(170));
+                    EditorGUI.BeginDisabledGroup(!overrideAtlasCompressQuality);
+                    {
+                        atlasSettings.compressQuality = (int)(TextureCompressionQuality)EditorGUILayout.EnumPopup((TextureCompressionQuality)(atlasSettings.compressQuality ?? (int)TextureCompressionQuality.Normal));
+                        EditorGUI.EndDisabledGroup();
+                    }
+                    EditorGUILayout.EndHorizontal();
+                }
+                EditorGUILayout.EndVertical();
             }
         }
 
@@ -882,7 +987,10 @@ namespace GameFramework.Editor
                 case CompressToolMode.Atlas:
                     {
                         dragAreaContent.text = "拖拽到此处添加图片或文件夹";
-                        atlasSettings = ReferencePool.Acquire<AtlasVariantSettings>();
+                        if (null == atlasSettings)
+                        {
+                            atlasSettings = ReferencePool.Acquire<AtlasVariantSettings>();
+                        }
                         createAtlasByFolder = true;
                         atlasSpriteSizeLimit = 512;
                         InitTextureFormatOptions();
@@ -892,6 +1000,10 @@ namespace GameFramework.Editor
                 case CompressToolMode.AtlasVariant:
                     {
                         dragAreaContent.text = "拖拽到此处添加SpriteAtlas或文件夹";
+                        if (null == atlasSettings)
+                        {
+                            atlasSettings = ReferencePool.Acquire<AtlasVariantSettings>();
+                        }
                         InitTextureFormatOptions();
                     }
                     break;
@@ -1334,32 +1446,19 @@ namespace GameFramework.Editor
                 case CompressToolMode.RawFile:
                     {
                         var ext = Path.GetExtension(fileName).ToLower();
-                        if (ArrayUtility.Contains(SupportImgTypes, ext))
-                        {
-                            return true;
-                        }
+                        return ArrayUtility.Contains(SupportImgTypes, ext);
                     }
-                    break;
                 case CompressToolMode.UnityAsset:
                 case CompressToolMode.Atlas:
                     {
                         var assetObj = AssetDatabase.GetMainAssetTypeAtPath(fileName);
-                        if (assetObj != null)
-                        {
-                            var itemTp = assetObj.GetType();
-                            return itemTp == typeof(Sprite) || itemTp == typeof(Texture) || itemTp == typeof(Texture2D);
-                        }
+                        return assetObj != null && (assetObj == typeof(Sprite) || assetObj == typeof(Texture) || assetObj == typeof(Texture2D));
                     }
-                    break;
                 case CompressToolMode.AtlasVariant:
                     {
                         var assetObj = AssetDatabase.GetMainAssetTypeAtPath(fileName);
-                        if (assetObj != null)
-                        {
-                            return assetObj.GetType() == typeof(SpriteAtlas);
-                        }
+                        return assetObj != null && assetObj == typeof(SpriteAtlas);
                     }
-                    break;
                 case CompressToolMode.AnimationClip:
                     return AssetDatabase.GetMainAssetTypeAtPath(fileName) == typeof(AnimationClip);
             }
@@ -1369,10 +1468,8 @@ namespace GameFramework.Editor
         {
             if (item == null) return ItemType.NoSupport;
             var name = AssetDatabase.GetAssetPath(item);
-            if ((File.GetAttributes(name) & FileAttributes.Directory) == FileAttributes.Directory)
-            {
-                return ItemType.Folder;
-            }
+            if ((File.GetAttributes(name) & FileAttributes.Directory) == FileAttributes.Directory) return ItemType.Folder;
+
             if (CheckSupportFileType(name)) return ItemType.File;
 
             return ItemType.NoSupport;
