@@ -23,8 +23,6 @@ MonoBehaviour:
   KeystorePass: topgames
   AndroidKeyAliasName: release
   KeyAliasPass: topgames
-  DevelopmentBuild: 0
-  BuildForGooglePlay: 1
   CompressImgToolBackupDir: CompressImageTool\ImgBackupDir
   CompressImgToolCoverRaw: 1
   CompressImgToolOutputDir: CompressImageTool\ImgCompressedDir
@@ -37,4 +35,4 @@ MonoBehaviour:
   CompressImgToolQualityLv: 80.94645
   CompressImgToolQualityMinLv: 0
   AppBuildDir: BuildApp
-  CompressImgMode: 0
+  CompressImgMode: 2

@@ -966,6 +966,7 @@ namespace GameFramework.Editor
 
         private void SwitchUIPanel(CompressToolMode mCompressMode)
         {
+            this.titleContent.text = tabButtons[(int)mCompressMode];
             switch (mCompressMode)
             {
                 case CompressToolMode.RawFile:

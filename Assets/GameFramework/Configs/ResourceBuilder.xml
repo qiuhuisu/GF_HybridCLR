@@ -2,7 +2,7 @@
 <UnityGameFramework>
   <ResourceBuilder>
     <Settings>
-      <InternalResourceVersion>2</InternalResourceVersion>
+      <InternalResourceVersion>1</InternalResourceVersion>
       <Platforms>32</Platforms>
       <AssetBundleCompression>1</AssetBundleCompression>
       <CompressionHelperTypeName>UnityGameFramework.Runtime.DefaultCompressionHelper</CompressionHelperTypeName>
@@ -10,8 +10,8 @@
       <ForceRebuildAssetBundleSelected>True</ForceRebuildAssetBundleSelected>
       <BuildEventHandlerTypeName>UnityGameFramework.Editor.AssetBuildHandler</BuildEventHandlerTypeName>
       <OutputDirectory>D:/Workspace/UnityProjects/GF_HybridCLR/AB</OutputDirectory>
-      <OutputPackageSelected>True</OutputPackageSelected>
-      <OutputFullSelected>False</OutputFullSelected>
+      <OutputPackageSelected>False</OutputPackageSelected>
+      <OutputFullSelected>True</OutputFullSelected>
       <OutputPackedSelected>False</OutputPackedSelected>
     </Settings>
   </ResourceBuilder>
