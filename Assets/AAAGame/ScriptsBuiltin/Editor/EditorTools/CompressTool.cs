@@ -69,11 +69,11 @@ namespace GameFramework.Editor
     }
     public class AtlasVariantSettings : AtlasSettings
     {
-        public float variantScale = 1f;
+        public float variantScale = 0.5f;
         public override void Clear()
         {
             base.Clear();
-            variantScale = 1f;
+            variantScale = 0.5f;
         }
         public static AtlasVariantSettings CreateFrom(AtlasSettings atlasSettings, float scale = 1f)
         {

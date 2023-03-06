@@ -64,8 +64,8 @@ namespace GameFramework.Editor
         };
         //EditorSettings.spritePackerMode != SpritePackerMode.Disabled
         string[] tabButtons = { "图片文件压缩", "Unity图片压缩", "创建图集", "创建图集变体", "动画压缩" };
-        readonly int[] maxTextureSizeOptionValues = { 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384 };
-        readonly string[] maxTextureSizeDisplayOptions = { "32", "64", "128", "256", "512", "1024", "2048", "4096", "8192", "16384" };
+        readonly int[] maxTextureSizeOptionValues = { 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192 };//, 16384 };
+        readonly string[] maxTextureSizeDisplayOptions = { "32", "64", "128", "256", "512", "1024", "2048", "4096", "8192" };//, "16384" };
         private bool overrideTextureType;
         private bool overrideMeshType;
         private bool overrideAlphaIsTransparency;
@@ -78,6 +78,25 @@ namespace GameFramework.Editor
         private bool overrideFormat;
         private bool overrideCompresserQuality;
 
+        //图集相关
+        AtlasVariantSettings atlasSettings;
+        bool generateAtlasVariant = false;
+        bool overrideAtlasIncludeInBuild;
+        bool overrideAtlasAllowRotation;
+        bool overrideAtlasTightPacking;
+        bool overrideAtlasAlphaDilation;
+        bool overrideAtlasPadding;
+        bool overrideAtlasReadWrite;
+        bool overrideAtlasMipMaps;
+        bool overrideAtlasSRGB;
+        bool overrideAtlasFilterMode;
+        bool overrideAtlasMaxTexSize;
+        bool overrideAtlasTexFormat;
+        bool overrideAtlasCompressQuality;
+        private bool createAtlasByFolder;
+        private int atlasSpriteSizeLimit;//像素在多少之内的图片打进图集
+        readonly int[] paddingOptionValues = { 2, 4, 8 };
+        readonly string[] paddingDisplayOptions = { "2", "4", "8" };
         private void OnEnable()
         {
             dragAreaContent = new GUIContent("拖拽到此添加文件/文件夹");
@@ -95,6 +114,10 @@ namespace GameFramework.Editor
         }
         private void OnDisable()
         {
+            if (atlasSettings != null)
+            {
+                ReferencePool.Release(atlasSettings);
+            }
             SaveSettings();
         }
         private void DrawTinypngKeyItem(Rect rect, int index, bool isActive, bool isFocused)
@@ -116,7 +139,7 @@ namespace GameFramework.Editor
             EditorGUILayout.BeginHorizontal("box");
             {
                 EditorGUI.BeginChangeCheck();
-                AppBuildSettings.Instance.CompressImgMode = GUILayout.Toolbar(AppBuildSettings.Instance.CompressImgMode, tabButtons);
+                AppBuildSettings.Instance.CompressImgMode = GUILayout.Toolbar(AppBuildSettings.Instance.CompressImgMode, tabButtons, GUILayout.Height(30));
                 if (EditorGUI.EndChangeCheck())
                 {
                     SwitchUIPanel((CompressToolMode)AppBuildSettings.Instance.CompressImgMode);
@@ -194,21 +217,179 @@ namespace GameFramework.Editor
 
         private void RecoveryAnimClip()
         {
-            
+
         }
 
         private void BackupAnimClip()
         {
-            
+
         }
 
         private void StartCompressAnimClip()
         {
-            
+
         }
 
         private void DrawCreateAtlasSettingsPanel()
         {
+            EditorGUILayout.BeginVertical("box");
+            {
+                EditorGUILayout.BeginHorizontal();
+                {
+                    createAtlasByFolder = EditorGUILayout.ToggleLeft("按文件夹批量创建图集", createAtlasByFolder, GUILayout.Width(170));
+                    EditorGUI.BeginDisabledGroup(!createAtlasByFolder);
+                    {
+                        atlasSpriteSizeLimit = EditorGUILayout.IntPopup("忽略大于像素的图片", atlasSpriteSizeLimit, maxTextureSizeDisplayOptions, maxTextureSizeOptionValues);
+                        EditorGUI.EndDisabledGroup();
+                    }
+                    EditorGUILayout.EndHorizontal();
+                }
+
+                EditorGUILayout.BeginHorizontal();
+                {
+                    generateAtlasVariant = EditorGUILayout.ToggleLeft("创建AtlasVariant", generateAtlasVariant, GUILayout.Width(170));
+                    EditorGUI.BeginDisabledGroup(!generateAtlasVariant);
+                    {
+                        EditorGUILayout.LabelField("Variant Scale:", GUILayout.Width(100));
+                        atlasSettings.variantScale = EditorGUILayout.Slider(atlasSettings.variantScale, 0, 1f);
+                        EditorGUI.EndDisabledGroup();
+                    }
+                    EditorGUILayout.EndHorizontal();
+                }
+                //Include In Build
+                EditorGUILayout.BeginHorizontal();
+                {
+                    overrideAtlasIncludeInBuild = EditorGUILayout.ToggleLeft("Include In Build", overrideAtlasIncludeInBuild, GUILayout.Width(170));
+                    EditorGUI.BeginDisabledGroup(!overrideAtlasIncludeInBuild);
+                    {
+                        atlasSettings.includeInBuild = EditorGUILayout.Toggle(atlasSettings.includeInBuild ?? true);
+                        EditorGUI.EndDisabledGroup();
+                    }
+                    EditorGUILayout.EndHorizontal();
+                }
+                //Allow Rotation
+                EditorGUILayout.BeginHorizontal();
+                {
+                    overrideAtlasAllowRotation = EditorGUILayout.ToggleLeft("Allow Rotation", overrideAtlasAllowRotation, GUILayout.Width(170));
+                    EditorGUI.BeginDisabledGroup(!overrideAtlasAllowRotation);
+                    {
+                        atlasSettings.allowRotation = EditorGUILayout.Toggle(atlasSettings.allowRotation ?? true);
+                        EditorGUI.EndDisabledGroup();
+                    }
+                    EditorGUILayout.EndHorizontal();
+                }
+                //Tight Packing
+                EditorGUILayout.BeginHorizontal();
+                {
+                    overrideAtlasTightPacking = EditorGUILayout.ToggleLeft("Tight Packing", overrideAtlasTightPacking, GUILayout.Width(170));
+                    EditorGUI.BeginDisabledGroup(!overrideAtlasTightPacking);
+                    {
+                        atlasSettings.tightPacking = EditorGUILayout.Toggle(atlasSettings.tightPacking ?? true);
+                        EditorGUI.EndDisabledGroup();
+                    }
+                    EditorGUILayout.EndHorizontal();
+                }
+                //Alpha Dilation
+                EditorGUILayout.BeginHorizontal();
+                {
+                    overrideAtlasAlphaDilation = EditorGUILayout.ToggleLeft("Alpha Dilation", overrideAtlasAlphaDilation, GUILayout.Width(170));
+                    EditorGUI.BeginDisabledGroup(!overrideAtlasAlphaDilation);
+                    {
+                        atlasSettings.alphaDilation = EditorGUILayout.Toggle(atlasSettings.alphaDilation ?? false);
+                        EditorGUI.EndDisabledGroup();
+                    }
+                    EditorGUILayout.EndHorizontal();
+                }
+                //Padding
+                EditorGUILayout.BeginHorizontal();
+                {
+                    overrideAtlasPadding = EditorGUILayout.ToggleLeft("Padding", overrideAtlasPadding, GUILayout.Width(170));
+                    EditorGUI.BeginDisabledGroup(!overrideAtlasPadding);
+                    {
+                        atlasSettings.padding = EditorGUILayout.IntPopup(atlasSettings.padding ?? paddingOptionValues[0], paddingDisplayOptions, paddingOptionValues);
+                        EditorGUI.EndDisabledGroup();
+                    }
+                    EditorGUILayout.EndHorizontal();
+                }
+                //ReadWrite
+                EditorGUILayout.BeginHorizontal();
+                {
+                    overrideAtlasReadWrite = EditorGUILayout.ToggleLeft("Read/Write", overrideAtlasReadWrite, GUILayout.Width(170));
+                    EditorGUI.BeginDisabledGroup(!overrideAtlasReadWrite);
+                    {
+                        atlasSettings.readWrite = EditorGUILayout.Toggle(atlasSettings.readWrite ?? false);
+                        EditorGUI.EndDisabledGroup();
+                    }
+                    EditorGUILayout.EndHorizontal();
+                }
+                //mipMaps
+                EditorGUILayout.BeginHorizontal();
+                {
+                    overrideAtlasMipMaps = EditorGUILayout.ToggleLeft("Generate Mip Maps", overrideAtlasMipMaps, GUILayout.Width(170));
+                    EditorGUI.BeginDisabledGroup(!overrideAtlasMipMaps);
+                    {
+                        atlasSettings.mipMaps = EditorGUILayout.Toggle(atlasSettings.mipMaps ?? false);
+                        EditorGUI.EndDisabledGroup();
+                    }
+                    EditorGUILayout.EndHorizontal();
+                }
+                //sRGB
+                EditorGUILayout.BeginHorizontal();
+                {
+                    overrideAtlasSRGB = EditorGUILayout.ToggleLeft("sRGB", overrideAtlasSRGB, GUILayout.Width(170));
+                    EditorGUI.BeginDisabledGroup(!overrideAtlasSRGB);
+                    {
+                        atlasSettings.sRGB = EditorGUILayout.Toggle(atlasSettings.sRGB ?? true);
+                        EditorGUI.EndDisabledGroup();
+                    }
+                    EditorGUILayout.EndHorizontal();
+                }
+                //filterMode
+                EditorGUILayout.BeginHorizontal();
+                {
+                    overrideAtlasFilterMode = EditorGUILayout.ToggleLeft("Filter Mode", overrideAtlasFilterMode, GUILayout.Width(170));
+                    EditorGUI.BeginDisabledGroup(!overrideAtlasFilterMode);
+                    {
+                        atlasSettings.filterMode = (FilterMode)EditorGUILayout.EnumPopup(atlasSettings.filterMode ?? FilterMode.Bilinear);
+                        EditorGUI.EndDisabledGroup();
+                    }
+                    EditorGUILayout.EndHorizontal();
+                }
+                //MaxTextureSize
+                EditorGUILayout.BeginHorizontal();
+                {
+                    overrideAtlasMaxTexSize = EditorGUILayout.ToggleLeft("Max Texture Size", overrideAtlasMaxTexSize, GUILayout.Width(170));
+                    EditorGUI.BeginDisabledGroup(!overrideAtlasMaxTexSize);
+                    {
+                        atlasSettings.maxTexSize = EditorGUILayout.IntPopup(atlasSettings.maxTexSize ?? 2048, maxTextureSizeDisplayOptions, maxTextureSizeOptionValues);
+                        EditorGUI.EndDisabledGroup();
+                    }
+                    EditorGUILayout.EndHorizontal();
+                }
+                //TextureFormat
+                EditorGUILayout.BeginHorizontal();
+                {
+                    overrideAtlasTexFormat = EditorGUILayout.ToggleLeft("Texture Format", overrideAtlasTexFormat, GUILayout.Width(170));
+                    EditorGUI.BeginDisabledGroup(!overrideAtlasTexFormat);
+                    {
+                        atlasSettings.texFormat = (TextureImporterFormat)EditorGUILayout.IntPopup((int)(atlasSettings.texFormat ?? (TextureImporterFormat)formatValues[0]), formatDisplayOptions, formatValues);
+                        EditorGUI.EndDisabledGroup();
+                    }
+                    EditorGUILayout.EndHorizontal();
+                }
+                //CompressQuality
+                EditorGUILayout.BeginHorizontal();
+                {
+                    overrideAtlasCompressQuality = EditorGUILayout.ToggleLeft("Compress Quality", overrideAtlasCompressQuality, GUILayout.Width(170));
+                    EditorGUI.BeginDisabledGroup(!overrideAtlasCompressQuality);
+                    {
+                        atlasSettings.compressQuality = EditorGUILayout.IntSlider(atlasSettings.compressQuality ?? 50, 0, 100);
+                        EditorGUI.EndDisabledGroup();
+                    }
+                    EditorGUILayout.EndHorizontal();
+                }
+                EditorGUILayout.EndVertical();
+            }
             
         }
 
@@ -244,7 +425,7 @@ namespace GameFramework.Editor
                     {
                         CreateAtlas();
                     }
-                    
+
                     if (GUILayout.Button("保存设置", GUILayout.Height(30), GUILayout.MaxWidth(100)))
                     {
                         SaveSettings();
@@ -695,26 +876,38 @@ namespace GameFramework.Editor
                         dragAreaContent.text = "拖拽到此处添加图片或文件夹";
                         compressSettings = new TextureImporterSettings();
                         compressPlatformSettings = new TextureImporterPlatformSettings();
-
-                        var getOptionsFunc = Utility.Assembly.GetType("UnityEditor.TextureImportValidFormats").GetMethod("GetPlatformTextureFormatValuesAndStrings", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
-                        var paramsObjs = new object[] { TextureImporterType.Sprite, EditorUserBuildSettings.activeBuildTarget, null, null };
-                        getOptionsFunc.Invoke(null, paramsObjs);
-                        formatValues = paramsObjs[2] as int[];
-                        formatDisplayOptions = paramsObjs[3] as string[];
+                        InitTextureFormatOptions();
                     }
                     break;
                 case CompressToolMode.Atlas:
-                    dragAreaContent.text = "拖拽到此处添加图片或文件夹";
+                    {
+                        dragAreaContent.text = "拖拽到此处添加图片或文件夹";
+                        atlasSettings = ReferencePool.Acquire<AtlasVariantSettings>();
+                        createAtlasByFolder = true;
+                        atlasSpriteSizeLimit = 512;
+                        InitTextureFormatOptions();
+                    }
+
                     break;
                 case CompressToolMode.AtlasVariant:
-                    dragAreaContent.text = "拖拽到此处添加SpriteAtlas或文件夹";
+                    {
+                        dragAreaContent.text = "拖拽到此处添加SpriteAtlas或文件夹";
+                        InitTextureFormatOptions();
+                    }
                     break;
                 case CompressToolMode.AnimationClip:
                     dragAreaContent.text = "拖拽到此处添加AnimationClip或文件夹";
                     break;
             }
         }
-
+        private void InitTextureFormatOptions()
+        {
+            var getOptionsFunc = Utility.Assembly.GetType("UnityEditor.TextureImportValidFormats").GetMethod("GetPlatformTextureFormatValuesAndStrings", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
+            var paramsObjs = new object[] { TextureImporterType.Sprite, EditorUserBuildSettings.activeBuildTarget, null, null };
+            getOptionsFunc.Invoke(null, paramsObjs);
+            formatValues = paramsObjs[2] as int[];
+            formatDisplayOptions = paramsObjs[3] as string[];
+        }
         private void DrawRawFileModeSettingsPanel()
         {
             EditorGUI.BeginDisabledGroup(AppBuildSettings.Instance.CompressImgToolOffline);
