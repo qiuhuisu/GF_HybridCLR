@@ -6,6 +6,9 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using TinifyAPI;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp;
+
 namespace GameFramework.Editor
 {
     //public class TextureSettings : IReference
@@ -130,6 +133,41 @@ namespace GameFramework.Editor
                     return CompressJpgOffline(imgFileName, outputFileName);
             }
             return false;
+        }
+        /// <summary>
+        /// ∞¥±»¿˝Àı∑≈Õº∆¨≥ﬂ¥Á
+        /// </summary>
+        /// <param name="imgFileName"></param>
+        /// <param name="outputFileName"></param>
+        /// <param name="scale"></param>
+        /// <returns></returns>
+        public static bool ResizeImage(string imgFileName, string outputFileName, float scale)
+        {
+            using (var img = SixLabors.ImageSharp.Image.Load(imgFileName))
+            {
+                int scaleWidth = (int)(img.Width * scale);
+                int scaleHeight = (int)(img.Height * scale);
+                img.Mutate(x => x.Resize(scaleWidth, scaleHeight));
+                img.Save(outputFileName);
+            }
+            return true;
+        }
+        /// <summary>
+        /// …Ë÷√Õº∆¨≥ﬂ¥Á
+        /// </summary>
+        /// <param name="imgFileName"></param>
+        /// <param name="outputFileName"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <returns></returns>
+        public static bool ResizeImage(string imgFileName, string outputFileName, int width, int height)
+        {
+            using (var img = SixLabors.ImageSharp.Image.Load(imgFileName))
+            {
+                img.Mutate(x => x.Resize(width, height));
+                img.Save(outputFileName);
+            }
+            return true;
         }
         /// <summary>
         ///  π”√ImageSharp—πÀıjpgÕº∆¨
