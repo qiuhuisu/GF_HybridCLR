@@ -143,7 +143,10 @@ namespace UnityGameFramework.Editor.ResourceTools
                 BuildResources();
             }
         }
-
+        private void OnDisable()
+        {
+            SaveConfiguration();
+        }
         private void OnGUI()
         {
             EditorGUILayout.BeginVertical(GUILayout.Width(position.width), GUILayout.Height(position.height));

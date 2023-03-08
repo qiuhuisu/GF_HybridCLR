@@ -15,6 +15,7 @@ public class ConstEditor
     public const string ConstGroupScriptFileFullName = "Assets/AAAGame/Scripts/Common/Const.Groups.cs";
 
     public static readonly string[] PrefabsPath = { "Assets/AAAGame/Prefabs/" };
+    public static readonly string[] ScenePath = { "Assets/AAAGame/Scene/" };
 
     public const string DataTableCodeTemplate = "Assets/AAAGame/ScriptsBuiltin/Editor/DataTableGenerator/DataTableCodeTemplate/DataTableCodeTemplate.txt"; //生成配置表代码的模板文件
     public const string BuiltinAssembly = "Assets/AAAGame/ScriptsBuiltin/Runtime/Builtin.Runtime.asmdef";
