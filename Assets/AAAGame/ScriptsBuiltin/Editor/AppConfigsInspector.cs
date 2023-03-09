@@ -92,6 +92,11 @@ public class AppConfigsInspector : Editor
     ItemData[] procedures;
     private GUIStyle normalStyle;
     private GUIStyle selectedStyle;
+
+    GUIContent editorConstSettingsContent;
+    private string newTableExcelName;
+    private string newConfigExcelName;
+
     private void OnEnable()
     {
         appConfig = target as AppConfigs;
@@ -100,6 +105,7 @@ public class AppConfigsInspector : Editor
         selectedStyle = new GUIStyle();
         selectedStyle.normal.textColor = Color.green;
 
+        editorConstSettingsContent = EditorGUIUtility.TrTextContentWithIcon("Path Settings [设置DataTable/Config导入/导出路径]", "Settings");
         svDataArr = new ScrollViewData[2] { new ScrollViewData(ConfigDataType.DataTable, ConstEditor.DataTableExcelPath, ConstEditor.DataTablePath), new ScrollViewData(ConfigDataType.Config, ConstEditor.ConfigExcelPath, ConstEditor.GameConfigPath) };
         ReloadScrollView(appConfig);
     }
@@ -109,9 +115,9 @@ public class AppConfigsInspector : Editor
         //base.OnInspectorGUI();
         EditorGUILayout.BeginVertical();
         serializedObject.Update();
-        if (GUILayout.Button("Path Settings [设置DataTable/Config导入/导出路径]"))
+        if (GUILayout.Button(editorConstSettingsContent))
         {
-            InternalEditorUtility.OpenFileAtLineExternal(UtilityBuiltin.ResPath.GetCombinePath(Application.dataPath, "AAAGame/ScriptsBuiltin/Editor/ConstEditor.cs"), 0);
+            InternalEditorUtility.OpenFileAtLineExternal(Path.Combine(Path.GetDirectoryName(ConstEditor.BuiltinAssembly), "../Editor/Common/ConstEditor.cs"), 0);
         }
         EditorGUILayout.BeginHorizontal();
         EditorGUILayout.BeginVertical("box");
@@ -132,7 +138,7 @@ public class AppConfigsInspector : Editor
         GUILayout.EndScrollView();
 
         EditorGUILayout.BeginHorizontal();
-        
+
         if (GUILayout.Button("All", GUILayout.Width(50)))
         {
             svDataArr[0].SetSelectAll(true);
@@ -154,7 +160,16 @@ public class AppConfigsInspector : Editor
             MyGameTools.RefreshAllDataTable(appConfig.DataTables);
         }
         EditorGUILayout.EndHorizontal();
-
+        EditorGUILayout.Space(5);
+        EditorGUILayout.BeginHorizontal();
+        {
+            newTableExcelName = EditorGUILayout.TextField(newTableExcelName);
+            if (GUILayout.Button("New DataTable", GUILayout.Width(100)))
+            {
+                CreateDataTableExcel(newTableExcelName);
+            }
+            EditorGUILayout.EndHorizontal();
+        }
         EditorGUILayout.EndVertical();
         EditorGUILayout.Space(10);
         EditorGUILayout.BeginVertical("box");
@@ -194,7 +209,16 @@ public class AppConfigsInspector : Editor
             MyGameTools.RefreshAllConfig(appConfig.Configs);
         }
         EditorGUILayout.EndHorizontal();
-
+        EditorGUILayout.Space(5);
+        EditorGUILayout.BeginHorizontal();
+        {
+            newConfigExcelName = EditorGUILayout.TextField(newConfigExcelName);
+            if (GUILayout.Button("New Config", GUILayout.Width(100)))
+            {
+                CreateConfigExcel(newConfigExcelName);
+            }
+            EditorGUILayout.EndHorizontal();
+        }
         EditorGUILayout.EndVertical();
         EditorGUILayout.EndHorizontal();
 
@@ -232,48 +256,46 @@ public class AppConfigsInspector : Editor
         serializedObject.ApplyModifiedProperties();
         EditorGUILayout.EndVertical();
     }
-    //private void DrawPathSettingPanel()
-    //{
-    //    pathPanelFoldout = EditorGUILayout.Foldout(pathPanelFoldout, "Path Settings:");
-    //    if (pathPanelFoldout)
-    //    {
-    //        EditorGUILayout.BeginVertical();
-    //        {
-    //            EditorGUILayout.BeginHorizontal("box");
-    //            {
-    //                EditorGUILayout.LabelField("DataTable Excel Path:", EditorStyles.boldLabel, GUILayout.Width(150));
-    //                AppBuildSettings.Instance.DataTableExcelPath = EditorGUILayout.TextField(AppBuildSettings.Instance.DataTableExcelPath);
-    //                if (GUILayout.Button("Select", GUILayout.Width(80)))
-    //                {
-    //                    var projectRoot = Directory.GetParent(Application.dataPath).FullName;
-    //                    var curFullPath = UtilityBuiltin.ResPath.GetCombinePath(projectRoot, AppBuildSettings.Instance.DataTableExcelPath);
-    //                    var sPath = EditorUtility.OpenFolderPanel("Select Path", curFullPath, null);
-    //                    AppBuildSettings.Instance.DataTableExcelPath = Path.GetRelativePath(projectRoot, sPath);
-    //                    AppBuildSettings.Save();
-    //                    GUIUtility.ExitGUI();
-    //                }
-    //            }
-    //            EditorGUILayout.EndHorizontal();
 
-    //            EditorGUILayout.BeginHorizontal("box");
-    //            {
-    //                EditorGUILayout.LabelField("Config Excel Path:", EditorStyles.boldLabel, GUILayout.Width(150));
-    //                AppBuildSettings.Instance.ConfigExcelPath = EditorGUILayout.TextField(AppBuildSettings.Instance.ConfigExcelPath);
-    //                if (GUILayout.Button("Select", GUILayout.Width(80)))
-    //                {
-    //                    var projectRoot = Directory.GetParent(Application.dataPath).FullName;
-    //                    var curFullPath = UtilityBuiltin.ResPath.GetCombinePath(projectRoot, AppBuildSettings.Instance.ConfigExcelPath);
-    //                    var sPath = EditorUtility.OpenFolderPanel("Select Path", curFullPath, null);
-    //                    AppBuildSettings.Instance.ConfigExcelPath = Path.GetRelativePath(projectRoot, sPath);
-    //                    AppBuildSettings.Save();
-    //                    GUIUtility.ExitGUI();
-    //                }
-    //            }
-    //            EditorGUILayout.EndHorizontal();
-    //        }
-    //        EditorGUILayout.EndVertical();
-    //    }
-    //}
+    private void CreateDataTableExcel(string v)
+    {
+        if (string.IsNullOrWhiteSpace(v))
+        {
+            return;
+        }
+        var excelPath = UtilityBuiltin.ResPath.GetCombinePath(svDataArr[0].excelDir, v + ".xlsx");
+        if (File.Exists(excelPath))
+        {
+            Debug.LogWarning($"创建DataTable失败, 文件已存在:{excelPath}");
+            return;
+        }
+        if (MyGameTools.CreateDataTableExcel(excelPath))
+        {
+            ReloadScrollView(appConfig);
+            EditorUtility.RevealInFinder(excelPath);
+            GUIUtility.ExitGUI();
+        }
+    }
+    private void CreateConfigExcel(string v)
+    {
+        if (string.IsNullOrWhiteSpace(v))
+        {
+            return;
+        }
+        var excelPath = UtilityBuiltin.ResPath.GetCombinePath(svDataArr[1].excelDir, v + ".xlsx");
+        if (File.Exists(excelPath))
+        {
+            Debug.LogWarning($"创建Config失败, 文件已存在:{excelPath}");
+            return;
+        }
+        if (MyGameTools.CreateGameConfigExcel(excelPath))
+        {
+            ReloadScrollView(appConfig);
+            EditorUtility.RevealInFinder(excelPath);
+            GUIUtility.ExitGUI();
+        }
+    }
+
     private void SaveConfig(AppConfigs cfg)
     {
         foreach (var svData in svDataArr)

@@ -105,7 +105,7 @@ namespace GameFramework.Editor
         const string pngquantTool = "Tools/CompressImageTools/pngquant_mac/pngquant";
 #endif
         /// <summary>
-        /// Ê¹ÓÃTinyPngÔÚÏßÑ¹Ëõ,Ö§³Öpng,jpg,webp
+        /// ä½¿ç”¨TinyPngåœ¨çº¿å‹ç¼©,æ”¯æŒpng,jpg,webp
         /// </summary>
         public static async Task<bool> CompressOnlineAsync(string imgFileName, string outputFileName, string tinypngKey)
         {
@@ -120,7 +120,7 @@ namespace GameFramework.Editor
         }
 
         /// <summary>
-        /// Ê¹ÓÃpngquantÀëÏßÑ¹Ëõ,Ö»Ö§³Öpng
+        /// ä½¿ç”¨pngquantç¦»çº¿å‹ç¼©,åªæ”¯æŒpng
         /// </summary>
         public static bool CompressImageOffline(string imgFileName, string outputFileName)
         {
@@ -135,7 +135,7 @@ namespace GameFramework.Editor
             return false;
         }
         /// <summary>
-        /// °´±ÈÀıËõ·ÅÍ¼Æ¬³ß´ç
+        /// æŒ‰æ¯”ä¾‹ç¼©æ”¾å›¾ç‰‡å°ºå¯¸
         /// </summary>
         /// <param name="imgFileName"></param>
         /// <param name="outputFileName"></param>
@@ -153,7 +153,7 @@ namespace GameFramework.Editor
             return true;
         }
         /// <summary>
-        /// ÉèÖÃÍ¼Æ¬³ß´ç
+        /// è®¾ç½®å›¾ç‰‡å°ºå¯¸
         /// </summary>
         /// <param name="imgFileName"></param>
         /// <param name="outputFileName"></param>
@@ -170,7 +170,7 @@ namespace GameFramework.Editor
             return true;
         }
         /// <summary>
-        /// Ê¹ÓÃImageSharpÑ¹ËõjpgÍ¼Æ¬
+        /// ä½¿ç”¨ImageSharpå‹ç¼©jpgå›¾ç‰‡
         /// </summary>
         /// <param name="imgFileName"></param>
         /// <param name="outputFileName"></param>
@@ -193,7 +193,7 @@ namespace GameFramework.Editor
             return true;
         }
         /// <summary>
-        /// Ê¹ÓÃpngquantÑ¹ËõpngÍ¼Æ¬
+        /// ä½¿ç”¨pngquantå‹ç¼©pngå›¾ç‰‡
         /// </summary>
         /// <param name="imgFileName"></param>
         /// <param name="outputFileName"></param>
@@ -218,13 +218,13 @@ namespace GameFramework.Editor
                 success = proce.ExitCode == 0;
                 if (!success)
                 {
-                    Debug.LogWarningFormat("ÀëÏßÑ¹ËõÍ¼Æ¬:{0}Ê§°Ü,ExitCode:{1}", imgFileName, proce.ExitCode);
+                    Debug.LogWarningFormat("ç¦»çº¿å‹ç¼©å›¾ç‰‡:{0}å¤±è´¥,ExitCode:{1}", imgFileName, proce.ExitCode);
                 }
             }
             return success;
         }
         /// <summary>
-        /// ´´½¨Í¼¼¯
+        /// åˆ›å»ºå›¾é›†
         /// </summary>
         /// <param name="atlasFilePath"></param>
         /// <param name="settings"></param>
@@ -248,7 +248,7 @@ namespace GameFramework.Editor
             return atlasAsset;
         }
         /// <summary>
-        /// ¸ù¾İÍ¼¼¯¶ÔÏóÉú³ÉÍ¼¼¯±äÌå
+        /// æ ¹æ®å›¾é›†å¯¹è±¡ç”Ÿæˆå›¾é›†å˜ä½“
         /// </summary>
         /// <param name="atlas"></param>
         /// <param name="settings"></param>
@@ -319,7 +319,7 @@ namespace GameFramework.Editor
             return varAtlas;
         }
         /// <summary>
-        /// ¸ù¾İAtlasÎÄ¼şÃûÎªAtlasÉú³ÉAtlas±äÌå(Atlas Variant)
+        /// æ ¹æ®Atlasæ–‡ä»¶åä¸ºAtlasç”ŸæˆAtlaså˜ä½“(Atlas Variant)
         /// </summary>
         /// <param name="atlasFile"></param>
         /// <param name="settings"></param>
@@ -332,7 +332,7 @@ namespace GameFramework.Editor
         }
 
         /// <summary>
-        /// ÅúÁ¿ÖØĞÂ´ò°üÍ¼¼¯
+        /// æ‰¹é‡é‡æ–°æ‰“åŒ…å›¾é›†
         /// </summary>
         /// <param name="spriteAtlas"></param>
         public static void PackAtlases(SpriteAtlas[] spriteAtlas)

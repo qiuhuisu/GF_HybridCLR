@@ -1,18 +1,13 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-using System;
-using System.Text.RegularExpressions;
-using UnityEngine.UI;
 using System.IO;
 using Mono.Cecil;
 using System.Linq;
-using dnlib.DotNet;
 using GameFramework;
 using Mono.Cecil.Cil;
 
-[EditorToolMenu("资源/语言国际化扫描工具", 2)]
+[EditorToolMenu("资源/语言国际化扫描工具", 3)]
 public class LocalizationStringEditor : EditorToolBase
 {
     private static readonly string LocalizationStrPattern = "Localization.GetText\\(\"([^\"]+)\"";

@@ -72,6 +72,56 @@ public partial class MyGameTools : EditorWindow
         GenerateGroupEnumScript();
         AssetDatabase.Refresh();
     }
+    public static bool CreateGameConfigExcel(string excelPath)
+    {
+        try
+        {
+            using (var excel = new ExcelPackage(excelPath))
+            {
+                var sheet = excel.Workbook.Worksheets.Add("Sheet 1");
+                sheet.SetValue(1, 1, "#");
+                sheet.SetValue(1, 2, Path.GetFileNameWithoutExtension(excelPath));
+                sheet.SetValue(2, 1, "#");
+                sheet.SetValue(2, 2, "Key");
+                sheet.SetValue(2, 3, "备注");
+                sheet.SetValue(2, 4, "Value");
+                excel.Save();
+            }
+            return true;
+        }
+        catch (Exception emsg)
+        {
+            Debug.LogError($"创建Excel:{excelPath}失败! Error:{emsg}");
+            return false;
+        }
+
+    }
+    public static bool CreateDataTableExcel(string excelPath)
+    {
+        try
+        {
+            using (var excel = new ExcelPackage(excelPath))
+            {
+                var sheet = excel.Workbook.Worksheets.Add("Sheet 1");
+                sheet.SetValue(1, 1, "#");
+                sheet.SetValue(1, 2, Path.GetFileNameWithoutExtension(excelPath));
+                sheet.SetValue(2, 1, "#");
+                sheet.SetValue(2, 2, "ID");
+                sheet.SetValue(3, 1, "#");
+                sheet.SetValue(3, 2, "int");
+                sheet.SetValue(4, 1, "#");
+                sheet.SetValue(4, 3, "备注");
+                excel.Save();
+            }
+            return true;
+        }
+        catch (Exception emsg)
+        {
+            Debug.LogError($"创建Excel:{excelPath}失败! Error:{emsg}");
+            return false;
+        }
+
+    }
     /// <summary>
     /// 生成Entity,Sound,UI枚举脚本
     /// </summary>
@@ -410,7 +460,7 @@ public partial class MyGameTools : EditorWindow
             EditorUtility.DisplayProgressBar($"Excel -> txt: ({i}/{totalExcelCount})", $"{excelFileName} -> {savePath}", i / (float)totalExcelCount);
             try
             {
-                if(Excel2TxtFile(excelFileName, savePath))
+                if (Excel2TxtFile(excelFileName, savePath))
                 {
                     Debug.Log($"------------Excel -> txt:{excelFileName} -> {savePath}");
                 }

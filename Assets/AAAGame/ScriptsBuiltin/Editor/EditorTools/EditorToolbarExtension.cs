@@ -11,8 +11,7 @@ using Unity.VisualScripting;
 using UnityEditor.SceneManagement;
 using UnityEngine.SceneManagement;
 
-[UnityEditor.InitializeOnLoad]
-public static class EditorToolbarExtension
+public class EditorToolbarExtension
 {
     private static GUIContent switchSceneBtContent;
     private static GUIContent buildBtContent;
@@ -22,16 +21,20 @@ public static class EditorToolbarExtension
     //Toolbar栏工具箱下拉列表
     private static List<Type> editorToolList;
     private static List<string> sceneAssetList;
-    static EditorToolbarExtension()
+    [InitializeOnLoadMethod]
+    static void Init()
     {
         editorToolList = new List<Type>();
+        sceneAssetList = new List<string>();
         var curPlatformIcon = Utility.Assembly.GetType("UnityEditor.Networking.PlayerConnection.ConnectionUIHelper").GetMethod("GetIcon", BindingFlags.Static | BindingFlags.Public).Invoke(null, new object[] { EditorUserBuildSettings.activeBuildTarget.ToString() }) as GUIContent;
-        switchSceneBtContent = EditorGUIUtility.TrTextContentWithIcon(EditorSceneManager.GetActiveScene().name, "切换场景", "UnityLogo");
+        var curOpenSceneName = EditorSceneManager.GetActiveScene().name;
+        switchSceneBtContent = EditorGUIUtility.TrTextContentWithIcon(string.IsNullOrEmpty(curOpenSceneName) ? "Switch Scene" : curOpenSceneName, "切换场景", "UnityLogo");
 
         buildBtContent = EditorGUIUtility.TrTextContentWithIcon("Build App/Hotfix", "打新包/打热更", curPlatformIcon.image);
         appConfigBtContent = EditorGUIUtility.TrTextContentWithIcon("App Configs", "配置App运行时所需DataTable/Config/Procedure", "Settings");
         toolsDropBtContent = EditorGUIUtility.TrTextContentWithIcon("Tools", "工具箱", "CustomTool");
         EditorSceneManager.sceneOpened += OnSceneOpened;
+
         ScanEditorToolClass();
 
         UnityEditorToolbar.RightToolbarGUI.Add(OnRightToolbarGUI);
@@ -42,7 +45,9 @@ public static class EditorToolbarExtension
     {
         switchSceneBtContent.text = scene.name;
     }
-
+    /// <summary>
+    /// 获取所有EditorTool扩展工具类,用于显示到Toolbar的Tools菜单栏
+    /// </summary>
     static void ScanEditorToolClass()
     {
         editorToolList.Clear();
@@ -89,8 +94,6 @@ public static class EditorToolbarExtension
     static void DrawSwithSceneDropdownMenus()
     {
         GenericMenu popMenu = new GenericMenu();
-        if (sceneAssetList == null) sceneAssetList = new List<string>();
-
         var sceneGuids = AssetDatabase.FindAssets("t:Scene", ConstEditor.ScenePath);
         sceneAssetList.Clear();
         for (int i = 0; i < sceneGuids.Length; i++)

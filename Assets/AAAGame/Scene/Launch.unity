@@ -1033,7 +1033,7 @@ MonoBehaviour:
   m_LogHelperTypeName: UnityGameFramework.Runtime.DefaultLogHelper
   m_CompressionHelperTypeName: UnityGameFramework.Runtime.DefaultCompressionHelper
   m_JsonHelperTypeName: NewtonsoftJsonHelper
-  m_FrameRate: 60
+  m_FrameRate: 120
   m_GameSpeed: 1
   m_RunInBackground: 1
   m_NeverSleep: 1
