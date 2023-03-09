@@ -81,25 +81,25 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Plugins\CompressImageLibs\System.Text.Json.dll" />
+    <None Include="Assets\Plugins\EPPlus.6.1.3\EPPlus.dll" />
     <None Include="Assets\Plugins\CompressImageLibs\System.Buffers.dll" />
-    <None Include="Assets\Plugins\EPPlus_v6.0.8\Microsoft.IO.RecyclableMemoryStream.dll" />
     <None Include="Assets\Plugins\DOTween\DOTween.dll" />
-    <None Include="Assets\Plugins\EPPlus_v6.0.8\EPPlus.dll" />
     <None Include="Assets\Plugins\CompressImageLibs\System.ValueTuple.dll" />
+    <None Include="Assets\Plugins\EPPlus.6.1.3\Microsoft.IO.RecyclableMemoryStream.dll" />
     <None Include="Assets\Plugins\Android\com\unity3d\player\PrivacyActivity.java" />
     <None Include="Assets\Plugins\CompressImageLibs\System.Text.Encodings.Web.dll" />
     <None Include="Assets\Plugins\CompressImageLibs\System.Memory.dll" />
-    <None Include="Assets\Plugins\EPPlus_v6.0.8\EPPlus.Interfaces.dll" />
     <None Include="Assets\Plugins\CompressImageLibs\System.Numerics.Vectors.dll" />
     <None Include="Assets\Plugins\CompressImageLibs\System.Threading.Tasks.Extensions.dll" />
     <None Include="Assets\Plugins\DOTween\DOTween.XML" />
     <None Include="Assets\Plugins\CompressImageLibs\System.Runtime.CompilerServices.Unsafe.dll" />
     <None Include="Assets\Plugins\CompressImageLibs\Tinify.dll" />
+    <None Include="Assets\Plugins\EPPlus.6.1.3\EPPlus.Interfaces.dll" />
+    <None Include="Assets\Plugins\EPPlus.6.1.3\EPPlus.System.Drawing.dll" />
     <None Include="Assets\Plugins\SuperScrollView\Scripts\Version 2.4.3.txt" />
     <None Include="Assets\Plugins\CompressImageLibs\Microsoft.Bcl.AsyncInterfaces.dll" />
     <None Include="Assets\Plugins\DOTween\readme.txt" />
     <None Include="Assets\Plugins\CompressImageLibs\SixLabors.ImageSharp.dll" />
-    <None Include="Assets\Plugins\EPPlus_v6.0.8\EPPlus.System.Drawing.dll" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">
@@ -339,9 +339,6 @@
     <Reference Include="UnityEditor.UnityConnectModule">
       <HintPath>C:\Program Files\Unity\Hub\Editor\2021.3.19f1\Editor\Data\Managed\UnityEngine\UnityEditor.UnityConnectModule.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.IO.RecyclableMemoryStream">
-      <HintPath>Assets\Plugins\EPPlus_v6.0.8\Microsoft.IO.RecyclableMemoryStream.dll</HintPath>
-    </Reference>
     <Reference Include="System.Text.Encodings.Web">
       <HintPath>Assets\Plugins\CompressImageLibs\System.Text.Encodings.Web.dll</HintPath>
     </Reference>
@@ -372,17 +369,11 @@
     <Reference Include="ICSharpCode.SharpZipLib">
       <HintPath>Assets\GameFramework\Libraries\ICSharpCode.SharpZipLib.dll</HintPath>
     </Reference>
-    <Reference Include="EPPlus.Interfaces">
-      <HintPath>Assets\Plugins\EPPlus_v6.0.8\EPPlus.Interfaces.dll</HintPath>
-    </Reference>
     <Reference Include="DOTween">
       <HintPath>Assets\Plugins\DOTween\DOTween.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Burst.Cecil.Mdb">
       <HintPath>Library\PackageCache\com.unity.burst@1.8.2\Unity.Burst.CodeGen\Unity.Burst.Cecil.Mdb.dll</HintPath>
-    </Reference>
-    <Reference Include="EPPlus.System.Drawing">
-      <HintPath>Assets\Plugins\EPPlus_v6.0.8\EPPlus.System.Drawing.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Burst.Cecil">
       <HintPath>Library\PackageCache\com.unity.burst@1.8.2\Unity.Burst.CodeGen\Unity.Burst.Cecil.dll</HintPath>
@@ -399,8 +390,17 @@
     <Reference Include="Microsoft.Bcl.AsyncInterfaces">
       <HintPath>Assets\Plugins\CompressImageLibs\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
     </Reference>
+    <Reference Include="EPPlus.System.Drawing">
+      <HintPath>Assets\Plugins\EPPlus.6.1.3\EPPlus.System.Drawing.dll</HintPath>
+    </Reference>
+    <Reference Include="EPPlus.Interfaces">
+      <HintPath>Assets\Plugins\EPPlus.6.1.3\EPPlus.Interfaces.dll</HintPath>
+    </Reference>
     <Reference Include="EPPlus">
-      <HintPath>Assets\Plugins\EPPlus_v6.0.8\EPPlus.dll</HintPath>
+      <HintPath>Assets\Plugins\EPPlus.6.1.3\EPPlus.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.IO.RecyclableMemoryStream">
+      <HintPath>Assets\Plugins\EPPlus.6.1.3\Microsoft.IO.RecyclableMemoryStream.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Android.Types">
       <HintPath>C:\Program Files\Unity\Hub\Editor\2021.3.19f1\Editor\Data\PlaybackEngines\AndroidPlayer\Unity.Android.Types.dll</HintPath>
